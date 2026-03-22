@@ -1,7 +1,7 @@
 """
 data_engine/equity.py
 負責處理單一個股 (Tearsheet) 的即時資料抓取、指標計算與繪圖
-架構：YFinance (歷史股價) + Financial Modeling Prep API (基本面與財報)
+架構：YFinance (歷史股價) + Financial Modeling Prep (基本面與財報 - 最新 Stable API)
 """
 import yfinance as yf
 import plotly.graph_objects as go
@@ -15,7 +15,7 @@ FMP_API_KEY = "29epqrFbGsBfasHJHyU7fnFT8CcUdeaF"
 @st.cache_data(ttl=3600, show_spinner=False)
 def fetch_stock_profile(ticker: str, period: str = "2y", interval: str = "1d"):
     """
-    雙引擎抓取：YF 負責股價與均線，FMP 負責基本面與財報，徹底解決雲端白畫面問題！
+    雙引擎抓取：YF 負責股價與均線，FMP 負責基本面與財報
     """
     # ==========================================
     # 引擎 1：YFinance (專職負責 K 線與技術分析)
@@ -40,20 +40,21 @@ def fetch_stock_profile(ticker: str, period: str = "2y", interval: str = "1d"):
     hist['Signal_Down'] = (hist['Close'] < hist['Min_20']) & (hist['Close'].shift(1) >= hist['Min_20'].shift(1))
 
     # ==========================================
-    # 引擎 2：FMP API (專職負責公司基本面與財務報表)
+    # 引擎 2：FMP API (你找出的最新 Stable 秘密通道)
     # ==========================================
     info = {}
     income_stmt = pd.DataFrame()
     
     # 防止 API 請求失敗的保護機制
     try:
-        # A. 抓取公司基本資料 (Profile)
-        profile_url = f"https://financialmodelingprep.com/api/v3/profile/{ticker}?apikey={FMP_API_KEY}"
+        # A. 抓取公司基本資料 (使用你親自測試成功的 Stable Endpoint)
+        profile_url = f"https://financialmodelingprep.com/stable/profile?symbol={ticker}&apikey={FMP_API_KEY}"
         profile_resp = requests.get(profile_url).json()
         
-        if profile_resp and isinstance(profile_resp, list) and len(profile_resp) > 0:
-            p = profile_resp[0]
-            # 把 FMP 的資料欄位，偽裝成原本 yfinance 的格式，讓 app.py 無縫接軌！
+        # 新版 stable API 回傳的可能是一個 list，也可能直接是一個字典，我們做個兼容防呆
+        if profile_resp:
+            p = profile_resp[0] if isinstance(profile_resp, list) else profile_resp
+            
             info['shortName'] = p.get('companyName', ticker)
             info['currentPrice'] = p.get('price', 0)
             info['previousClose'] = p.get('price', 0) - p.get('changes', 0)
@@ -64,27 +65,29 @@ def fetch_stock_profile(ticker: str, period: str = "2y", interval: str = "1d"):
             info['longBusinessSummary'] = p.get('description', '暫無公司業務介紹。')
 
         # B. 抓取關鍵財務指標 (Key Metrics TTM)
-        metrics_url = f"https://financialmodelingprep.com/api/v3/key-metrics-ttm/{ticker}?apikey={FMP_API_KEY}"
+        metrics_url = f"https://financialmodelingprep.com/stable/key-metrics-ttm?symbol={ticker}&apikey={FMP_API_KEY}"
         metrics_resp = requests.get(metrics_url).json()
         
-        if metrics_resp and isinstance(metrics_resp, list) and len(metrics_resp) > 0:
-            m = metrics_resp[0]
+        if metrics_resp:
+            m = metrics_resp[0] if isinstance(metrics_resp, list) else metrics_resp
             info['trailingPE'] = m.get('peRatioTTM', 'N/A')
             info['priceToBook'] = m.get('pbRatioTTM', 'N/A')
             info['returnOnEquity'] = m.get('roeTTM', 0)
-            info['debtToEquity'] = m.get('debtToEquityTTM', 0) * 100 # 轉為百分比
+            info['debtToEquity'] = m.get('debtToEquityTTM', 0) * 100 
 
         # C. 抓取年度損益表 (Income Statement)
-        is_url = f"https://financialmodelingprep.com/api/v3/income-statement/{ticker}?limit=4&apikey={FMP_API_KEY}"
+        is_url = f"https://financialmodelingprep.com/stable/income-statement?symbol={ticker}&limit=4&apikey={FMP_API_KEY}"
         is_resp = requests.get(is_url).json()
         
-        if is_resp and isinstance(is_resp, list) and len(is_resp) > 0:
-            df_is = pd.DataFrame(is_resp)
+        if is_resp:
+            # 確保它是 list 型態才能轉成 DataFrame
+            is_data = is_resp if isinstance(is_resp, list) else [is_resp]
+            df_is = pd.DataFrame(is_data)
+            
             if 'date' in df_is.columns:
                 df_is.set_index('date', inplace=True)
-                df_is = df_is.T # 轉置，讓日期變成直行 (符合舊版格式)
+                df_is = df_is.T 
                 
-                # 欄位名稱對應翻譯
                 mapping = {
                     'revenue': 'Total Revenue',
                     'grossProfit': 'Gross Profit',
@@ -94,7 +97,6 @@ def fetch_stock_profile(ticker: str, period: str = "2y", interval: str = "1d"):
                 df_is.rename(index=mapping, inplace=True)
                 income_stmt = df_is
                 
-                # 順便計算毛利率與淨利率
                 try:
                     latest_col = income_stmt.columns[0]
                     rev = income_stmt.loc['Total Revenue', latest_col]
@@ -106,7 +108,7 @@ def fetch_stock_profile(ticker: str, period: str = "2y", interval: str = "1d"):
     except Exception as e:
         print(f"⚠️ FMP API 抓取失敗: {e}")
 
-    # 如果 FMP 偶爾出錯，我們用 YFinance 的歷史價格當作最後防線
+    # 如果 FMP 偶爾出錯，用 YFinance 歷史價格當最後防線
     if 'currentPrice' not in info and not hist.empty:
         info['currentPrice'] = float(hist['Close'].iloc[-1])
         info['previousClose'] = float(hist['Close'].iloc[-2]) if len(hist) > 1 else float(hist['Close'].iloc[-1])
