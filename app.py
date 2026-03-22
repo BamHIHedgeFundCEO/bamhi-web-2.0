@@ -361,7 +361,11 @@ def render_search_result(ticker: str):
                 # 將資料轉置 (Transpose) 讓年份在上面，科目在左邊，並將大數字除以 100 萬 (轉換為百萬美元)
                 df_income = data["income_stmt"].copy()
                 df_income.columns = [str(date).split(' ')[0] for date in df_income.columns] # 取出日期字串
-                df_income = df_income / 1000000 # 轉換單位為百萬
+                # 👇 先強制把所有欄位轉換成數字格式 (遇到純文字如 "USD" 則自動忽略變成 NaN)
+                df_income = df_income.apply(pd.to_numeric, errors='coerce')
+
+                # 👇 現在確定全是數字了，再安心地除以 100 萬
+                df_income = df_income / 1000000
                 
                 # 只挑選幾個重要的中文科目顯示
                 key_items = {
