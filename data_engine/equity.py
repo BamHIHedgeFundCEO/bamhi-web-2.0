@@ -5,12 +5,28 @@ data_engine/equity.py
 import yfinance as yf
 import plotly.graph_objects as go
 import pandas as pd
+import requests            # 👈 1. 新增這行
+import streamlit as st     # 👈 2. 新增這行
 
+# 👇 3. 新增這行快取魔法 (加在 def 的正上方)
+@st.cache_data(ttl=3600, show_spinner=False)
 def fetch_stock_profile(ticker: str, period: str = "2y", interval: str = "1d"):
     """
     抓取個股資料，並計算均線與突破訊號
     """
-    stock = yf.Ticker(ticker)
+    # 👇 4. 新增這段偽裝機制
+    session = requests.Session()
+    session.headers.update({
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9,zh-TW;q=0.8,zh;q=0.7",
+    })
+    
+    # 👇 5. 把原本的 stock = yf.Ticker(ticker) 改成這樣，掛上 session
+    stock = yf.Ticker(ticker, session=session)
+    
+    # ---------------------------------------------------------
+    # ... (下方原本的 hist = stock.history(...) 和算均線邏輯完全保留不用動) ...
     
     # 1. 抓取歷史價格 (加入動態期間與 K線級別)
     try:
