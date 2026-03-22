@@ -346,43 +346,80 @@ def render_search_result(ticker: str):
 
                 # 顯示翻譯後的中文結果
                 st.markdown(f"<div style='background-color:#1f2937; padding:15px; border-radius:10px; color:#d1d5db; line-height:1.6;'>{display_summary}</div>", unsafe_allow_html=True)
-                st.caption("💡 資料來源: Yahoo Finance | 翻譯: Google Translate")
-        # ── 頁籤 3：財務報表 ──
+                # 💡 更安全的寫法
+                is_tw = "台灣" in str(info.get('sector', '')) or "TWSE" in str(info.get('sector', ''))
+                source_name = "FMP (Financial Modeling Prep)" if is_tw else "Yahoo Finance"
+                st.caption(f"💡 簡介資料來源: {source_name} | 翻譯: Google Translate")
+# ── 頁籤 3：財務報表 ──
         with tab_finance:
-            st.subheader("關鍵財務數據")
-            f_col1, f_col2, f_col3, f_col4 = st.columns(4)
-            f_col1.metric("毛利率 (Gross Margin)", f"{info.get('grossMargins', 0)*100:.2f}%" if info.get('grossMargins') else "N/A")
-            f_col2.metric("營收成長 (YoY)", f"{info.get('revenueGrowth', 0)*100:.2f}%" if info.get('revenueGrowth') else "N/A")
-            f_col3.metric("淨利率 (Profit Margin)", f"{info.get('profitMargins', 0)*100:.2f}%" if info.get('profitMargins') else "N/A")
-            f_col4.metric("負債資產比", f"{info.get('debtToEquity', 0):.2f}%" if info.get('debtToEquity') else "N/A")
+            finance_source = data.get("finance_source")
+            if finance_source:
+                st.markdown(f"### 關鍵財務數據 <span style='font-size:0.8rem; background-color:#374151; color:#9ca3af; padding:2px 8px; border-radius:10px; vertical-align:middle; margin-left:10px;'>資料來源: {finance_source}</span>", unsafe_allow_html=True)
+            else:
+                st.subheader("關鍵財務數據")
             
-            st.markdown("#### 📄 年度損益表 (Income Statement)")
-            if not data["income_stmt"].empty:
-                # 將資料轉置 (Transpose) 讓年份在上面，科目在左邊，並將大數字除以 100 萬 (轉換為百萬美元)
-                df_income = data["income_stmt"].copy()
-                df_income.columns = [str(date).split(' ')[0] for date in df_income.columns] # 取出日期字串
-                # 👇 先強制把所有欄位轉換成數字格式 (遇到純文字如 "USD" 則自動忽略變成 NaN)
-                df_income = df_income.apply(pd.to_numeric, errors='coerce')
+            # 💡 智能判斷：如果是台股，幣別換成 NT$，除數換成 1000 (因為政府財報單位是千元)
+            is_twse = info.get("sector") == '台灣市場 (TWSE)'
+            currency = "NT$" if is_twse else "$"
+            divisor = 1000 if is_twse else 1000000 
 
-                # 👇 現在確定全是數字了，再安心地除以 100 萬
-                df_income = df_income / 1000000
+            df_fin = data.get("income_stmt", pd.DataFrame())
+            
+            # ── 頂部 4 個快速指標 (直接抓 DataFrame 最新一季的資料) ──
+            latest_col = df_fin.columns[0] if not df_fin.empty else None
+            
+            def get_latest_val(row_name):
+                if latest_col and row_name in df_fin.index:
+                    val = df_fin.at[row_name, latest_col]
+                    if pd.notna(val) and val is not None:
+                        return float(val)
+                return None
+
+            gross_margin = get_latest_val('毛利率 (Gross Margin)')
+            yoy = get_latest_val('營收年增率 (YoY)')
+            net_margin = get_latest_val('淨利率 (Net Margin)')
+            eps = get_latest_val('單季 EPS')
+
+            f_col1, f_col2, f_col3, f_col4 = st.columns(4)
+            f_col1.metric("毛利率 (最新一季)", f"{gross_margin*100:.2f}%" if gross_margin is not None else "N/A")
+            f_col2.metric("營收成長 (YoY)", f"{yoy*100:.2f}%" if yoy is not None else "N/A")
+            f_col3.metric("淨利率 (最新一季)", f"{net_margin*100:.2f}%" if net_margin is not None else "N/A")
+            f_col4.metric(f"單季 EPS ({currency})", f"{eps:.2f}" if eps is not None else "N/A")
+            
+            st.markdown("#### 📄 近期財務報表 (近四個季度)")
+            
+            if not df_fin.empty:
+                df_display = df_fin.copy()
                 
-                # 只挑選幾個重要的中文科目顯示
-                key_items = {
-                    "Total Revenue": "總營收",
-                    "Gross Profit": "毛利",
-                    "Operating Income": "營業利益",
-                    "Net Income": "淨利"
-                }
-                
-                # 過濾並重新命名
-                df_display = pd.DataFrame()
-                for en_key, tw_key in key_items.items():
-                    if en_key in df_income.index:
-                        df_display[tw_key] = df_income.loc[en_key]
-                
-                if not df_display.empty:
-                    st.dataframe(df_display.T.style.format("{:,.2f} M"), use_container_width=True)
+                # ── 自動格式化排版 ──
+                for col in df_display.columns:
+                    # 1. 營收與現金流 (轉換為 M 百萬單位)
+                    for row in ['營收 (Revenue)', '營運現金流 (Operating CF)', '自由現金流 (Free CF)']:
+                        if row in df_display.index:
+                            val = df_display.at[row, col]
+                            if pd.notna(val) and val is not None:
+                                df_display.at[row, col] = f"{currency} {float(val) / divisor:,.1f} M"
+                            else:
+                                df_display.at[row, col] = "N/A"
+                                
+                    # 2. 利潤率與成長率 (轉為百分比 %)
+                    for row in ['營收年增率 (YoY)', '毛利率 (Gross Margin)', '淨利率 (Net Margin)']:
+                        if row in df_display.index:
+                            val = df_display.at[row, col]
+                            if pd.notna(val) and val is not None:
+                                df_display.at[row, col] = f"{float(val) * 100:.2f} %"
+                            else:
+                                df_display.at[row, col] = "N/A"
+                                
+                    # 3. EPS
+                    if '單季 EPS' in df_display.index:
+                        val = df_display.at['單季 EPS', col]
+                        if pd.notna(val) and val is not None:
+                            df_display.at['單季 EPS', col] = f"{currency} {float(val):.2f}"
+                        else:
+                            df_display.at['單季 EPS', col] = "N/A"
+
+                st.dataframe(df_display, use_container_width=True)
             else:
                 st.info("無法取得損益表資料。")
 
