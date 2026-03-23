@@ -53,17 +53,16 @@ def fetch_stock_profile(ticker: str, period: str = "2y", interval: str = "1d"):
     finance_source = None
 
     if is_taiwan_stock:
-        # 🟢 【台股模式 - 終極乾淨完全體】
+        # 🟢 【台股模式 - 雲端專業量化版：FMP (英文簡介) + FinMind (台股財報)】
         symbol = ticker_upper.split('.')[0]
-        is_otc = ticker_upper.endswith(".TWO")
         info['sector'] = '台灣市場 (TWSE)'
         
-        # 💡 拿最新收盤價算指標
+        # 💡 從歷史 K 線拿最新收盤價，這是計算估值指標的核心！
         current_price = float(hist['Close'].iloc[-1]) if not hist.empty else 0
         info['currentPrice'] = current_price
 
         # ==========================================
-        # A. 質性簡介 (FMP 拿深度簡介與員工數)
+        # A. 質性簡介 (FMP 拿深度英文介紹，雲端安全)
         # ==========================================
         try:
             profile_url = f"https://financialmodelingprep.com/stable/profile?symbol={ticker_upper}&apikey={FMP_API_KEY}"
@@ -73,133 +72,89 @@ def fetch_stock_profile(ticker: str, period: str = "2y", interval: str = "1d"):
                 info['shortName'] = p.get('companyName', ticker_upper)
                 info['industry'] = p.get('industry', 'N/A')
                 info['longBusinessSummary'] = p.get('description', '暫無公司業務介紹。')
-                info['website'] = p.get('website', 'N/A')
                 info['fullTimeEmployees'] = p.get('fullTimeEmployees', 'N/A')
         except Exception as e:
             print(f"FMP 基本資料抓取失敗: {e}")
 
-        # 共用標頭
-        import json
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0",
-            "Accept": "application/json"
-        }
+        # ==========================================
+        # B. 財務數據 (FinMind API - 專為量化交易設計，不怕雲端封鎖)
+        # ==========================================
+        import requests
+        import pandas as pd
+        from datetime import datetime, timedelta
 
-        # ==========================================
-        # B. 算「市值」(TWSE t187ap03) - 絕對不蓋掉簡介！
-        # ==========================================
+        # 設定抓取近一年的資料，確保能精準抓到最新一季
+        start_date = (datetime.now() - timedelta(days=400)).strftime('%Y-%m-%d')
+        fm_url = "https://api.finmindtrade.com/api/v4/data"
+
         try:
-            twse_prof_url = "https://openapi.twse.com.tw/v1/opendata/t187ap03_O" if is_otc else "https://openapi.twse.com.tw/v1/opendata/t187ap03_L"
-            p_resp = requests.get(twse_prof_url, headers=headers, timeout=15)
-            if p_resp.status_code == 200:
-                p_data = json.loads(p_resp.text)
-                comp = next((item for item in p_data if str(item.get('公司代號', '')).strip() == symbol), None)
-                if comp:
-                    capital_str = str(comp.get('實收資本額', '0')).replace(',', '').strip()
-                    try:
-                        shares = float(capital_str) / 10 
-                        if current_price > 0:
-                            info['marketCap'] = shares * current_price
-                    except: pass
-        except Exception as e:
-            print(f"TWSE 資本額抓取失敗: {e}")
+            print(f"🚀 啟動 FinMind 專業量化引擎抓取 {symbol} 財報...")
+            
+            # 1. 抓取綜合損益表
+            is_params = {"dataset": "TaiwanStockFinancialStatements", "data_id": symbol, "start_date": start_date}
+            is_resp = requests.get(fm_url, params=is_params, timeout=15).json()
+            
+            # 2. 抓取資產負債表 (算 PB, ROE, 市值用)
+            bs_params = {"dataset": "TaiwanStockBalanceSheet", "data_id": symbol, "start_date": start_date}
+            bs_resp = requests.get(fm_url, params=bs_params, timeout=15).json()
 
-        # ==========================================
-        # C. 算「P/E」與財報 (TWSE t187ap06)
-        # ==========================================
-        ni = 0 # 宣告給下面的 ROE 使用
-        try:
-            twse_fin_url = "https://openapi.twse.com.tw/v1/opendata/t187ap06_O_ci" if is_otc else "https://openapi.twse.com.tw/v1/opendata/t187ap06_L_ci"
-            resp = requests.get(twse_fin_url, headers=headers, timeout=20)
-            if resp.status_code == 200:
-                twse_f_resp = json.loads(resp.text)
-                fin_data = next((item for item in twse_f_resp if str(item.get('公司代號', '')).strip() == symbol), None)
-                if fin_data:
-                    clean_data = {str(k).replace(' ', '').replace('　', '').replace('（', '(').replace('）', ')'): v for k, v in fin_data.items()}
-                    def safe_float(val_str):
-                        try: return float(str(val_str).replace(',', '').strip())
-                        except: return 0.0
+            # --- 處理損益表 ---
+            if is_resp.get("msg") == "success" and len(is_resp.get("data", [])) > 0:
+                df_is = pd.DataFrame(is_resp["data"])
+                
+                # 找出最新一季的日期，並把資料轉成字典方便讀取
+                latest_date_is = df_is['date'].max()
+                df_is_latest = df_is[df_is['date'] == latest_date_is]
+                is_dict = dict(zip(df_is_latest['type'], df_is_latest['value']))
 
-                    rev = safe_float(clean_data.get('營業收入', 0))
-                    gp = safe_float(clean_data.get('營業毛利(毛損)', 0))
-                    ni = safe_float(clean_data.get('本期淨利(淨損)', 0))
-                    eps = safe_float(clean_data.get('基本每股盈餘(元)', 0))
+                rev = is_dict.get('OperatingRevenue', 0)
+                gp = is_dict.get('GrossProfit', 0)
+                ni = is_dict.get('NetIncome', 0)
+                eps = is_dict.get('EPS', 0)
 
-                    if eps > 0 and current_price > 0:
-                        info['trailingPE'] = current_price / (eps * 4)
+                # 算本益比 P/E
+                if eps > 0 and current_price > 0:
+                    info['trailingPE'] = current_price / (eps * 4)
 
-                    year = clean_data.get('年度', '最新')
-                    quarter = clean_data.get('季別', '季')
-                    col_name = f"民國{year}年 Q{quarter}"
+                # 建立 UI 專用的 DataFrame
+                col_name = f"{latest_date_is} (FinMind)"
+                tw_fin = pd.DataFrame(index=[
+                    '營收 (Revenue)', '營收年增率 (YoY)', '毛利率 (Gross Margin)', '淨利率 (Net Margin)',
+                    '單季 EPS', '營運現金流 (Operating CF)', '自由現金流 (Free CF)'
+                ], columns=[col_name])
 
-                    tw_fin = pd.DataFrame(index=[
-                        '營收 (Revenue)', '營收年增率 (YoY)', '毛利率 (Gross Margin)', '淨利率 (Net Margin)',
-                        '單季 EPS', '營運現金流 (Operating CF)', '自由現金流 (Free CF)'
-                    ], columns=[col_name])
+                tw_fin.loc['營收 (Revenue)', col_name] = rev
+                tw_fin.loc['營收年增率 (YoY)', col_name] = None 
+                tw_fin.loc['毛利率 (Gross Margin)', col_name] = gp / rev if rev else 0
+                tw_fin.loc['淨利率 (Net Margin)', col_name] = ni / rev if rev else 0
+                tw_fin.loc['單季 EPS', col_name] = eps
+                income_stmt = tw_fin
 
-                    tw_fin.loc['營收 (Revenue)', col_name] = rev
-                    tw_fin.loc['毛利率 (Gross Margin)', col_name] = gp / rev if rev else 0
-                    tw_fin.loc['淨利率 (Net Margin)', col_name] = ni / rev if rev else 0
-                    tw_fin.loc['單季 EPS', col_name] = eps
-                    income_stmt = tw_fin
-        except Exception as e:
-            print(f"TWSE 損益表抓取失敗: {e}")
+                # --- 處理資產負債表 ---
+                if bs_resp.get("msg") == "success" and len(bs_resp.get("data", [])) > 0:
+                    df_bs = pd.DataFrame(bs_resp["data"])
+                    latest_date_bs = df_bs['date'].max()
+                    df_bs_latest = df_bs[df_bs['date'] == latest_date_bs]
+                    bs_dict = dict(zip(df_bs_latest['type'], df_bs_latest['value']))
 
-        # ==========================================
-        # D. 算「P/B」與「ROE」(TWSE t187ap07)
-        # ==========================================
-        try:
-            twse_bs_url = "https://openapi.twse.com.tw/v1/opendata/t187ap07_O_ci" if is_otc else "https://openapi.twse.com.tw/v1/opendata/t187ap07_L_ci"
-            bs_resp = requests.get(twse_bs_url, headers=headers, timeout=15)
-            if bs_resp.status_code == 200:
-                bs_data = json.loads(bs_resp.text)
-                comp_bs = next((item for item in bs_data if str(item.get('公司代號', '')).strip() == symbol), None)
-                if comp_bs:
-                    c_bs = {str(k).replace(' ', '').replace('　', '').replace('（', '(').replace('）', ')'): v for k, v in comp_bs.items()}
-                    bps = float(str(c_bs.get('每股參考淨值', '0')).replace(',', '').strip() or 0)
-                    
-                    # 💡 ROE 容錯機制：政府的「權益」名稱五花八門
-                    equity_str = c_bs.get('權益總計', c_bs.get('權益總額', c_bs.get('歸屬於母公司業主之權益', '0')))
-                    equity = float(str(equity_str).replace(',', '').strip() or 0)
-                    
+                    equity = bs_dict.get('TotalEquity', 0)
+                    bps = bs_dict.get('BookValuePerShare', 0)
+                    ordinary_shares = bs_dict.get('OrdinaryShares', 0) # 普通股股本
+
+                    # 算 P/B
                     if bps > 0 and current_price > 0:
                         info['priceToBook'] = current_price / bps
+
+                    # 算 ROE (單季淨利 / 總權益)
                     if equity > 0 and ni != 0:
                         info['returnOnEquity'] = ni / equity
+
+                    # 算市值：普通股本(金額) / 10 = 股數。市值 = 股數 * 股價
+                    if ordinary_shares > 0 and current_price > 0:
+                        info['marketCap'] = (ordinary_shares / 10) * current_price
+
         except Exception as e:
-            print(f"TWSE 資產負債表抓取失敗: {e}")
-
-        # ==========================================
-        # E. FMP 備援機制
-        # ==========================================
-        if income_stmt.empty:
-            print(f"⚠️ TWSE 無財務數據，啟動 FMP 備援...")
-            try:
-                is_url = f"https://financialmodelingprep.com/stable/income-statement?symbol={ticker_upper}&period=quarter&limit=5&apikey={FMP_API_KEY}"
-                cf_url = f"https://financialmodelingprep.com/stable/cash-flow-statement?symbol={ticker_upper}&period=quarter&limit=4&apikey={FMP_API_KEY}"
-                is_resp = requests.get(is_url, timeout=10).json()
-                cf_resp = requests.get(cf_url, timeout=10).json()
-
-                if is_resp and cf_resp:
-                    df_is = pd.DataFrame(is_resp if isinstance(is_resp, list) else [is_resp])
-                    df_cf = pd.DataFrame(cf_resp if isinstance(cf_resp, list) else [cf_resp])
-                    
-                    if not df_is.empty and not df_cf.empty:
-                        df_is.set_index('date', inplace=True)
-                        df_cf.set_index('date', inplace=True)
-                        if len(df_is) >= 5: df_is['revenue_YoY'] = df_is['revenue'].pct_change(periods=-4)
-                        else: df_is['revenue_YoY'] = None
-                            
-                        df_combined = pd.concat([df_is.head(4), df_cf.head(4)], axis=1).T
-                        mapping = {'revenue': '營收 (Revenue)', 'revenue_YoY': '營收年增率 (YoY)', 'grossProfitRatio': '毛利率 (Gross Margin)', 'netIncomeRatio': '淨利率 (Net Margin)', 'eps': '單季 EPS', 'operatingCashFlow': '營運現金流 (Operating CF)', 'freeCashFlow': '自由現金流 (Free CF)'}
-                        available_cols = [c for c in mapping.keys() if c in df_combined.index]
-                        df_mapped = df_combined.loc[available_cols].rename(index=mapping)
-                        
-                        for row in ['營收 (Revenue)', '營運現金流 (Operating CF)', '自由現金流 (Free CF)']:
-                            if row in df_mapped.index:
-                                df_mapped.loc[row] = df_mapped.loc[row].apply(lambda x: float(x) / 1000 if pd.notna(x) else None)
-                        income_stmt = df_mapped
-            except Exception as e: print(f"FMP 備援失敗: {e}")
+            print(f"FinMind 量化引擎抓取失敗: {e}")
     else:
         # 🔵 【美股模式 - 保持 FMP 完美萃取 4 季與 8 大指標】
         try:
