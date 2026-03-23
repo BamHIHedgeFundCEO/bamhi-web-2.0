@@ -76,10 +76,9 @@ def fetch_stock_profile(ticker: str, period: str = "2y", interval: str = "1d"):
         except Exception as e:
             print(f"FMP 基本資料抓取失敗: {e}")
 
-        # ==========================================
+ # ==========================================
         # B. 財務數據 (FinMind API - 專為量化交易設計，不怕雲端封鎖)
         # ==========================================
-
         # 設定抓取近一年的資料，確保能精準抓到最新一季
         start_date = (datetime.now() - timedelta(days=400)).strftime('%Y-%m-%d')
         fm_url = "https://api.finmindtrade.com/api/v4/data"
@@ -91,29 +90,44 @@ def fetch_stock_profile(ticker: str, period: str = "2y", interval: str = "1d"):
             is_params = {"dataset": "TaiwanStockFinancialStatements", "data_id": symbol, "start_date": start_date}
             is_resp = requests.get(fm_url, params=is_params, timeout=15).json()
             
-            # 2. 抓取資產負債表 (算 PB, ROE, 市值用)
+            # 2. 抓取資產負債表
             bs_params = {"dataset": "TaiwanStockBalanceSheet", "data_id": symbol, "start_date": start_date}
             bs_resp = requests.get(fm_url, params=bs_params, timeout=15).json()
+
+            # 🌟 3. 新增：抓取官方每日估值 (P/E, P/B) -> 這是 FinMind 最強的隱藏功能！
+            per_params = {"dataset": "TaiwanStockPER", "data_id": symbol, "start_date": start_date}
+            per_resp = requests.get(fm_url, params=per_params, timeout=15).json()
+
+            # 💡 建立「超強容錯」取值工具 (解決 N/A 跟 0.00% 的兇手)
+            def get_val(d, keys):
+                for k in keys:
+                    if k in d: return float(d[k])
+                return 0
+
+            # --- 處理每日估值 (P/E, P/B) ---
+            if per_resp.get("msg") == "success" and len(per_resp.get("data", [])) > 0:
+                df_per = pd.DataFrame(per_resp["data"])
+                latest_per = df_per.iloc[-1]
+                info['trailingPE'] = float(latest_per.get('PER', 0))
+                info['priceToBook'] = float(latest_per.get('PBR', 0))
 
             # --- 處理損益表 ---
             if is_resp.get("msg") == "success" and len(is_resp.get("data", [])) > 0:
                 df_is = pd.DataFrame(is_resp["data"])
-                
-                # 找出最新一季的日期，並把資料轉成字典方便讀取
                 latest_date_is = df_is['date'].max()
                 df_is_latest = df_is[df_is['date'] == latest_date_is]
                 is_dict = dict(zip(df_is_latest['type'], df_is_latest['value']))
 
-                rev = is_dict.get('OperatingRevenue', 0)
-                gp = is_dict.get('GrossProfit', 0)
-                ni = is_dict.get('NetIncome', 0)
-                eps = is_dict.get('EPS', 0)
+                # 涵蓋所有 FinMind 可能的英文欄位名稱，一網打盡！
+                rev = get_val(is_dict, ['Revenue', 'OperatingRevenue'])
+                gp = get_val(is_dict, ['GrossProfit', 'OperatingIncome'])
+                ni = get_val(is_dict, ['NetIncome', 'NetIncomeAttributableToOwnersOfTheParent'])
+                eps = get_val(is_dict, ['EPS'])
 
-                # 算本益比 P/E
-                if eps > 0 and current_price > 0:
+                # 如果上面沒抓到 P/E，就用 EPS 自己算備用
+                if 'trailingPE' not in info and eps > 0 and current_price > 0:
                     info['trailingPE'] = current_price / (eps * 4)
 
-                # 建立 UI 專用的 DataFrame
                 col_name = f"{latest_date_is} (FinMind)"
                 tw_fin = pd.DataFrame(index=[
                     '營收 (Revenue)', '營收年增率 (YoY)', '毛利率 (Gross Margin)', '淨利率 (Net Margin)',
@@ -134,19 +148,15 @@ def fetch_stock_profile(ticker: str, period: str = "2y", interval: str = "1d"):
                     df_bs_latest = df_bs[df_bs['date'] == latest_date_bs]
                     bs_dict = dict(zip(df_bs_latest['type'], df_bs_latest['value']))
 
-                    equity = bs_dict.get('TotalEquity', 0)
-                    bps = bs_dict.get('BookValuePerShare', 0)
-                    ordinary_shares = bs_dict.get('OrdinaryShares', 0) # 普通股股本
+                    # 同樣涵蓋多種可能的資產負債表名稱
+                    equity = get_val(bs_dict, ['TotalEquity', 'EquityAttributableToOwnersOfParent'])
+                    ordinary_shares = get_val(bs_dict, ['OrdinaryShareCapital', 'ShareCapital', 'OrdinaryShares']) 
 
-                    # 算 P/B
-                    if bps > 0 and current_price > 0:
-                        info['priceToBook'] = current_price / bps
-
-                    # 算 ROE (單季淨利 / 總權益)
+                    # 算 ROE：單季淨利 / 權益總計
                     if equity > 0 and ni != 0:
                         info['returnOnEquity'] = ni / equity
 
-                    # 算市值：普通股本(金額) / 10 = 股數。市值 = 股數 * 股價
+                    # 算市值：股本 / 10 = 股數，股數 * 股價 = 市值
                     if ordinary_shares > 0 and current_price > 0:
                         info['marketCap'] = (ordinary_shares / 10) * current_price
 
