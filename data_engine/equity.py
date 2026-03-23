@@ -76,7 +76,7 @@ def fetch_stock_profile(ticker: str, period: str = "2y", interval: str = "1d"):
         except Exception as e:
             print(f"FMP 基本資料抓取失敗: {e}")
 
- # ==========================================
+# ==========================================
         # B. 財務數據 (FinMind API - 專為量化交易設計，不怕雲端封鎖)
         # ==========================================
         # 設定抓取近一年的資料，確保能精準抓到最新一季
@@ -86,19 +86,22 @@ def fetch_stock_profile(ticker: str, period: str = "2y", interval: str = "1d"):
         try:
             print(f"🚀 啟動 FinMind 專業量化引擎抓取 {symbol} 財報...")
             
-            # 1. 抓取綜合損益表
+            # 1. 綜合損益表
             is_params = {"dataset": "TaiwanStockFinancialStatements", "data_id": symbol, "start_date": start_date}
             is_resp = requests.get(fm_url, params=is_params, timeout=15).json()
             
-            # 2. 抓取資產負債表
+            # 2. 資產負債表
             bs_params = {"dataset": "TaiwanStockBalanceSheet", "data_id": symbol, "start_date": start_date}
             bs_resp = requests.get(fm_url, params=bs_params, timeout=15).json()
 
-            # 🌟 3. 新增：抓取官方每日估值 (P/E, P/B) -> 這是 FinMind 最強的隱藏功能！
+            # 🌟 3. 新增：現金流量表 (用來算 Operating CF 與 Free CF)
+            cf_params = {"dataset": "TaiwanStockCashFlowsStatement", "data_id": symbol, "start_date": start_date}
+            cf_resp = requests.get(fm_url, params=cf_params, timeout=15).json()
+
+            # 4. 官方每日估值 (P/E, P/B)
             per_params = {"dataset": "TaiwanStockPER", "data_id": symbol, "start_date": start_date}
             per_resp = requests.get(fm_url, params=per_params, timeout=15).json()
 
-            # 💡 建立「超強容錯」取值工具 (解決 N/A 跟 0.00% 的兇手)
             def get_val(d, keys):
                 for k in keys:
                     if k in d: return float(d[k])
@@ -111,6 +114,24 @@ def fetch_stock_profile(ticker: str, period: str = "2y", interval: str = "1d"):
                 info['trailingPE'] = float(latest_per.get('PER', 0))
                 info['priceToBook'] = float(latest_per.get('PBR', 0))
 
+            # 🌟 --- 處理現金流量表 ---
+            op_cf, free_cf = None, None
+            if cf_resp.get("msg") == "success" and len(cf_resp.get("data", [])) > 0:
+                df_cf = pd.DataFrame(cf_resp["data"])
+                latest_date_cf = df_cf['date'].max()
+                df_cf_latest = df_cf[df_cf['date'] == latest_date_cf]
+                cf_dict = dict(zip(df_cf_latest['type'], df_cf_latest['value']))
+                
+                # 營運現金流 (IFRS 詞彙)
+                op_cf = get_val(cf_dict, ['NetCashGeneratedFromUsedInOperatingActivities', 'NetCashFlowsFromOperatingActivities'])
+                
+                # 資本支出 CAPEX (取得不動產、廠房及設備，通常為負值流出)
+                capex = get_val(cf_dict, ['AcquisitionOfPropertyPlantAndEquipment', 'PurchasesOfPropertyPlantAndEquipment'])
+                
+                # 計算自由現金流 = 營運現金流 - 資本支出的絕對值
+                if op_cf != 0:
+                    free_cf = op_cf - abs(capex)
+
             # --- 處理損益表 ---
             if is_resp.get("msg") == "success" and len(is_resp.get("data", [])) > 0:
                 df_is = pd.DataFrame(is_resp["data"])
@@ -118,13 +139,11 @@ def fetch_stock_profile(ticker: str, period: str = "2y", interval: str = "1d"):
                 df_is_latest = df_is[df_is['date'] == latest_date_is]
                 is_dict = dict(zip(df_is_latest['type'], df_is_latest['value']))
 
-                # 涵蓋所有 FinMind 可能的英文欄位名稱，一網打盡！
-                rev = get_val(is_dict, ['Revenue', 'OperatingRevenue'])
+                rev = get_val(is_dict, ['Revenue', 'OperatingRevenue', 'NetRevenue'])
                 gp = get_val(is_dict, ['GrossProfit', 'OperatingIncome'])
-                ni = get_val(is_dict, ['NetIncome', 'NetIncomeAttributableToOwnersOfTheParent'])
-                eps = get_val(is_dict, ['EPS'])
+                ni = get_val(is_dict, ['NetIncome', 'NetIncomeLoss', 'ProfitLoss', 'ProfitLossAttributableToOwnersOfParent'])
+                eps = get_val(is_dict, ['EPS', 'BasicEarningsLossPerShare'])
 
-                # 如果上面沒抓到 P/E，就用 EPS 自己算備用
                 if 'trailingPE' not in info and eps > 0 and current_price > 0:
                     info['trailingPE'] = current_price / (eps * 4)
 
@@ -134,11 +153,16 @@ def fetch_stock_profile(ticker: str, period: str = "2y", interval: str = "1d"):
                     '單季 EPS', '營運現金流 (Operating CF)', '自由現金流 (Free CF)'
                 ], columns=[col_name])
 
-                tw_fin.loc['營收 (Revenue)', col_name] = rev
+                tw_fin.loc['營收 (Revenue)', col_name] = rev / 1000 if rev else 0
                 tw_fin.loc['營收年增率 (YoY)', col_name] = None 
                 tw_fin.loc['毛利率 (Gross Margin)', col_name] = gp / rev if rev else 0
                 tw_fin.loc['淨利率 (Net Margin)', col_name] = ni / rev if rev else 0
                 tw_fin.loc['單季 EPS', col_name] = eps
+                
+                # 🌟 把剛剛算好的現金流放進來，並除以 1000 配合 M (百萬) 單位
+                tw_fin.loc['營運現金流 (Operating CF)', col_name] = op_cf / 1000 if op_cf is not None else None
+                tw_fin.loc['自由現金流 (Free CF)', col_name] = free_cf / 1000 if free_cf is not None else None
+                
                 income_stmt = tw_fin
 
                 # --- 處理資產負債表 ---
@@ -148,38 +172,53 @@ def fetch_stock_profile(ticker: str, period: str = "2y", interval: str = "1d"):
                     df_bs_latest = df_bs[df_bs['date'] == latest_date_bs]
                     bs_dict = dict(zip(df_bs_latest['type'], df_bs_latest['value']))
 
-                    # 同樣涵蓋多種可能的資產負債表名稱
-                    equity = get_val(bs_dict, ['TotalEquity', 'EquityAttributableToOwnersOfParent'])
-                    ordinary_shares = get_val(bs_dict, ['OrdinaryShareCapital', 'ShareCapital', 'OrdinaryShares']) 
+                    equity = get_val(bs_dict, ['TotalEquity', 'EquityAttributableToOwnersOfParent', 'Equity'])
+                    ordinary_shares = get_val(bs_dict, ['OrdinaryShareCapital', 'ShareCapital', 'CapitalStock', 'OrdinaryShares']) 
 
-                    # 算 ROE：單季淨利 / 權益總計
                     if equity > 0 and ni != 0:
                         info['returnOnEquity'] = ni / equity
 
-                    # 算市值：股本 / 10 = 股數，股數 * 股價 = 市值
                     if ordinary_shares > 0 and current_price > 0:
                         info['marketCap'] = (ordinary_shares / 10) * current_price
 
         except Exception as e:
             print(f"FinMind 量化引擎抓取失敗: {e}")
     else:
-        # 🔵 【美股模式 - 保持 FMP 完美萃取 4 季與 8 大指標】
+        # 🔵 【美股模式 - 雲端專業版：100% FMP 引擎】
+        info['currentPrice'] = float(hist['Close'].iloc[-1]) if not hist.empty else 0
+
+        # ==========================================
+        # A. 基本資料與估值 (向 FMP 拿，雲端防封鎖)
+        # ==========================================
         try:
+            # 1. 拿公司介紹與市值
             profile_url = f"https://financialmodelingprep.com/stable/profile?symbol={ticker_upper}&apikey={FMP_API_KEY}"
             p_resp = requests.get(profile_url, timeout=10).json()
             if p_resp:
                 p = p_resp[0] if isinstance(p_resp, list) else p_resp
                 info['shortName'] = p.get('companyName', ticker_upper)
+                info['sector'] = p.get('sector', 'N/A')
+                info['industry'] = p.get('industry', 'N/A')
                 info['longBusinessSummary'] = p.get('description', '暫無公司業務介紹。')
                 info['website'] = p.get('website', 'N/A')
+                info['fullTimeEmployees'] = p.get('fullTimeEmployees', 'N/A')
                 info['marketCap'] = p.get('mktCap', 0)
 
+            # 2. 拿 P/E, P/B, ROE
             metrics_url = f"https://financialmodelingprep.com/stable/key-metrics-ttm?symbol={ticker_upper}&apikey={FMP_API_KEY}"
             m_resp = requests.get(metrics_url, timeout=10).json()
             if m_resp:
                 m = m_resp[0] if isinstance(m_resp, list) else m_resp
-                info['trailingPE'] = m.get('peRatioTTM', 'N/A')
+                info['trailingPE'] = m.get('peRatioTTM', None)
+                info['priceToBook'] = m.get('pbRatioTTM', None)
+                info['returnOnEquity'] = m.get('roeTTM', None)
+        except Exception as e:
+            print(f"美股基本資料抓取失敗: {e}")
 
+        # ==========================================
+        # B. 財務數據 (向 FMP 拿單季財報，並自行精算利潤率)
+        # ==========================================
+        try:
             is_url = f"https://financialmodelingprep.com/stable/income-statement?symbol={ticker_upper}&period=quarter&limit=5&apikey={FMP_API_KEY}"
             cf_url = f"https://financialmodelingprep.com/stable/cash-flow-statement?symbol={ticker_upper}&period=quarter&limit=4&apikey={FMP_API_KEY}"
             is_resp = requests.get(is_url, timeout=10).json()
@@ -192,24 +231,33 @@ def fetch_stock_profile(ticker: str, period: str = "2y", interval: str = "1d"):
                 if not df_is.empty and not df_cf.empty:
                     df_is.set_index('date', inplace=True)
                     df_cf.set_index('date', inplace=True)
-                    if len(df_is) >= 5:
+                    
+                    # 💡 安全機制：自己算毛利率與淨利率，不依賴 API 提供的 ratio 欄位
+                    if 'grossProfit' in df_is.columns and 'revenue' in df_is.columns:
+                        df_is['grossProfitRatio'] = df_is['grossProfit'] / df_is['revenue']
+                    if 'netIncome' in df_is.columns and 'revenue' in df_is.columns:
+                        df_is['netIncomeRatio'] = df_is['netIncome'] / df_is['revenue']
+                    
+                    # 算營收年增率 (YoY)
+                    if len(df_is) >= 5: 
                         df_is['revenue_YoY'] = df_is['revenue'].pct_change(periods=-4)
-                    else:
+                    else: 
                         df_is['revenue_YoY'] = None
                         
                     df_combined = pd.concat([df_is.head(4), df_cf.head(4)], axis=1).T
                     mapping = {
-                        'revenue': '營收 (Revenue)', 'revenue_YoY': '營收年增率 (YoY)',
-                        'grossProfitRatio': '毛利率 (Gross Margin)', 'netIncomeRatio': '淨利率 (Net Margin)',
-                        'eps': '單季 EPS', 'operatingCashFlow': '營運現金流 (Operating CF)',
+                        'revenue': '營收 (Revenue)', 
+                        'revenue_YoY': '營收年增率 (YoY)', 
+                        'grossProfitRatio': '毛利率 (Gross Margin)', 
+                        'netIncomeRatio': '淨利率 (Net Margin)', 
+                        'eps': '單季 EPS', 
+                        'operatingCashFlow': '營運現金流 (Operating CF)', 
                         'freeCashFlow': '自由現金流 (Free CF)'
                     }
                     available_cols = [c for c in mapping.keys() if c in df_combined.index]
                     income_stmt = df_combined.loc[available_cols].rename(index=mapping)
-                    finance_source = "FMP (Financial Modeling Prep)"
-
         except Exception as e:
-            print(f"FMP API 抓取失敗: {e}")
+            print(f"美股財報抓取失敗: {e}")
 
     # 防呆補上收盤價
     if 'currentPrice' not in info and not hist.empty:
