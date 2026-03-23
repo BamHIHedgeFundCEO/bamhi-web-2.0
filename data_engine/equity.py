@@ -13,7 +13,7 @@ import plotly.graph_objects as go
 import pandas as pd
 import requests
 import streamlit as st
-
+from datetime import datetime, timedelta
 # 🔑 你的專屬 FMP API 金鑰
 FMP_API_KEY = "29epqrFbGsBfasHJHyU7fnFT8CcUdeaF"
 
@@ -79,9 +79,6 @@ def fetch_stock_profile(ticker: str, period: str = "2y", interval: str = "1d"):
         # ==========================================
         # B. 財務數據 (FinMind API - 專為量化交易設計，不怕雲端封鎖)
         # ==========================================
-        import requests
-        import pandas as pd
-        from datetime import datetime, timedelta
 
         # 設定抓取近一年的資料，確保能精準抓到最新一季
         start_date = (datetime.now() - timedelta(days=400)).strftime('%Y-%m-%d')
