@@ -302,7 +302,29 @@ def render_search_result(ticker: str):
 
 # ── 頁籤 1：技術線圖 ──
         with tab_chart:
-            # 👇 把使用者選好的 K 線級別 (interval_opt) 傳給畫圖引擎
+            # 🌟 新增：從 hist 中萃取最新的趨勢與分數來顯示文字情報
+            if not hist.empty and 'Composite' in hist.columns:
+                last_score = hist['Composite'].iloc[-1]
+                ma20 = hist['MA_20'].iloc[-1] if 'MA_20' in hist.columns else 0
+                ma60 = hist['MA_60'].iloc[-1] if 'MA_60' in hist.columns else 0
+                ma120 = hist['MA_120'].iloc[-1] if 'MA_120' in hist.columns else 0
+                
+                # 均線趨勢判斷
+                if ma20 > ma60 > ma120: trend_status = "多頭 🐂 (均線發散)"
+                elif ma20 < ma60 < ma120: trend_status = "空頭 🐻 (均線蓋頭)"
+                else: trend_status = "盤整震盪 ⚖️ (均線糾結)"
+                
+                # 燈號判斷
+                if last_score > 75: status_emoji = "🔴 過熱警示 (賣訊)"
+                elif last_score < 25: status_emoji = "🟢 超跌機會 (買訊)"
+                else: status_emoji = "⚪ 觀望持有"
+                
+                # 用精美的並排卡片顯示出來
+                col_t1, col_t2 = st.columns(2)
+                col_t1.info(f"**趨勢狀態:** {trend_status}")
+                col_t2.info(f"**量化訊號:** {status_emoji} (綜合分數: **{last_score:.1f}**)")
+
+            # 👇 畫出雙層圖表
             fig = equity_engine.plot_candlestick(hist, ticker_upper, interval=interval_opt)
             if fig:
                 st.plotly_chart(fig, use_container_width=True)
