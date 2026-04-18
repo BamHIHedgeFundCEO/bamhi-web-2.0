@@ -3,6 +3,9 @@ import pandas as pd
 from datetime import datetime
 import importlib
 from deep_translator import GoogleTranslator
+import os
+import glob
+import re
 # 🚨 自動偵測是否安裝了導覽列套件
 try:
     from streamlit_option_menu import option_menu
@@ -144,12 +147,13 @@ def render_navbar():
         st.markdown("<h3 style='margin-top: 10px; color: #3b82f6;'>🌌 BamHI Quant</h3>", unsafe_allow_html=True)
         
     with col2:
-        # 加入了下拉箭頭的選單
-        NAV_OPTIONS = ["首頁", "總經市場 ▼", "交易工具 ▼", "交易日誌", "專區", "功能教學"]
+        # 👇 這裡改為「交易模型」
+        NAV_OPTIONS = ["首頁", "總經市場 ▼", "交易工具 ▼", "交易模型", "專區", "功能教學"]
         selected = option_menu(
             menu_title=None, 
             options=NAV_OPTIONS,
-            icons=["house", "activity", "tools", "journal-text", "star", "book"],
+            # 👇 第四個 icon 改為 "cpu"
+            icons=["house", "activity", "tools", "cpu", "star", "book"],
             menu_icon="cast",
             default_index=0,
             orientation="horizontal",
@@ -217,6 +221,64 @@ def render_hero_section():
         </div>
         """, unsafe_allow_html=True)
 
+
+# ============== 🤖 交易模型大廳 ==============
+def draw_ai_table(csv_path, engine_type):
+    
+    if os.path.exists(csv_path):
+        df = pd.read_csv(csv_path)
+        if 'Win_Prob' in df.columns: df['Win_Prob'] = df['Win_Prob'] * 100
+        
+        if engine_type == "alpha":
+            display_cols = ['Ticker', 'Resonance_Score', 'Win_Prob', 'Price', 'RS_Rating', 'Ov_Supply', 'POC_Dist', 'MA20_DP', 'Vol_Dry_Up', 'Turtle']
+            col_config = {
+                "Resonance_Score": st.column_config.ProgressColumn("🔥 共振總分", format="%.1f", min_value=0, max_value=100),
+                "RS_Rating": st.column_config.NumberColumn("RS 強度", format="%.0f"),
+                "Turtle": st.column_config.CheckboxColumn("海龜突破")
+            }
+        else: # Genesis 引擎
+            display_cols = ['Ticker', 'Resonance_Score', 'Win_Prob', 'Price', 'MA_Conv', 'Vol_Z', 'Breakout', 'MA20_Slope', 'Ov_Supply', 'POC_Dist']
+            col_config = {
+                "Resonance_Score": st.column_config.ProgressColumn("⚡ 物理共振", format="%.1f", min_value=0, max_value=100),
+                "MA_Conv": st.column_config.NumberColumn("均線糾結 %", format="%.2f%%"),
+                "Vol_Z": st.column_config.NumberColumn("爆量 Z-Score", format="%.2f"),
+                "Breakout": st.column_config.NumberColumn("破線位階 %", format="%.1f%%"),
+                "MA20_Slope": st.column_config.NumberColumn("20MA 拐頭 %", format="%.2f%%")
+            }
+
+        common_config = {
+            "Ticker": st.column_config.TextColumn("代碼", weight="bold"),
+            "Win_Prob": st.column_config.NumberColumn("🤖 AI 勝率", format="%.1f%%"),
+            "Price": st.column_config.NumberColumn("價格 ($)", format="%.2f"),
+            "Ov_Supply": st.column_config.NumberColumn("套牢 %", format="%.1f%%"),
+            "POC_Dist": st.column_config.NumberColumn("POC 距離 %", format="%.1f%%")
+        }
+        col_config.update(common_config)
+
+        st.dataframe(
+            df[[c for c in display_cols if c in df.columns]],
+            use_container_width=True, hide_index=True, height=500,
+            column_config=col_config
+        )
+        st.caption(f"🔄 最後更新：{datetime.fromtimestamp(os.path.getmtime(csv_path)).strftime('%Y-%m-%d %H:%M:%S')}")
+    else:
+        st.info(f"⏳ 該引擎資料尚未產生或同步中...")
+
+def render_trading_models():
+    st.title("🤖 BamHI 交易模型大廳")
+    st.markdown("揭開 BamHI 交易決策背後的 AI 大腦。結合 **Alpha (強勢追蹤)** 與 **Genesis (底部翻轉)** 兩大引擎的終極量化選股。")
+    
+    tab_alpha, tab_genesis = st.tabs(["🌊 Alpha 趨勢追蹤", "🌋 Genesis 創世紀底部"])
+
+    with tab_alpha:
+        st.subheader("Alpha 趨勢追蹤引擎 (V7.3)")
+        st.caption("專攻：已站上均線、準備進入或正在主升段的強勢領頭羊。")
+        draw_ai_table("data/BamHI_Dashboard_Latest.csv", engine_type="alpha")
+
+    with tab_genesis:
+        st.subheader("Genesis 創世紀引擎 (V1.0)")
+        st.caption("專攻：均線極度糾結、底部帶量破線、具備極高盈虧比的轉折股。")
+        draw_ai_table("data/BamHI_Genesis_Dashboard_Latest.csv", engine_type="genesis")
 # ============== 🔍 股票搜尋結果頁面 ==============
 # ============== 🔍 股票深度搜尋引擎 (純 UI 介面) ==============
 def render_search_result(ticker: str):
@@ -553,6 +615,100 @@ def render_trading_tools():
     st.subheader(f"🎯 {selected_sub}")
     render_dynamic_chart(UI_TOOLS_MAPPING[selected_sub])
 
+# ============== 🤖 交易模型分頁 ==============
+def render_trading_models():
+    st.title("🤖 BamHI 量化模型庫與每日戰報")
+    st.markdown("揭開 BamHI 交易決策背後的 AI 大腦，並展示兩大引擎每日最新（或歷史）輸出的狙擊名單。")
+    
+    # ==========================================
+    # 🕰️ 新增：時光機日期選擇器
+    # ==========================================
+    st.markdown("### 📅 戰報日期選擇")
+    
+    # 自動掃描 data 資料夾內的歷史檔案 (利用正則表達式抓取檔名裡的日期)
+    history_files = glob.glob("data/BamHI_Dashboard_20*.csv")
+    dates = []
+    for f in history_files:
+        match = re.search(r"(\d{8})", f)
+        if match:
+            date_str = match.group(1)
+            # 格式化為 YYYY-MM-DD 比較好看
+            formatted_date = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:]}"
+            dates.append((formatted_date, date_str))
+            
+    # 依照日期由新到舊排序
+    dates = sorted(dates, key=lambda x: x[0], reverse=True)
+    
+    # 建立下拉選單選項 (預設第一項永遠是 Latest)
+    options = ["🔥 最新戰報 (Latest)"] + [f"🕰️ 歷史紀錄: {d[0]}" for d in dates]
+    
+    # 畫出下拉式選單
+    selected_option = st.selectbox("請選擇要查看的 AI 榜單日期：", options, label_visibility="collapsed")
+    
+    # 🧠 根據使用者的選擇，決定要讀取哪兩個 CSV 檔案
+    if selected_option == "🔥 最新戰報 (Latest)":
+        alpha_path = "data/BamHI_Dashboard_Latest.csv"
+        genesis_path = "data/BamHI_Genesis_Dashboard_Latest.csv"
+        display_date = "(Latest)"
+    else:
+        # 抽出選擇的 YYYYMMDD
+        selected_date_raw = dates[options.index(selected_option) - 1][1]
+        alpha_path = f"data/BamHI_Dashboard_{selected_date_raw}.csv"
+        genesis_path = f"data/BamHI_Genesis_Dashboard_{selected_date_raw}.csv"
+        display_date = selected_option.replace("🕰️ 歷史紀錄: ", "")
+        
+    st.divider()
+
+    # ==========================================
+    # 📊 雙引擎展示區 (Tabs)
+    # ==========================================
+    tab_m1, tab_m2, tab_backtest = st.tabs(["🌊 Alpha 趨勢大腦", "🌋 Genesis 創世紀大腦", "📈 歷史回測績效"])
+
+    with tab_m1:
+        st.subheader("Alpha 趨勢追蹤模型 (V7.3)")
+        st.markdown("**模型架構:** `LightGBM Classifier` + `Optuna 最佳化`")
+        st.markdown("**訓練目標:** 尋找均線多頭排列、準備進入主升段的強勢股，目標捕獲 10% 波段利潤。")
+        
+        col1, col2, col3 = st.columns(3)
+        col1.metric("歷史驗證 AUC", "0.825")
+        col2.metric("模型深度 (Max Depth)", "4")
+        col3.metric("訓練樣本數", "15,000+")
+        
+        st.markdown("#### 🧠 核心決策特徵權重 (Feature Importance)")
+        st.progress(85, text="1. RSI 強弱指標 (RSI)")
+        st.progress(72, text="2. 距離 52 週高點比例 (Dist_52W_High)")
+        st.progress(68, text="3. 相對大盤強度 (RS_Rating)")
+        st.progress(55, text="4. 20MA 未來扣抵推力 (MA20_DP)")
+        
+        st.markdown("---")
+        st.markdown(f"#### 🎯 AI 嚴選名單 🌊 Alpha 引擎 {display_date}")
+        # 👇 直接把動態路徑傳進去
+        draw_ai_table(alpha_path, engine_type="alpha")
+
+    with tab_m2:
+        st.subheader("Genesis 底部翻轉模型 (V1.0)")
+        st.markdown("**模型架構:** `LightGBM Classifier`")
+        st.markdown("**訓練目標:** 專攻均線極度糾結、底部帶量突破的潛在轉折股，追求極致盈虧比。")
+        
+        col1, col2, col3 = st.columns(3)
+        col1.metric("歷史驗證 AUC", "0.798")
+        col2.metric("均線糾結容忍度", "< 15%")
+        col3.metric("底部爆量要求", "Z-Score > 1.5")
+        
+        st.markdown("#### 🧠 核心決策特徵權重 (Feature Importance)")
+        st.progress(88, text="1. 均線糾結度 (MA_Convergence_Ratio)")
+        st.progress(76, text="2. 底部爆量 Z-Score (Vol_Z_Score)")
+        st.progress(70, text="3. 波動率壓縮 (ATR_Pct)")
+        st.progress(62, text="4. 上方套牢籌碼比例 (Overhead_Supply_Ratio)")
+        
+        st.markdown("---")
+        st.markdown(f"#### 🎯 AI 嚴選名單 🌋 Genesis 引擎 {display_date}")
+        # 👇 直接把動態路徑傳進去
+        draw_ai_table(genesis_path, engine_type="genesis")
+
+    with tab_backtest:
+        st.subheader("🚧 回測系統建置中")
+        st.info("未來這裡將會串接 BamHI 模型的歷史權益曲線 (Equity Curve)、最大回撤 (Max Drawdown) 與夏普值 (Sharpe Ratio) 等專業量化回測數據。")
 # ============== 主程式 ==============
 def main():
     if "search_query" not in st.session_state:
@@ -578,9 +734,12 @@ def main():
     elif page_token == "交易工具":
         render_trading_tools()
         
-    elif page_token in ["交易日誌", "專區", "功能教學"]:
+    elif page_token == "交易模型":
+        render_trading_models()  # 👈 模型大廳正式掛載在這裡！
+        
+    elif page_token in ["專區", "功能教學"]:
         st.title(f"🚧 {page_token}")
-        st.info("此功能正在開發中...")
+        st.info("此功能正在開發中...")  # 👈 專區退回開發中狀態
 
 if __name__ == "__main__":
     main()
