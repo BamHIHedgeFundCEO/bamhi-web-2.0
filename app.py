@@ -247,7 +247,7 @@ def draw_ai_table(csv_path, engine_type):
             }
 
         common_config = {
-            "Ticker": st.column_config.TextColumn("代碼", weight="bold"),
+            "Ticker": st.column_config.TextColumn("代碼"),  # 👈 把它刪掉，留這樣就好
             "Win_Prob": st.column_config.NumberColumn("🤖 AI 勝率", format="%.1f%%"),
             "Price": st.column_config.NumberColumn("價格 ($)", format="%.2f"),
             "Ov_Supply": st.column_config.NumberColumn("套牢 %", format="%.1f%%"),
