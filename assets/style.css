@@ -1,0 +1,93 @@
+/* 全域深色背景與字體 */
+.stApp { 
+    background-color: #0f1319; 
+    color: #e5e7eb;
+}
+
+/* 隱藏預設的頂部紅線和漢堡選單，讓畫面更乾淨 */
+header {visibility: hidden;}
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+
+/* 頂部搜尋框樣式 */
+.stTextInput>div>div>input {
+    background-color: #1f2937;
+    color: white;
+    border: 1px solid #374151;
+    border-radius: 20px;
+    padding-left: 15px;
+}
+.stTextInput>div>div>input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 1px #3b82f6;
+}
+
+/* Hero Section 大標題 */
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #ffffff;
+    margin-bottom: 1rem;
+}
+
+/* Hero Section 副標題 */
+.hero-subtitle {
+    font-size: 1.1rem;
+    color: #9ca3af;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+/* 主按鈕 (綠色) */
+.primary-btn {
+    background-color: #10b981;
+    color: #ffffff;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.2s;
+    border: none;
+}
+.primary-btn:hover {
+    background-color: #059669;
+    transform: translateY(-2px);
+}
+
+/* 次按鈕 (深灰色) */
+.secondary-btn {
+    background-color: #1f2937;
+    color: #e5e7eb;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.2s;
+    border: 1px solid #374151;
+    margin-left: 10px;
+}
+.secondary-btn:hover {
+    background-color: #374151;
+}
+
+/* 右側 Bento 卡片 */
+.bento-card {
+    background-color: #111827;
+    border: 1px solid #1f2937;
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+.bento-tag {
+    background-color: #064e3b;
+    color: #34d399;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    display: inline-block;
+    margin-bottom: 10px;
+}
