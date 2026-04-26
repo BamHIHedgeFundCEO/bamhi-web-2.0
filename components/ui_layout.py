@@ -48,7 +48,8 @@ def render_hero_section():
         st.markdown("""
         <div class='hero-subtitle'>
         BamHI Quant 把全市場掃描、板塊輪動、趨勢雷達、回測驗證、機構與內部人追蹤，整合出一套每天可以直接執行的研究工作流。<br><br>
-        重視資訊量，而且想更快找到值得研究的標的與時機，BamHI 是最貼近你需求的工具。新『專區』功能也會持續更新研究當下的原始紀錄與 AI 工作流，不只給你最後結論。
+        重視資訊量，而且想更快找到值得研究的標的與時機，BamHI 是最貼近你需求的工具。新『專區』功能也會持續更新研究當下的原始紀錄與 AI 工作流，不只給你最後結論。<br><br>
+        Buy the dip, short the VIX, f**k Bitcoin.
         </div>
         """, unsafe_allow_html=True)
         
