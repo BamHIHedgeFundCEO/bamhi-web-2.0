@@ -6,9 +6,11 @@ from components.charts import render_dynamic_chart
 
 # 匯入我們的後端大腦
 from data_engine.market.darkpool import get_darkpool_surge_list
+from views.sector_rotation import render_sector_rotation
 
 # ============== 🧠 選單對應本地端資料引擎 (Mapping) ==============
 UI_TOOLS_MAPPING = {
+    "自定義板塊與VCP監控": "SECTOR_ROTATION",
     "暗池異常資金監控": "DARK_POOL",
     "美股板塊強弱": {"cat_id": "market", "module": "strength", "ticker": "ALL", "name": "美股板塊強弱 (Sector Strength)", "id": "SECTOR_STRENGTH"},
     "全球市場強弱": {"cat_id": "market", "module": "world_sectors", "ticker": "WORLD", "name": "龜族全景動能儀表板", "id": "world_sectors"},
@@ -94,6 +96,8 @@ def render_trading_tools():
     
     if selected_sub == "暗池異常資金監控":
         render_darkpool_scanner()
+    elif selected_sub == "自定義板塊與VCP監控":
+        render_sector_rotation()
     else:
         st.subheader(f"🎯 {selected_sub}")
         render_dynamic_chart(UI_TOOLS_MAPPING[selected_sub])

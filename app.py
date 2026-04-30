@@ -30,6 +30,13 @@ def main():
     if "search_query" not in st.session_state:
         st.session_state.search_query = ""
 
+    # Check for URL query params to support deep linking
+    if hasattr(st, "query_params") and "search_query" in st.query_params:
+        query_val = st.query_params["search_query"]
+        if query_val:
+            st.session_state.search_query = query_val
+            st.query_params.clear() # Clear it so it doesn't persist across navigation
+
     # 渲染頂部導覽列與搜尋框
     selected_nav, search_input = render_navbar()
     
@@ -40,6 +47,9 @@ def main():
     if search_input:
         st.session_state.search_query = search_input
         render_search_result(search_input)
+    elif st.session_state.search_query:
+        # If we have a search_query from URL jump or previous state, render it instead of the normal page
+        render_search_result(st.session_state.search_query)
         
     elif page_token == "首頁":
         render_hero_section()

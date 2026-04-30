@@ -5,6 +5,10 @@ import pandas as pd
 import numpy as np
 import yfinance as yf
 from datetime import datetime, timedelta
+from dotenv import load_dotenv # 👈 新增：用來讀取 .env 檔
+
+# 載入環境變數 (確保抓得到 DISCORD_WEBHOOK)
+load_dotenv()
 
 # 設定路徑
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -13,6 +17,35 @@ os.makedirs(DATA_DIR, exist_ok=True)
 
 FINRA_URL_TEMPLATE = "https://cdn.finra.org/equity/regsho/daily/CNMSshvol{}.txt"
 
+# ==========================================
+# 🦇 新增：Discord 推播函數 (暗池專屬文案)
+# ==========================================
+def send_to_discord(file_path):
+    webhook_url = os.environ.get('DISCORD_WEBHOOK') 
+    if not webhook_url:
+        print("⚠️ 未設定 Discord Webhook，跳過傳送。")
+        return
+    if not os.path.exists(file_path): 
+        print("⚠️ 找不到檔案，無法傳送至 Discord。")
+        return
+        
+    try:
+        with open(file_path, 'rb') as f:
+            files = {'file': (os.path.basename(file_path), f)}
+            # 🌟 專屬文案修改：標明這是暗池雷達
+            payload = {'content': f"🦇 **BamHI 廣域雷達：暗池異常資金掃描完畢**\n今日 Top 50 爆量標的與雙軌技術指標已出爐，請查收！"}
+            response = requests.post(webhook_url, data=payload, files=files)
+            
+        if response.status_code in [200, 204]: 
+            print("✅ Discord 戰報傳送成功！")
+        else:
+            print(f"❌ Discord 傳送失敗，狀態碼: {response.status_code}")
+    except Exception as e:
+        print(f"❌ 傳送至 Discord 時發生錯誤: {e}")
+
+# ==========================================
+# 核心資料抓取與運算邏輯
+# ==========================================
 def get_valid_finra_dates(target_date, required_days=21):
     valid_dates = []
     current_date = target_date
@@ -121,8 +154,12 @@ def main():
     
     output_path = os.path.join(DATA_DIR, 'darkpool_results.csv')
     df_final.to_csv(output_path, index=False, encoding='utf-8-sig')
+    
     print(f"🎉 任務完成！CSV 已儲存至: {output_path}")
     print(f"⏱️ 總耗時: {time.time() - start_time:.2f} 秒")
+    
+    # 👈 新增：腳本跑到最後，自動把剛存好的 CSV 送去 Discord
+    send_to_discord(output_path)
 
 if __name__ == "__main__":
     main()

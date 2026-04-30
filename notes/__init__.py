@@ -17,3 +17,4 @@ def fetch_note(category: str, module_name: str, ticker: str):
             return f"⚠️ {module_name}.py 裡面沒有定義 get_note(ticker) 函式"
     except Exception:
         return f"⚠️ 尚未建立 notes/{category}/{module_name}.py 筆記檔案"
+        
