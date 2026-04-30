@@ -29,23 +29,22 @@ def render_sector_rotation():
     # === 0. 全局控制面板 ===
     st.markdown("### ⚙️ 系統參數設定")
     
-    # 初始化獨立的 Session State 變數（避免與 widget key 衝突）
-    if "current_sector" not in st.session_state:
-        st.session_state.current_sector = list(TRACKED_SECTORS.keys())[0]
+    # 初始化 Session State
+    if "sector_selectbox_ui" not in st.session_state:
+        st.session_state.sector_selectbox_ui = list(TRACKED_SECTORS.keys())[0]
         
-    def on_sector_change():
-        st.session_state.current_sector = st.session_state.sector_selectbox_ui
+    # 如果有來自熱力圖的跳轉請求，在渲染 Selectbox 之前先更新它的 key
+    if "next_sector" in st.session_state:
+        st.session_state.sector_selectbox_ui = st.session_state.next_sector
+        del st.session_state.next_sector
         
     col_opt1, col_opt2, col_opt3 = st.columns([2, 2, 3])
     
     with col_opt1:
-        current_index = list(TRACKED_SECTORS.keys()).index(st.session_state.current_sector)
         sector_name = st.selectbox(
             "📂 選擇深度掃描板塊", 
             options=list(TRACKED_SECTORS.keys()),
-            index=current_index,
-            key="sector_selectbox_ui",
-            on_change=on_sector_change
+            key="sector_selectbox_ui"
         )
         
     with col_opt2:
@@ -109,8 +108,8 @@ def render_sector_rotation():
                     points = event["selection"]["points"]
                     if points:
                         clicked_sector = points[0].get("label", "")
-                        if clicked_sector in TRACKED_SECTORS and st.session_state.get("current_sector") != clicked_sector:
-                            st.session_state.current_sector = clicked_sector
+                        if clicked_sector in TRACKED_SECTORS and st.session_state.get("sector_selectbox_ui") != clicked_sector:
+                            st.session_state.next_sector = clicked_sector
                             st.rerun()
             except TypeError:
                 # 舊版 Streamlit 不支援 on_select 的降級處理
