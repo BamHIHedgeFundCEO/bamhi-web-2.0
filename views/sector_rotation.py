@@ -26,46 +26,42 @@ def render_sector_rotation():
     st.title("🔄 BamHI 板塊輪動與資金流向監控")
     st.markdown("結合 5D/20D 動能加速、RS 相對強度與 VCP 籌碼掃描，鎖定市場最強主線。")
     
-    # === 側邊欄：板塊選擇與全局設定 ===
-    with st.sidebar:
-        st.header("⚙️ 每日追蹤板塊")
+    # === 0. 全局控制面板 ===
+    st.markdown("### ⚙️ 系統參數設定")
+    
+    # 初始化 Session State
+    if "sector_selectbox" not in st.session_state:
+        st.session_state.sector_selectbox = list(TRACKED_SECTORS.keys())[0]
         
-        # 初始化 Session State
-        if "sector_selectbox" not in st.session_state:
-            st.session_state.sector_selectbox = list(TRACKED_SECTORS.keys())[0]
-            
+    col_opt1, col_opt2, col_opt3 = st.columns([2, 2, 3])
+    
+    with col_opt1:
         # 👇 直接讀取上方的字典，變成下拉式選單，並綁定 key 以實現連動
         sector_name = st.selectbox(
-            "📂 選擇要深度掃描的板塊", 
+            "📂 選擇深度掃描板塊", 
             options=list(TRACKED_SECTORS.keys()),
             key="sector_selectbox"
         )
         
-        # 👇 新增：超酷的時間級別與歷史長度控制器
-        st.markdown("---")
-        st.markdown("### ⚙️ 圖表參數設定")
+    with col_opt2:
         period_opt = st.selectbox("📅 歷史區間", ["6mo", "1y", "2y", "5y", "10y", "max"], index=2, key="sector_period")
         
-        # 根據選到的板塊名稱，抓出對應的股票代碼清單
-        tickers = TRACKED_SECTORS[sector_name]
-        
-        # 顯示該板塊包含哪些股票，方便確認
-        st.info(f"**追蹤清單:**\n{', '.join(tickers)}")
-        
-        # 單一個股快速跳轉搜詢
-        st.markdown("---")
-        st.markdown("### 🔍 快速個股透視")
-        search_ticker = st.text_input("輸入代碼跳轉", placeholder="例如: RKLB").upper()
+    with col_opt3:
+        search_ticker = st.text_input("🔍 快速個股透視 (輸入代碼)", placeholder="例如: RKLB").upper()
         if search_ticker:
-            # 跳轉回自己的網站並帶上 search_query 參數
             target_url = f"/?search_query={search_ticker}"
             st.markdown(f"""
                 <a href="{target_url}" target="_self">
-                    <button style="width:100%; border-radius:5px; background-color:#FF4B4B; color:white; border:none; padding:10px; cursor:pointer;">
+                    <button style="width:100%; border-radius:5px; background-color:#FF4B4B; color:white; border:none; padding:7px; cursor:pointer;">
                         🚀 深度分析 {search_ticker}
                     </button>
                 </a>
             """, unsafe_allow_html=True)
+            
+    # 根據選到的板塊名稱，抓出對應的股票代碼清單
+    tickers = TRACKED_SECTORS[sector_name]
+    st.caption(f"**追蹤清單:** {', '.join(tickers)}")
+    st.markdown("---")
 
     # === 0. 板塊動能熱力圖 (全覽) ===
     st.subheader("🗺️ 板塊動能熱力圖 (Sector Momentum Heatmap)")
