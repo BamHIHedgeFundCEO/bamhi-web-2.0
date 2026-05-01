@@ -38,12 +38,15 @@ jobs:
 
       # 4. 執行你的「中央廚房」腳本 (做便當)
       - name: Run Data Pipeline
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}  # 💡 新增：將 Discord Webhook 注入環境變數
         run: python update_data.py
 
       # 4.5 執行暗池監控管線
       - name: Run Darkpool Pipeline
         env:
           POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}  # 💡 新增：如果暗池腳本也需要傳 Discord 就用得到
         run: python data_pipeline/market/update_darkpool_pipeline.py
 
       # 5. 把新的 CSV 檔上傳回 Github
