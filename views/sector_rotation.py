@@ -20,7 +20,7 @@ TRACKED_SECTORS = {
     "存儲記憶體 (Storage)": ["MU", "WDC", "STX", "NTAP","SNDK","RMBS","SIMO"],
     "AI 伺服器 (AI Server)": ["SMCI", "DELL", "HPE", "VRT"],
     "散熱與液冷 (Cooling)": ["MOD", "VERT", "NVT"],
-    "AI 晶片與軟體 (Chip & Software)": ["NVDA", "AVGO", "ADBE", "AMD", "INTC", "ORCL", "GOOGL", "META", "AMZN"],
+    "AI 應用軟體 (AI Apps)": ["ADBE", "ADP", "AI", "APP", "APPS", "ASAN", "BRZE", "CLBT", "CRM", "CVLT", "DDOG", "DOCS", "DOCU", "DUOL", "ESTC", "FIG", "FSLY", "GTLB", "GWRE", "HUBS", "INTU", "IOT", "KVYO", "LIF", "MDB", "MNDY", "NET", "NOW", "PATH", "PCOR", "PINS", "PLTR", "RBLX", "RBRK", "RDDT", "SAP", "SHOP", "SNAP", "SNOW", "SOUN", "SPOT", "TEAM", "TEM", "TTD", "TWLO", "U", "VEEV", "ZETA", "ZM"],
     "稀土與戰略金屬 (Rare Earths)": ["MP", "UUUU", "AREC", "CRML", "NB", "TMC", "IDR", "PPTA", "CLF", "UAMY", "USAR"],
     "光通訊 (Optical Communication)": ["GLW", "LITE", "COHR", "FN", "AAOI", "POET", "MRVL", "CRDO", "ALAB", "ANET", "AVGO", "CIEN", "VIAV", "CLFD", "NOK", "LUMN", "APH"],
     "鈾礦 (Uranium)": ["CCJ", "UEC", "UUUU", "LEU", "ISOU", "UROY", "NXE", "URG", "DNN", "EU", "SMR", "OKLO", "NNE", "BWXT", "AEC", "NUCL", "JAGU"],
@@ -162,67 +162,89 @@ def render_sector_rotation():
             is_overheated = crowd_ratio >= crowd_90p
             
             col7.metric(
-                "板塊資金擁擠度", 
+                "資金佔大盤均量比例", 
                 f"{crowd_ratio:.2f}%", 
                 delta="⚠️ 達 90% 過熱水位" if is_overheated else "✅ 水位正常", 
                 delta_color="inverse" if is_overheated else "normal"
             )
             
-            # 💡 判斷進出場狀態與防護罩警報 (升級為 M5 > M10 > M20 動能共振)
+            # 💡 判斷進出場狀態與防護罩警報
+            close_val = latest['Sector_Close']
+            ma20_val = latest['MA20']
+            ma60_val = latest['MA60']
+            
             st.markdown("<br>", unsafe_allow_html=True)
             if is_overheated:
-                st.error(f"🚨 **【擁擠度防護罩觸發】** 該板塊成交金額佔比 ({crowd_ratio:.2f}%) 已突破過去一年 90% 絕對高位 ({crowd_90p:.2f}%)。散戶情緒極度擁擠，隨時可能面臨大戶派發反轉，請嚴格執行減碼紀律！")
-            elif latest['M5'] > latest['M10'] and latest['M10'] > latest['M20'] and rs_slope > 0:
-                st.success("🟢 **【極致動能共振】** M5 > M10 > M20 多頭排列，短、中線熱錢同步加速流入，且籌碼尚未過熱！")
-            elif latest['M5'] > latest['M20'] and rs_slope > 0:
-                st.info("🔵 **【初步進場訊號】** 短線動能穿越中線，板塊轉強，可開始觀察下方 VCP 標的。")
-            elif latest['M5'] < latest['M10']:
-                st.warning("🟡 **【動能衰減】** 短線動能 (M5) 已落後波段動能 (M10)，追價力道減弱，不建議積極建倉。")
+                st.error(f"🚨 **【擁擠度防護罩觸發】** 該板塊資金佔大盤均量比例 ({crowd_ratio:.2f}%) 已突破過去一年 90% 絕對高位 ({crowd_90p:.2f}%)。散戶情緒極度擁擠，隨時可能面臨大戶派發反轉，請嚴格執行減碼紀律，切勿盲目追高！")
+            elif close_val < ma20_val:
+                st.warning(f"🔴 **【空頭弱勢 / 跌破月線】** 指數跌破 20 日均線 ({close_val:.2f} < {ma20_val:.2f})，板塊處於回檔或空頭格局，建議觀望，等待突破壓力或 VCP 右側收縮完成。")
+            elif close_val > ma20_val and ma20_val > ma60_val and rs_slope > 0 and latest['M5'] > 0:
+                st.success("🟢 **【強勢多頭排列】** 價格站上月線與季線 (Close > MA20 > MA60)，且相對強度 (RS) 向上發散。板塊處於主升段，是尋找 VCP 突破與順勢建倉的最佳時機！")
+            elif close_val > ma20_val and rs_slope > 0:
+                st.info("🔵 **【初步轉強訊號】** 指數剛站上 20 日均線且 RS 開始向上翻轉，板塊有落底回升跡象。可開始把注意力放在下方掃描出的 VCP 潛力股。")
+            else:
+                st.warning("🟡 **【動能衰減 / 整理區間】** 指數雖在月線之上，但短線動能減弱或 RS 呈現下滑，板塊可能正在進行橫盤消化或面臨獲利了結賣壓。")
 
-            # --- 2. 板塊 K 線圖 (自定義指數 OHLC) ---
+            # --- 2. 綜合圖表 (K線 + 相對強度) ---
             st.markdown("---")
-            st.subheader(f"📊 {sector_name} 專屬 K 線圖 (自定義指數)")
+            col_rs1, col_rs2 = st.columns([3, 1])
+            with col_rs1:
+                st.subheader(f"📊 {sector_name} 綜合圖表 (K線 + 相對強度)")
+            with col_rs2:
+                use_log_scale = st.checkbox("開啟對數座標 (Log Scale)", value=True, help="當板塊漲幅極大 (如鈾礦) 時，線性座標會壓縮波動。開啟對數座標能還原真實的漲跌百分比比例！")
             
-            fig_k = go.Figure()
+            # 建立三層子圖 (K線, 疊圖, RS Line)，開啟 shared_xaxes 讓 X 軸連動對齊
+            fig = make_subplots(
+                rows=3, cols=1, 
+                shared_xaxes=True, 
+                vertical_spacing=0.03, 
+                row_heights=[0.5, 0.3, 0.2]
+            )
             
-            # K線
-            fig_k.add_trace(go.Candlestick(
+            # --- Row 1: K線與均線 ---
+            fig.add_trace(go.Candlestick(
                 x=df_sector.index,
                 open=df_sector['Sector_Open'],
                 high=df_sector['Sector_High'],
                 low=df_sector['Sector_Low'],
                 close=df_sector['Sector_Close'],
                 name="指數 K 線"
-            ))
+            ), row=1, col=1)
             
-            # 均線
             colors = {'MA10': 'orange', 'MA20': 'yellow', 'MA60': 'red', 'MA120': 'purple', 'MA200': 'cyan'}
             for ma_name, color in colors.items():
-                fig_k.add_trace(go.Scatter(
+                fig.add_trace(go.Scatter(
                     x=df_sector.index, y=df_sector[ma_name],
                     line=dict(color=color, width=1.5), name=ma_name
-                ))
+                ), row=1, col=1)
+                
+            # --- Row 2: 疊圖分析 (Sector vs SPY) ---
+            fig.add_trace(go.Scatter(x=df_sector.index, y=df_sector['Sector_Index'], name=f"{sector_name} 指數", line=dict(color='blue', width=2)), row=2, col=1)
+            fig.add_trace(go.Scatter(x=df_sector.index, y=df_sector['SPY_Index'], name="SPY 指數", line=dict(color='gray', width=1.5, dash='dot')), row=2, col=1)
             
-            fig_k.update_layout(
-                height=550, margin=dict(l=0, r=0, t=30, b=0),
-                xaxis_rangeslider_visible=False,
-                hovermode="x unified",
-                yaxis_title="板塊指數 (基準 100)"
+            # --- Row 3: RS Line ---
+            fig.add_trace(go.Scatter(x=df_sector.index, y=df_sector['RS_Line'], name="RS Line", line=dict(color='green', width=2)), row=3, col=1)
+            
+            fig.add_hline(
+                y=1.0,
+                line_dash="dot",
+                line_color="rgba(255,255,255,0.3)",
+                annotation_text="RS 基準 (= SPY)",
+                annotation_position="bottom right",
+                row=3, col=1
             )
-            st.plotly_chart(fig_k, use_container_width=True)
-
-            # --- 3. 疊圖分析 (自製指數 vs SPY + RS Line) ---
-            st.markdown("---")
-            st.subheader("📈 相對強度分析 (Relative Strength)")
             
-            fig = make_subplots(rows=2, cols=1, shared_xaxes=True, 
-                                vertical_spacing=0.1, row_heights=[0.7, 0.3])
+            if use_log_scale:
+                fig.update_yaxes(type="log", row=1, col=1)
+                fig.update_yaxes(type="log", row=2, col=1)
             
-            fig.add_trace(go.Scatter(x=df_sector.index, y=df_sector['Sector_Index'], name=f"{sector_name} 指數", line=dict(color='blue', width=2)), row=1, col=1)
-            fig.add_trace(go.Scatter(x=df_sector.index, y=df_sector['SPY_Index'], name="SPY 指數", line=dict(color='gray', width=1.5, dash='dot')), row=1, col=1)
-            fig.add_trace(go.Scatter(x=df_sector.index, y=df_sector['RS_Line'], name="RS Line", line=dict(color='green', width=2)), row=2, col=1)
+            fig.update_layout(
+                height=900, margin=dict(l=0, r=0, t=30, b=0),
+                xaxis_rangeslider_visible=False,
+                xaxis3_rangeslider_visible=False,  # 隱藏 Candlestick 預設的 rangeslider
+                hovermode="x unified"
+            )
             
-            fig.update_layout(height=600, margin=dict(l=0, r=0, t=30, b=0), hovermode="x unified")
             st.plotly_chart(fig, use_container_width=True)
 
             # --- 3. VCP 個股掃描器 (包含超連結跳轉) ---
@@ -234,7 +256,25 @@ def render_sector_rotation():
             
             if not df_vcp.empty:
                 df_vcp['Action'] = "/?search_query=" + df_vcp['Ticker']
-                df_vcp = df_vcp[['Ticker', 'Price', 'Dist_to_High', 'Trend_Pass', 'ATR', 'Vol_Dry_Up', 'Action']]
+                
+                # 幫漲跌幅加上直觀的顏色標籤與符號
+                def format_pct(val):
+                    if pd.isna(val): return "-"
+                    color = "🟢 " if val > 0 else "🔴 " if val < 0 else "⚪ "
+                    return f"{color}{val:+.2f}%"
+                
+                df_vcp['M1_Fmt'] = df_vcp['M1'].apply(format_pct)
+                df_vcp['M10_Fmt'] = df_vcp['M10'].apply(format_pct)
+                df_vcp['M20_Fmt'] = df_vcp['M20'].apply(format_pct)
+                df_vcp['M60_Fmt'] = df_vcp['M60'].apply(format_pct)
+                df_vcp['Dist_MA20_Fmt'] = df_vcp['Dist_MA20'].apply(format_pct)
+                df_vcp['RS_3M_Fmt'] = df_vcp['RS_3M'].apply(format_pct)
+                
+                # ATR 收縮與吃貨量比格式化
+                df_vcp['ATR_Contraction_Fmt'] = df_vcp['ATR_Contraction'].apply(lambda x: f"🔥 {x:.2f}" if x < 0.6 else f"{x:.2f}")
+                df_vcp['Up_Down_Vol_Fmt'] = df_vcp['Up_Down_Vol'].apply(lambda x: f"🐳 {x:.2f}" if x > 1.2 else f"{x:.2f}")
+                
+                df_vcp = df_vcp[['Ticker', 'Price', 'M1_Fmt', 'M10_Fmt', 'M20_Fmt', 'M60_Fmt', 'Dist_MA20_Fmt', 'RS_3M_Fmt', 'ATR_Contraction_Fmt', 'Up_Down_Vol_Fmt', 'Dist_to_High', 'Trend_Pass', 'Vol_Dry_Up', 'Action']]
                 
                 st.dataframe(
                     df_vcp,
@@ -243,12 +283,19 @@ def render_sector_rotation():
                     column_config={
                         "Ticker": st.column_config.TextColumn("代碼", width="small"),
                         "Price": st.column_config.NumberColumn("收盤價", format="$%.2f"),
-                        "Dist_to_High": st.column_config.TextColumn("距52W新高"),
-                        "Trend_Pass": st.column_config.TextColumn("符合趨勢"),
-                        "ATR": st.column_config.NumberColumn("近期 ATR"),
+                        "M1_Fmt": st.column_config.TextColumn("日漲跌幅"),
+                        "M10_Fmt": st.column_config.TextColumn("累積10日"),
+                        "M20_Fmt": st.column_config.TextColumn("累積20日"),
+                        "M60_Fmt": st.column_config.TextColumn("累積60日"),
+                        "Dist_MA20_Fmt": st.column_config.TextColumn("月線乖離"),
+                        "RS_3M_Fmt": st.column_config.TextColumn("RS 3M"),
+                        "ATR_Contraction_Fmt": st.column_config.TextColumn("波動收縮比"),
+                        "Up_Down_Vol_Fmt": st.column_config.TextColumn("吃貨量比"),
+                        "Dist_to_High": st.column_config.TextColumn("距52W高"),
+                        "Trend_Pass": st.column_config.TextColumn("多頭趨勢"),
                         "Vol_Dry_Up": st.column_config.TextColumn("量能枯竭"),
-                        "Action": st.column_config.LinkColumn("深度透視", display_text="🔍 前往系統分析", width="medium")
+                        "Action": st.column_config.LinkColumn("深度透視", display_text="🔍 系統分析", width="small")
                     }
                 )
             else:
-                st.info("目前板塊內無完全符合 VCP 嚴格條件的標的。")
+                st.info("目前板塊內無符合 VCP 嚴格條件的標的。")
