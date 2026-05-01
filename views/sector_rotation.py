@@ -21,7 +21,10 @@ TRACKED_SECTORS = {
     "AI 伺服器 (AI Server)": ["SMCI", "DELL", "HPE", "VRT"],
     "散熱與液冷 (Cooling)": ["MOD", "VERT", "NVT"],
     "AI 晶片與軟體 (Chip & Software)": ["NVDA", "AVGO", "ADBE", "AMD", "INTC", "ORCL", "GOOGL", "META", "AMZN"],
-    
+    "稀土與戰略金屬 (Rare Earths)": ["MP", "UUUU", "AREC", "CRML", "NB", "TMC", "IDR", "PPTA", "CLF", "UAMY", "USAR"],
+    "光通訊 (Optical Communication)": ["GLW", "LITE", "COHR", "FN", "AAOI", "POET", "MRVL", "CRDO", "ALAB", "ANET", "AVGO", "CIEN", "VIAV", "CLFD", "NOK", "LUMN", "APH"],
+    "鈾礦 (Uranium)": ["CCJ", "UEC", "UUUU", "LEU", "ISOU", "UROY", "NXE", "URG", "DNN", "EU", "SMR", "OKLO", "NNE", "BWXT", "AEC", "NUCL", "JAGU"],
+    "核電與核能技術 (Nuclear Power)": ["OKLO", "UEC", "UUUU", "SMR", "LEU", "CCJ", "NXE", "TLN", "ETN", "CEG", "GHM", "NNE", "KEP", "BWXT", "NEE", "SO", "D", "EMR", "ETR", "VST", "PEG", "DUK", "RWEOY", "XE", "HON", "GEV", "EXC", "PPL"]
 }
 
 def render_sector_rotation():
