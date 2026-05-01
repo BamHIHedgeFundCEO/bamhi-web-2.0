@@ -16,10 +16,12 @@ from data_engine.market.sector_engine import calculate_sector_metrics, scan_vcp_
 # 只要在這裡新增 "板塊名稱": ["代碼1", "代碼2"...]，網頁選單就會自動擴充！
 # ==========================================
 TRACKED_SECTORS = {
-    "🚀 太空概念股 (Space)": ["RKLB", "PL", "LUNR", "ASTS", "RDW"],
-    "💾 存儲記憶體 (Storage)": ["MU", "WDC", "STX", "NTAP"], # 註：SNDK已下市，替換為 STX
-    "🤖 AI 伺服器 (AI Server)": ["SMCI", "DELL", "HPE", "VRT"],
-    "🌊 散熱與液冷 (Cooling)": ["MOD", "VERT", "NVT"]
+    "太空概念股 (Space)": ["RKLB", "PL", "LUNR", "ASTS", "RDW","SATS", "VSAT", "FLY", "MDA", "IRDM","YSS","VOYG","SPIR","BKSY","SPCE","TSAT"],
+    "存儲記憶體 (Storage)": ["MU", "WDC", "STX", "NTAP","SNDK","RMBS","SIMO"],
+    "AI 伺服器 (AI Server)": ["SMCI", "DELL", "HPE", "VRT"],
+    "散熱與液冷 (Cooling)": ["MOD", "VERT", "NVT"],
+    "AI 晶片與軟體 (Chip & Software)": ["NVDA", "AVGO", "ADBE", "AMD", "INTC", "ORCL", "GOOGL", "META", "AMZN"],
+    
 }
 
 def render_sector_rotation():
