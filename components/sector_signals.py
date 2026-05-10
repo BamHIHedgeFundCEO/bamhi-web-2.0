@@ -4,7 +4,7 @@ components/sector_signals.py
 """
 import streamlit as st
 from data_engine.market.sector_engine import calculate_sector_metrics
-from config.sectors import TRACKED_SECTORS, SECTOR_LEADERS
+from sector_config import TRACKED_SECTORS, SECTOR_LEADERS
 
 def get_signal_for_sector(sector_name, period="1y"):
     """

@@ -11,8 +11,8 @@ from plotly.subplots import make_subplots
 # 匯入後端大腦
 from data_engine.market.sector_engine import calculate_sector_metrics, scan_vcp_candidates
 
-# ✅ 板塊設定集中管理，從 config 引入（避免循環引用）
-from config.sectors import TRACKED_SECTORS, SECTOR_LEADERS
+# ✅ 板塊設定集中管理，從 sector_config 引入（避免與根目錄 config.py 衝突）
+from sector_config import TRACKED_SECTORS, SECTOR_LEADERS
 
 def render_sector_rotation():
     st.title("🔄 BamHI 板塊輪動與資金流向監控")
