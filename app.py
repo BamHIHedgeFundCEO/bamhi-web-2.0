@@ -10,6 +10,7 @@ st.set_page_config(
 
 import os
 from components.ui_layout import render_navbar, render_hero_section
+from components.sector_signals import render_sector_signals_panel
 from views.macro_market import render_macro_market
 from views.trading_tools import render_trading_tools
 from views.trading_models import render_trading_models
@@ -52,7 +53,15 @@ def main():
         render_search_result(st.session_state.search_query)
         
     elif page_token == "首頁":
-        render_hero_section()
+        # 如果按下了首頁訊號面板的「前往查看」按鈕，自動跳轉到板塊輪動頁
+        if st.session_state.get("goto_sector_rotation"):
+            del st.session_state["goto_sector_rotation"]
+            from views.sector_rotation import render_sector_rotation
+            render_sector_rotation()
+        else:
+            render_hero_section()
+            st.markdown("---")
+            render_sector_signals_panel()
         
     elif page_token == "總經市場":
         render_macro_market()

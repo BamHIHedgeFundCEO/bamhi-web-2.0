@@ -23,8 +23,36 @@ TRACKED_SECTORS = {
     "AI 應用軟體 (AI Apps)": ["ADBE", "ADP", "AI", "APP", "APPS", "ASAN", "BRZE", "CLBT", "CRM", "CVLT", "DDOG", "DOCS", "DOCU", "DUOL", "ESTC", "FIG", "FSLY", "GTLB", "GWRE", "HUBS", "INTU", "IOT", "KVYO", "LIF", "MDB", "MNDY", "NET", "NOW", "PATH", "PCOR", "PINS", "PLTR", "RBLX", "RBRK", "RDDT", "SAP", "SHOP", "SNAP", "SNOW", "SOUN", "SPOT", "TEAM", "TEM", "TTD", "TWLO", "U", "VEEV", "ZETA", "ZM"],
     "稀土與戰略金屬 (Rare Earths)": ["MP", "UUUU", "AREC", "CRML", "NB", "TMC", "IDR", "PPTA", "CLF", "UAMY", "USAR"],
     "光通訊 (Optical Communication)": ["GLW", "LITE", "COHR", "FN", "AAOI", "POET", "MRVL", "CRDO", "ALAB", "ANET", "AVGO", "CIEN", "VIAV", "CLFD", "NOK", "LUMN", "APH"],
-    "鈾礦 (Uranium)": ["CCJ", "UEC", "UUUU", "LEU", "ISOU", "UROY", "NXE", "URG", "DNN", "EU", "SMR", "OKLO", "NNE", "BWXT", "AEC", "NUCL", "JAGU"],
-    "核電與核能技術 (Nuclear Power)": ["OKLO", "UEC", "UUUU", "SMR", "LEU", "CCJ", "NXE", "TLN", "ETN", "CEG", "GHM", "NNE", "KEP", "BWXT", "NEE", "SO", "D", "EMR", "ETR", "VST", "PEG", "DUK", "RWEOY", "XE", "HON", "GEV", "EXC", "PPL"]
+    "鈾礦 (Uranium)": ["CCJ", "UEC", "UUUU", "LEU", "ISOU", "UROY", "NXE", "URG", "DNN", "EU", "AEC", "NUCL", "JAGU"],
+    "核電與核能技術 (Nuclear Power)": ["OKLO", "UEC", "UUUU", "SMR", "LEU", "CCJ", "NXE", "TLN", "ETN", "CEG", "GHM", "NNE", "KEP", "BWXT", "NEE", "SO", "D", "EMR", "ETR", "VST", "PEG", "DUK", "RWEOY", "XE", "HON", "GEV", "EXC", "PPL"],
+    "純血量子計算 (Pure Quantum)":["IONQ", "RGTI", "QBTS", "QUBT", "ARQQ", "ZPTA", "LAES", "HOLO", "QMCO", "WIMI"],
+    "算力租借平台 (AI Compute Infra)":["NBIS","CRWV", "APLD", "CORZ", "IREN", "WULF", "BTDR", "HUT","HIVE","CIFR","RIOT","CLSK","MARA","GLXY"],
+    "微電網與獨立能源島(Microgrids & Energy Islands)": ["BE", "PSIX", "BKR", "STEM", "FIP", "ENPH", "BW","SEI","PLUG","FCEL","BLDP","GNRC"],
+    "天然氣供應鏈 (Natural Gas & LNG)": ["LNG", "CQP", "WMB", "KMI", "DTM", "TRGP", "ENB", "TRP", "ET", "OKE", "EPD", "MPLX", "GLNG", "EE", "FLNG", "NFE", "DLNG", "WES", "PBA", "AM", "KNTK", "SMC", "BWLP", "LPG", "NVGS", "NGL"],
+    "電力公用事業 (Electric Utilities)": ["CEG", "VST", "TLN", "NEE", "SO", "DUK", "EXC", "PEG", "PPL", "D", "ETR", "NRG", "RWEOY", "KEP", "TAC", "KEN", "DGXX", "DYNC" ],
+    "電網工程設備 (Grid Infrastructure)": ["PWR", "MYRG", "ETN", "HUBB", "APH", "TEL", "GEV", "DY", "TTEK", "AMRC"],
+}
+
+# ==========================================
+# 👑 CEO 專屬：每個板塊的龍頭股標記
+# 只要在這裡新增或修改，VCP 列表會自動打上 ⭐ 龍頭標記
+# ==========================================
+SECTOR_LEADERS = {
+    "太空概念股 (Space)": ["RKLB", "ASTS","PL"],
+    "存儲記憶體 (Storage)": ["MU","SNDK","STX"],
+    "AI 伺服器 (AI Server)": ["SMCI", "DELL"],
+    "散熱與液冷 (Cooling)": ["VRT"],
+    "AI 應用軟體 (AI Apps)": ["PLTR", "APP", "NET","SNOW", "NOW"],
+    "稀土與戰略金屬 (Rare Earths)": ["MP", "UUUU","UAMY", "USAR"],
+    "光通訊 (Optical Communication)": ["LITE", "COHR", "GLW"],
+    "鈾礦 (Uranium)": ["CCJ", "LEU", "UUUU"],
+    "核電與核能技術 (Nuclear Power)": ["CEG", "VST", "ETN"],
+    "純血量子計算 (Pure Quantum)": ["IONQ", "RGTI", "QBTS"],
+    "算力租借平台 (AI Compute Infra)": ["NBIS", "CRWV", "APLD", "IREN"],
+    "微電網與獨立能源島(Microgrids & Energy Islands)": ["BE"],
+    "天然氣供應鏈 (Natural Gas & LNG)": ["LNG", "KMI", "WMB","DTM", "EPD"],
+    "電力公用事業 (Electric Utilities)": ["CEG", "VST", "TLN", "NEE"],
+    "電網工程設備 (Grid Infrastructure)": ["PWR", "MYRG", "ETN"],
 }
 
 def render_sector_rotation():
@@ -69,7 +97,21 @@ def render_sector_rotation():
             
     # 根據選到的板塊名稱，抓出對應的股票代碼清單
     tickers = TRACKED_SECTORS[sector_name]
-    st.caption(f"**追蹤清單:** {', '.join(tickers)}")
+    leaders = SECTOR_LEADERS.get(sector_name, [])
+    
+    # 追蹤清單（龍頭股用 ⭐ 標記）
+    ticker_display = [f"⭐ {t}" if t in leaders else t for t in tickers]
+    st.caption(f"**追蹤清單:** {', '.join(ticker_display)}")
+    
+    # 龍頭股提示
+    if leaders:
+        st.markdown(
+            f"<div style='background:linear-gradient(90deg,#1e3a5f,#1f2937);padding:8px 14px;border-radius:8px;"
+            f"border-left:3px solid #f59e0b;margin-bottom:6px;font-size:0.88rem;'>"
+            f"👑 <b>板塊龍頭：</b> {'  ·  '.join(['<code style=\'color:#f59e0b\'>'+t+'</code>' for t in leaders])}&nbsp;"
+            f"<span style='color:#9ca3af;font-size:0.8rem;'>（這些是此板塊重點追蹤的核心標的）</span></div>",
+            unsafe_allow_html=True
+        )
     st.markdown("---")
 
     # === 0. 板塊動能熱力圖 (全覽) ===
@@ -255,7 +297,10 @@ def render_sector_rotation():
             df_vcp = scan_vcp_candidates(tickers, period=period_opt)
             
             if not df_vcp.empty:
-                df_vcp['Action'] = "/?search_query=" + df_vcp['Ticker']
+                df_vcp['Ticker'] = df_vcp['Ticker'].apply(
+                    lambda t: f"⭐ {t}" if t in leaders else t
+                )
+                df_vcp['Action'] = "/?search_query=" + df_vcp['Ticker'].str.replace("⭐ ", "", regex=False)
                 
                 # 幫漲跌幅加上直觀的顏色標籤與符號
                 def format_pct(val):
