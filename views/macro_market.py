@@ -6,6 +6,7 @@ UI_MACRO_MAPPING = {
     "10年期美債殖利率": {"cat_id": "rates", "module": "treasury", "ticker": "DGS10", "name": "10 Years Yield", "id": "DGS10"},
     "2年期美債殖利率": {"cat_id": "rates", "module": "treasury", "ticker": "DGS2", "name": "2 Years Yield", "id": "DGS2"},
     "10-2 spread": {"cat_id": "rates", "module": "treasury", "ticker": "SPREAD_10_2", "name": "10-2 Spread", "id": "SPREAD_10_2"},
+    "美國核心經濟指標 (GDP/名目/r-star)": {"cat_id": "rates", "module": "gdp_fedfunds_rstar", "ticker": "MACRO_TRIO", "name": "核心經濟指標", "id": "MACRO_TRIO"},
     "市場寬度": {"cat_id": "market", "module": "breadth", "ticker": "SP500_BREADTH", "name": "S&P 500 市場寬度", "id": "BREADTH_SP500"},
     "情緒方向": {"cat_id": "market", "module": "naaim", "ticker": "NAAIM_AAII", "name": "散戶 & 機構情緒方向", "id": "SENTIMENT_COMBO"},
 }

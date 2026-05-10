@@ -13,32 +13,67 @@ SENTIMENT_FILE = os.path.join(DATA_DIR, "sentiment.csv")
 HISTORY_FILE = os.path.join(DATA_DIR, "AAII_History.xlsx") 
 
 def get_aaii_latest():
-    """從 AAII 官網抓取最新一週數據"""
+    """從 AAII 官網抓取最新一週數據 (使用 undetected-chromedriver 繞過 Incapsula)"""
     url = "https://www.aaii.com/sentimentsurvey/sent_results"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.5",
-        "Accept-Encoding": "gzip, deflate, br",
-        "Connection": "keep-alive",
-        "Upgrade-Insecure-Requests": "1",
-        "Sec-Fetch-Dest": "document",
-        "Sec-Fetch-Mode": "navigate",
-        "Sec-Fetch-Site": "none",
-        "Sec-Fetch-User": "?1",
-        "Cache-Control": "max-age=0",
-    }
     
     try:
-        r = requests.get(url, headers=headers)
-        # 解決 html5lib 的黃色警告
-        import io
-        tables = pd.read_html(io.StringIO(r.text), flavor='html5lib')
+        import undetected_chromedriver as uc
+        import time
+        
+        print("      🤖 [Selenium] 啟動瀏覽器載入 AAII 頁面並嘗試繞過防火牆...")
+        
+        options = uc.ChromeOptions()
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--window-size=1,1")            # 視窗縮到最小
+        options.add_argument("--window-position=10000,10000")  # 移到螢幕之外，使用者看不到
+        
+        # ⚠️ 注意：不使用 headless=True，因為 Incapsula 能識破所有 Headless 指紋
+        # 視窗會在背景安靜出現約 30 秒後自動關閉，不影響您的操作
+        driver = uc.Chrome(options=options, version_main=147)
+        driver.get(url)
+        
+        # 動態等待，直到網頁出現表格為止 (最多 25 秒)
+        page_source = ""
+        for _ in range(25):
+            time.sleep(1)
+            page_source = driver.page_source
+            if "<table" in page_source.lower() or "reported date" in page_source.lower():
+                break
+                
+        driver.quit()
+        
+        if "<table" not in page_source.lower() and "reported date" not in page_source.lower():
+            print("      [Error] AAII 爬蟲失敗: 無法通過防火牆，請稍後重試。")
+            return pd.DataFrame()
+            
+        tables = pd.read_html(io.StringIO(page_source), flavor='html5lib')
         df = tables[0].iloc[:, [0, 1, 2, 3]]
         df.columns = ['Date', 'Bullish', 'Neutral', 'Bearish']
         
-        # 🔥 修正 1：強制轉換日期，若遇到 'Reported Date' 這種文字會變 NaT，然後把它刪掉
-        df['Date'] = pd.to_datetime(df['Date'], errors='coerce', format='mixed')
+        # 智慧補齊年份：AAII 網頁上的日期格式為 "May 6"（無年份），len("May 6")=5, len("Apr 29")=6
+        current_year = pd.Timestamp.now().year
+        
+        def parse_aaii_date(d):
+            d_str = str(d).strip()
+            # 過濾標題列
+            if d_str in ('Reported Date', 'nan', 'None', ''):
+                return pd.NaT
+            try:
+                # 🔥 關鍵修正：先補年份，再解析（避免 pandas 對 "May 6" 丟出 Exception）
+                if len(d_str) <= 6:  # "May 6"=5, "Apr 29"=6 → 這些沒有年份
+                    d_str = f"{d_str} {current_year}"
+                
+                parsed = pd.to_datetime(d_str)
+                
+                # 若補完年份後是未來日期，代表是去年的資料
+                if parsed > pd.Timestamp.now():
+                    parsed = parsed.replace(year=current_year - 1)
+                return parsed
+            except:
+                return pd.NaT
+                
+        df['Date'] = df['Date'].apply(parse_aaii_date)
         df = df.dropna(subset=['Date'])
         
         for col in ['Bullish', 'Neutral', 'Bearish']:
@@ -51,6 +86,7 @@ def get_aaii_latest():
     except Exception as e:
         print(f"      [Error] AAII 爬蟲失敗: {e}")
         return pd.DataFrame()
+
 
 def update():
     """主更新函數：整合歷史檔 + 網路爬蟲 + S&P 500"""
@@ -133,5 +169,17 @@ def update():
     # 5. 存檔
     if not os.path.exists(DATA_DIR):
         os.makedirs(DATA_DIR)
+        
+    # 存成系統要用的 CSV
     full_df.to_csv(SENTIMENT_FILE, index=False)
-    print(f"   ✅ [AAII Sentiment] 儲存成功，最新日期: {full_df['Date'].iloc[-1].strftime('%Y-%m-%d')}")
+    
+    # 🔥 自動回寫更新到使用者的 Excel 歷史檔案
+    history_save_df = full_df[['Date', 'Bullish', 'Neutral', 'Bearish', 'Spread']].copy()
+    history_save_df['Date'] = history_save_df['Date'].dt.strftime('%Y-%m-%d')
+    # 這裡將數值轉換成小數點 (0.55 = 55%) 以符合手動輸入的習慣
+    for col in ['Bullish', 'Neutral', 'Bearish']:
+        history_save_df[col] = history_save_df[col] / 100.0
+        
+    history_save_df.to_excel(HISTORY_FILE, index=False, engine='openpyxl')
+    
+    print(f"   ✅ [AAII Sentiment] 儲存成功，最新日期: {full_df['Date'].iloc[-1].strftime('%Y-%m-%d')} (已自動同步至 Excel)")

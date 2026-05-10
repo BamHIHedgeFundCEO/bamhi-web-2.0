@@ -29,13 +29,46 @@ def get_naaim_latest():
         "Cache-Control": "max-age=0",
     }
     try:
-        r = requests.get(url, headers=headers)
-        # 如果還是被擋，強制拋出錯誤讓我們知道
-        r.raise_for_status() 
+        from selenium import webdriver
+        from selenium.webdriver.chrome.options import Options
+        import io
+        import os
+        import time
+        import glob
         
-        soup = BeautifulSoup(r.text, 'html.parser')
+        # 建立專屬的暫存下載資料夾
+        download_dir = os.path.abspath(os.path.join("data", "temp_naaim"))
+        if not os.path.exists(download_dir):
+            os.makedirs(download_dir)
+        else:
+            # 清空舊檔案
+            for f in glob.glob(os.path.join(download_dir, "*")):
+                try: os.remove(f)
+                except: pass
+
+        chrome_options = Options()
+        chrome_options.add_argument("--headless=new")
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--no-sandbox") # 必須加上這行，否則在 GitHub Actions 的 Linux 環境會崩潰
+        chrome_options.add_argument("--disable-dev-shm-usage") # 解決 CI/CD 環境記憶體限制問題
+        chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
         
-        # 尋找網頁中的 excel 連結
+        # 設定預設下載路徑 (這是繞過 WAF 最重要的一步！)
+        prefs = {
+            "download.default_directory": download_dir,
+            "download.prompt_for_download": False,
+            "download.directory_upgrade": True,
+            "safebrowsing.enabled": True
+        }
+        chrome_options.add_experimental_option("prefs", prefs)
+        
+        driver = webdriver.Chrome(options=chrome_options)
+        print("      🤖 [Selenium] 啟動瀏覽器載入 NAAIM 頁面...")
+        driver.get(url)
+        time.sleep(2)
+        
+        soup = BeautifulSoup(driver.page_source, 'html.parser')
+        xls_link = None
         for a in soup.find_all('a', href=True):
             href = a['href'].lower()
             if ('.xls' in href or '.xlsx' in href) and 'naaim' in href:
@@ -43,8 +76,36 @@ def get_naaim_latest():
                 break
                 
         if xls_link:
-            df = pd.read_excel(xls_link)
-            return df
+            print(f"      📥 [Selenium] 找到 Excel 連結，正在透過瀏覽器真實下載...")
+            driver.get(xls_link)
+            
+            # 等待下載完成 (最多等 10 秒)
+            downloaded_file = None
+            for _ in range(10):
+                time.sleep(1)
+                files = glob.glob(os.path.join(download_dir, "*.xls*"))
+                # 排除 .crdownload 暫存檔
+                files = [f for f in files if not f.endswith('.crdownload')]
+                if files:
+                    downloaded_file = files[0]
+                    break
+            
+            driver.quit()
+            
+            if downloaded_file:
+                # 讀取本地端真正下載下來的 Excel，這樣就不會觸發 403 了
+                df = pd.read_excel(downloaded_file)
+                
+                # 讀完後清理
+                try: os.remove(downloaded_file)
+                except: pass
+                
+                return df
+            else:
+                print("      [Error] Selenium 下載 Excel 超時失敗")
+                return pd.DataFrame()
+        else:
+            driver.quit()
     except Exception as e:
         print(f"      [Error] NAAIM 爬蟲失敗: {e}")
     return pd.DataFrame()
@@ -123,5 +184,14 @@ def update():
     # 5. 存檔
     if not os.path.exists(DATA_DIR):
         os.makedirs(DATA_DIR)
+        
+    # 存成系統要用的 CSV
     full_df.to_csv(NAAIM_FILE, index=False)
-    print(f"   ✅ [NAAIM Exposure] 儲存成功，最新日期: {full_df['Date'].iloc[-1].strftime('%Y-%m-%d')}")
+    
+    # 🔥 自動回寫更新到使用者的 Excel 歷史檔案
+    # 確保只存需要的欄位，避免把 SP500_Price 存進去弄髒手動輸入的格式
+    history_save_df = full_df[['Date', 'NAAIM']].copy()
+    history_save_df['Date'] = history_save_df['Date'].dt.strftime('%Y-%m-%d')
+    history_save_df.to_excel(HISTORY_FILE, index=False, engine='openpyxl')
+    
+    print(f"   ✅ [NAAIM Exposure] 儲存成功，最新日期: {full_df['Date'].iloc[-1].strftime('%Y-%m-%d')} (已自動同步至 Excel)")

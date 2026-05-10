@@ -7,6 +7,9 @@ INDICATORS = {
             {"id": "DGS10", "name": "10 Years Yield", "ticker": "DGS10", "module": "treasury"},
             {"id": "DGS2", "name": "2 Years Yield", "ticker": "DGS2", "module": "treasury"},
             {"id": "SPREAD_10_2", "name": "10-2 Spread", "ticker": "SPREAD_10_2", "module": "treasury"},
+            {"id": "GDP_G", "name": "Nominal GDP Growth", "ticker": "GDP_G", "module": "gdp_fedfunds_rstar"},
+            {"id": "NOM_I", "name": "Fed Funds Rate", "ticker": "NOM_I", "module": "gdp_fedfunds_rstar"},
+            {"id": "RSTAR", "name": "r-star Neutral Rate", "ticker": "RSTAR", "module": "gdp_fedfunds_rstar"},
         ],
     },
     "market": {
