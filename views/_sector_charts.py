@@ -349,10 +349,12 @@ def render_correlation_heatmap(sector_data_dict: dict):
         st.plotly_chart(fig, use_container_width=True)
 
         # 找出相關係數最低的組合（最佳分散化對）
-        corr_no_diag = corr.copy()
-        np.fill_diagonal(corr_no_diag.values, np.nan)
-        min_idx = np.unravel_index(np.nanargmin(corr_no_diag.values), corr_no_diag.shape)
-        max_idx = np.unravel_index(np.nanargmax(corr_no_diag.values), corr_no_diag.shape)
+        # NumPy 2.x: DataFrame.values 是 read-only，需先取出可寫入的 numpy copy
+        _corr_arr = corr.to_numpy(copy=True).astype(float)
+        np.fill_diagonal(_corr_arr, np.nan)
+        corr_no_diag = pd.DataFrame(_corr_arr, index=corr.index, columns=corr.columns)
+        min_idx = np.unravel_index(np.nanargmin(_corr_arr), _corr_arr.shape)
+        max_idx = np.unravel_index(np.nanargmax(_corr_arr), _corr_arr.shape)
         col_a, col_b = st.columns(2)
         with col_a:
             st.success(f"✅ 最佳分散對：**{corr.columns[min_idx[0]]}** × **{corr.columns[min_idx[1]]}**  \n"
