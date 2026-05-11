@@ -10,6 +10,9 @@ from plotly.subplots import make_subplots
 
 # 匯入後端大腦
 from data_engine.market.sector_engine import calculate_sector_metrics, scan_vcp_candidates
+from views._sector_charts import (render_rrg_tab, render_breadth_chart, get_rrg_quadrant,
+                                   render_rrg_trail_tab, render_correlation_heatmap,
+                                   render_institutional_flow_chart, render_momentum_crossover_chart)
 
 # ✅ 板塊設定集中管理，從 sector_config 引入（避免與根目錄 config.py 衝突）
 from sector_config import TRACKED_SECTORS, SECTOR_LEADERS
@@ -64,32 +67,47 @@ def render_sector_rotation():
     
     # 龍頭股提示
     if leaders:
+        _leader_html = "  ·  ".join(f"<code style='color:#f59e0b'>{t}</code>" for t in leaders)
         st.markdown(
             f"<div style='background:linear-gradient(90deg,#1e3a5f,#1f2937);padding:8px 14px;border-radius:8px;"
             f"border-left:3px solid #f59e0b;margin-bottom:6px;font-size:0.88rem;'>"
-            f"👑 <b>板塊龍頭：</b> {'  ·  '.join(['<code style=\'color:#f59e0b\'>'+t+'</code>' for t in leaders])}&nbsp;"
+            f"👑 <b>板塊龍頭：</b> {_leader_html}&nbsp;"
             f"<span style='color:#9ca3af;font-size:0.8rem;'>（這些是此板塊重點追蹤的核心標的）</span></div>",
             unsafe_allow_html=True
         )
     st.markdown("---")
 
-    # === 0. 板塊動能熱力圖 (全覽) ===
-    st.subheader("🗺️ 板塊動能熱力圖 (Sector Momentum Heatmap)")
-    with st.spinner("正在計算各板塊動能差值以繪製熱力圖..."):
+    # === 預先計算所有板塊資料（一次載入，4個 Tab 共用，避免殘留）===
+    with st.spinner("🔄 正在載入全部板塊資料，請稍候..."):
+        all_sector_data = {}
+        for _s_name, _s_tickers in TRACKED_SECTORS.items():
+            _df, _ = calculate_sector_metrics(_s_tickers, period=period_opt)
+            if _df is not None and not _df.empty:
+                all_sector_data[_s_name] = _df
+
+    # === 全覽面板：熱力圖 + RRG + 軌跡 + 相關係數 ===
+    tab_heat, tab_rrg, tab_trail, tab_corr = st.tabs([
+        "🗺️ 動能熱力圖",
+        "📡 RRG 板塊輪動圖",
+        "📈 RRG 軌跡追蹤",
+        "🔗 板塊相關係數",
+    ])
+
+    with tab_heat:
+        st.subheader("🗺️ 板塊動能熱力圖 (Sector Momentum Heatmap)")
         heatmap_data = []
-        for s_name, s_tickers in TRACKED_SECTORS.items():
-            df_sec, _ = calculate_sector_metrics(s_tickers, period=period_opt)
-            if df_sec is not None and not df_sec.empty:
-                diff = df_sec.iloc[-1]['Momentum_Diff']
+        for s_name, _df_sec in all_sector_data.items():
+            if not _df_sec.empty and 'Momentum_Diff' in _df_sec.columns:
+                diff = _df_sec.iloc[-1]['Momentum_Diff']
                 heatmap_data.append({"Sector": s_name, "Momentum_Diff": round(diff, 2), "Size": 1})
-        
+
         if heatmap_data:
             df_heat = pd.DataFrame(heatmap_data)
             fig_heat = px.treemap(
-                df_heat, 
-                path=[px.Constant("所有追蹤板塊"), 'Sector'], 
+                df_heat,
+                path=[px.Constant("所有追蹤板塊"), 'Sector'],
                 values='Size',
-                color='Momentum_Diff', 
+                color='Momentum_Diff',
                 color_continuous_scale='RdYlGn',
                 color_continuous_midpoint=0,
                 custom_data=['Momentum_Diff']
@@ -100,16 +118,13 @@ def render_sector_rotation():
                 textposition="middle center",
                 textfont=dict(size=18)
             )
-            # Try using Streamlit 1.35+ on_select feature to link chart clicks to the selectbox
             try:
                 event = st.plotly_chart(
-                    fig_heat, 
-                    use_container_width=True, 
+                    fig_heat,
+                    use_container_width=True,
                     on_select="rerun",
                     selection_mode="points"
                 )
-                
-                # 解析點擊事件
                 if event and "selection" in event and "points" in event["selection"]:
                     points = event["selection"]["points"]
                     if points:
@@ -118,9 +133,17 @@ def render_sector_rotation():
                             st.session_state.next_sector = clicked_sector
                             st.rerun()
             except TypeError:
-                # 舊版 Streamlit 不支援 on_select 的降級處理
                 st.plotly_chart(fig_heat, use_container_width=True)
-                st.info("💡 提示：點擊熱力圖會進行縮放。若要查看特定板塊的詳細疊圖與 VCP 數據，請從左側【側邊欄】選單切換！")
+                st.info("💡 提示：點擊熱力圖會進行縮放。若要查看特定板塊，請從選單切換！")
+
+    with tab_rrg:
+        render_rrg_tab(all_sector_data)
+
+    with tab_trail:
+        render_rrg_trail_tab(all_sector_data)
+
+    with tab_corr:
+        render_correlation_heatmap(all_sector_data)
 
     # === 主畫面：單一板塊數據視覺化 ===
     if tickers:
@@ -141,7 +164,6 @@ def render_sector_rotation():
             yest_close = df_sector['Sector_Close'].iloc[-2]
             daily_pct = ((today_close - yest_close) / yest_close) * 100
             
-            # 🌟 把欄位改成 7 欄，加入今日漲跌幅
             col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
             col1.metric("今日漲跌幅", f"{daily_pct:.2f}%", delta=f"{daily_pct:.2f}%", delta_color="normal" if daily_pct > 0 else "inverse")
             col2.metric("5日極速動能", f"{latest['M5']:.2f}%")
@@ -157,19 +179,35 @@ def render_sector_rotation():
             rs_slope = latest['RS_Slope']
             col6.metric("RS 線 5日斜率", f"{rs_slope:.4f}", delta="向上" if rs_slope > 0 else "向下", delta_color="normal" if rs_slope > 0 else "inverse")
             
-            # 🌟 新增：擁擠度雷達
+            # 擁擠度雷達
             crowd_ratio = latest['Crowdedness'] * 100
             crowd_90p = latest['Crowdedness_90p'] * 100
             is_overheated = crowd_ratio >= crowd_90p
-            
+
             col7.metric(
-                "資金佔大盤均量比例", 
-                f"{crowd_ratio:.2f}%", 
-                delta="⚠️ 達 90% 過熱水位" if is_overheated else "✅ 水位正常", 
+                "資金佔大盤均量比例",
+                f"{crowd_ratio:.2f}%",
+                delta="⚠️ 達 90% 過熱水位" if is_overheated else "✅ 水位正常",
                 delta_color="inverse" if is_overheated else "normal"
             )
+
+            # RRG 象限標籤（第二行顯示）
+            rs_r_val = latest.get('RS_Ratio', None)
+            rs_m_val = latest.get('RS_Momentum', None)
+            if rs_r_val is not None and rs_m_val is not None and pd.notna(rs_r_val) and pd.notna(rs_m_val):
+                q_label, q_color, q_desc = get_rrg_quadrant(float(rs_r_val), float(rs_m_val))
+                st.markdown(
+                    f"<div style='background:linear-gradient(90deg,#1e3a5f,#1f2937);"
+                    f"padding:8px 16px;border-radius:8px;border-left:4px solid {q_color};"
+                    f"margin:4px 0 8px 0;'>"
+                    f"<span style='color:{q_color};font-weight:bold;font-size:1rem;'>{q_label}</span>"
+                    f"&nbsp;&nbsp;<span style='color:#9ca3af;font-size:0.87rem;'>"
+                    f"RS-Ratio: {rs_r_val:.2f} ｜ RS-Momentum: {rs_m_val:.2f} ｜ {q_desc}"
+                    f"</span></div>",
+                    unsafe_allow_html=True
+                )
             
-            # 💡 判斷進出場狀態與防護罩警報
+            # 判斷進出場狀態與防護罩警報
             close_val = latest['Sector_Close']
             ma20_val = latest['MA20']
             ma60_val = latest['MA60']
@@ -194,7 +232,6 @@ def render_sector_rotation():
             with col_rs2:
                 use_log_scale = st.checkbox("開啟對數座標 (Log Scale)", value=True, help="當板塊漲幅極大 (如鈾礦) 時，線性座標會壓縮波動。開啟對數座標能還原真實的漲跌百分比比例！")
             
-            # 建立三層子圖 (K線, 疊圖, RS Line)，開啟 shared_xaxes 讓 X 軸連動對齊
             fig = make_subplots(
                 rows=3, cols=1, 
                 shared_xaxes=True, 
@@ -202,7 +239,7 @@ def render_sector_rotation():
                 row_heights=[0.5, 0.3, 0.2]
             )
             
-            # --- Row 1: K線與均線 ---
+            # Row 1: K線與均線
             fig.add_trace(go.Candlestick(
                 x=df_sector.index,
                 open=df_sector['Sector_Open'],
@@ -219,11 +256,11 @@ def render_sector_rotation():
                     line=dict(color=color, width=1.5), name=ma_name
                 ), row=1, col=1)
                 
-            # --- Row 2: 疊圖分析 (Sector vs SPY) ---
+            # Row 2: 疊圖分析 (Sector vs SPY)
             fig.add_trace(go.Scatter(x=df_sector.index, y=df_sector['Sector_Index'], name=f"{sector_name} 指數", line=dict(color='blue', width=2)), row=2, col=1)
             fig.add_trace(go.Scatter(x=df_sector.index, y=df_sector['SPY_Index'], name="SPY 指數", line=dict(color='gray', width=1.5, dash='dot')), row=2, col=1)
             
-            # --- Row 3: RS Line ---
+            # Row 3: RS Line
             fig.add_trace(go.Scatter(x=df_sector.index, y=df_sector['RS_Line'], name="RS Line", line=dict(color='green', width=2)), row=3, col=1)
             
             fig.add_hline(
@@ -242,11 +279,20 @@ def render_sector_rotation():
             fig.update_layout(
                 height=900, margin=dict(l=0, r=0, t=30, b=0),
                 xaxis_rangeslider_visible=False,
-                xaxis3_rangeslider_visible=False,  # 隱藏 Candlestick 預設的 rangeslider
+                xaxis3_rangeslider_visible=False,
                 hovermode="x unified"
             )
             
             st.plotly_chart(fig, use_container_width=True)
+
+            # --- 2b. 板塊寬度走勢圖 ---
+            render_breadth_chart(df_sector, sector_name)
+
+            # --- 2c. 機構吃貨走勢圖 ---
+            render_institutional_flow_chart(df_sector, sector_name)
+
+            # --- 2d. M5/M10/M20 動能三線交叉圖 ---
+            render_momentum_crossover_chart(df_sector, sector_name)
 
             # --- 3. VCP 個股掃描器 (包含超連結跳轉) ---
             st.markdown("---")
@@ -261,7 +307,6 @@ def render_sector_rotation():
                 )
                 df_vcp['Action'] = "/?search_query=" + df_vcp['Ticker'].str.replace("⭐ ", "", regex=False)
                 
-                # 幫漲跌幅加上直觀的顏色標籤與符號
                 def format_pct(val):
                     if pd.isna(val): return "-"
                     color = "🟢 " if val > 0 else "🔴 " if val < 0 else "⚪ "
@@ -274,11 +319,15 @@ def render_sector_rotation():
                 df_vcp['Dist_MA20_Fmt'] = df_vcp['Dist_MA20'].apply(format_pct)
                 df_vcp['RS_3M_Fmt'] = df_vcp['RS_3M'].apply(format_pct)
                 
-                # ATR 收縮與吃貨量比格式化
-                df_vcp['ATR_Contraction_Fmt'] = df_vcp['ATR_Contraction'].apply(lambda x: f"🔥 {x:.2f}" if x < 0.6 else f"{x:.2f}")
+                df_vcp['ATR_Pct_Fmt']         = df_vcp['ATR_Pct'].apply(lambda x: f"🔥 {x:.2f}%" if x < 1.5 else f"{x:.2f}%") if 'ATR_Pct' in df_vcp.columns else "-"
+                df_vcp['ATR_Contraction_Fmt'] = df_vcp['ATR_Contraction'].apply(lambda x: f"🔥 {x:.2f}" if x < 0.7 else (f"⚠️ {x:.2f}" if x > 1.2 else f"{x:.2f}"))
                 df_vcp['Up_Down_Vol_Fmt'] = df_vcp['Up_Down_Vol'].apply(lambda x: f"🐳 {x:.2f}" if x > 1.2 else f"{x:.2f}")
+                df_vcp['RS_Rank_Fmt']     = df_vcp['RS_Rank'].apply(lambda x: f"🥇 {int(x)}" if x >= 80 else (f"🥈 {int(x)}" if x >= 50 else f"{int(x)}")) if 'RS_Rank' in df_vcp.columns else "-"
                 
-                df_vcp = df_vcp[['Ticker', 'Price', 'M1_Fmt', 'M10_Fmt', 'M20_Fmt', 'M60_Fmt', 'Dist_MA20_Fmt', 'RS_3M_Fmt', 'ATR_Contraction_Fmt', 'Up_Down_Vol_Fmt', 'Dist_to_High', 'Trend_Pass', 'Vol_Dry_Up', 'Action']]
+                df_vcp = df_vcp[['Ticker', 'Price', 'M1_Fmt', 'M10_Fmt', 'M20_Fmt', 'M60_Fmt',
+                                  'Dist_MA20_Fmt', 'RS_3M_Fmt', 'RS_Rank_Fmt',
+                                  'ATR_Pct_Fmt', 'ATR_Contraction_Fmt',
+                                  'Up_Down_Vol_Fmt', 'Dist_to_High', 'Trend_Pass', 'Vol_Dry_Up', 'Action']]
                 
                 st.dataframe(
                     df_vcp,
@@ -292,7 +341,9 @@ def render_sector_rotation():
                         "M20_Fmt": st.column_config.TextColumn("累積20日"),
                         "M60_Fmt": st.column_config.TextColumn("累積60日"),
                         "Dist_MA20_Fmt": st.column_config.TextColumn("月線乖離"),
-                        "RS_3M_Fmt": st.column_config.TextColumn("RS 3M"),
+                        "RS_3M_Fmt":           st.column_config.TextColumn("RS 3M"),
+                        "RS_Rank_Fmt":         st.column_config.TextColumn("板塊RS排行"),
+                        "ATR_Pct_Fmt":         st.column_config.TextColumn("ATR% (相對)"),
                         "ATR_Contraction_Fmt": st.column_config.TextColumn("波動收縮比"),
                         "Up_Down_Vol_Fmt": st.column_config.TextColumn("吃貨量比"),
                         "Dist_to_High": st.column_config.TextColumn("距52W高"),
