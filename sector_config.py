@@ -23,6 +23,9 @@ TRACKED_SECTORS = {
     "天然氣供應鏈 (Natural Gas & LNG)": ["LNG", "CQP", "WMB", "KMI", "DTM", "TRGP", "ENB", "TRP", "ET", "OKE", "EPD", "MPLX", "GLNG", "EE", "FLNG", "NFE", "DLNG", "WES", "PBA", "AM", "KNTK", "SMC", "BWLP", "LPG", "NVGS", "NGL"],
     "電力公用事業 (Electric Utilities)": ["CEG", "VST", "TLN", "NEE", "SO", "DUK", "EXC", "PEG", "PPL", "D", "ETR", "NRG", "RWEOY", "KEP", "TAC", "KEN", "DGXX", "DYNC"],
     "電網工程設備 (Grid Infrastructure)": ["PWR", "MYRG", "ETN", "HUBB", "APH", "TEL", "GEV", "DY", "TTEK", "AMRC"],
+    "AI 伺服器與硬體 (AI Computing Hardware)": ["SMCI", "DELL","HPE", "LNVGY", "HPQ","OSS","AVGO"], 
+    "資料中心基建(Data_Center_Infra)": ["FIX","EME","VRT","IESC","MTZ","ECG","PRIM","AGX","LGN","APG","STRL","J","ACM","CAT","BNC","TEX","MTW"],
+    "加密貨幣(Crypto)": ["MSTR", "COIN", "GLXY", "HOOD", "CRCL", "BKKT", "CNCK", "EXOD", "BTCS", "MARA", "RIOT", "CLSK", "IREN", "HUT", "CIFR", "WULF", "BTBT", "ARBK", "BTDR", "CORZ", "APLD", "CAN", "NA", "NCTY", "BGIN", "ICG", "GPUS", "ABTC"]
 }
 
 # ==========================================
@@ -45,4 +48,7 @@ SECTOR_LEADERS = {
     "天然氣供應鏈 (Natural Gas & LNG)": ["LNG", "KMI", "WMB", "DTM", "EPD"],
     "電力公用事業 (Electric Utilities)": ["CEG", "VST", "TLN", "NEE"],
     "電網工程設備 (Grid Infrastructure)": ["PWR", "MYRG", "ETN"],
+    "AI 伺服器與硬體 (AI Computing Hardware)": ["SMCI", "DELL","HPE","OSS","AVGO"],
+    "資料中心基建(Data_Center_Infra)": ["FIX","VRT","MTZ","CAT"],
+    "加密貨幣(Crypto)": ["MSTR", "COIN", "HOOD", "CRCL"]
 }

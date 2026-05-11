@@ -22,28 +22,20 @@ def calculate_sector_metrics(
     period="2y",
     rrg_short_window: int = 14,
     rrg_long_window: int = 50,
+    raw_data: pd.DataFrame = None
 ):
     """
     計算自定義板塊指數、動能、RS、RRG 指標、板塊寬度與擁擠度。
-
-    Parameters
-    ----------
-    tickers          : 板塊成分股代碼清單
-    period           : yfinance 歷史區間字串
-    rrg_short_window : RRG RS-Ratio 短均線窗口 (預設 14，週線可改 5)
-    rrg_long_window  : RRG RS-Ratio 長均線窗口 (預設 50，週線可改 21)
-
-    Returns
-    -------
-    df_sector, vol_data
     """
     if not tickers:
         return None, None
 
-    all_tickers = tickers + ['SPY']
-    # 一次下載全部 OHLCV
-    raw_data = yf.download(all_tickers, period=period, progress=False, auto_adjust=False)
-    if raw_data.empty:
+    if raw_data is None:
+        all_tickers = tickers + ['SPY']
+        # 獨立下載模式 (如果有提供 raw_data 就不會進來這裡)
+        raw_data = yf.download(all_tickers, period=period, progress=False, auto_adjust=False)
+        
+    if raw_data is None or raw_data.empty:
         return None, None
 
     data     = raw_data['Close']
@@ -55,15 +47,20 @@ def calculate_sector_metrics(
     if data.empty or vol_data.empty:
         return None, None
 
+    # 過濾出實際成功下載的 tickers，避免 yfinance 漏抓或退市代碼導致 KeyError
+    valid_tickers = [t for t in tickers if t in data.columns]
+    if not valid_tickers:
+        return None, None
+
     # ── 1. 等權重 OHLC 板塊指數 ──────────────────────────────────────────────
-    prev_close = data[tickers].shift(1)
+    prev_close = data[valid_tickers].shift(1)
 
-    ret_close = ((data[tickers]      - prev_close) / prev_close).clip(-0.95, 2.0)
-    ret_open  = ((open_data[tickers] - prev_close) / prev_close).clip(-0.95, 2.0)
-    ret_high  = ((high_data[tickers] - prev_close) / prev_close).clip(-0.95, 2.0)
-    ret_low   = ((low_data[tickers]  - prev_close) / prev_close).clip(-0.95, 2.0)
+    ret_close = ((data[valid_tickers]      - prev_close) / prev_close).clip(-0.95, 2.0)
+    ret_open  = ((open_data[valid_tickers] - prev_close) / prev_close).clip(-0.95, 2.0)
+    ret_high  = ((high_data[valid_tickers] - prev_close) / prev_close).clip(-0.95, 2.0)
+    ret_low   = ((low_data[valid_tickers]  - prev_close) / prev_close).clip(-0.95, 2.0)
 
-    valid_mask = data[tickers].notna().sum(axis=1) > 0
+    valid_mask = data[valid_tickers].notna().sum(axis=1) > 0
 
     avg_ret_close = ret_close.mean(axis=1).fillna(0)
     avg_ret_open  = ret_open.mean(axis=1).fillna(0)
@@ -120,10 +117,10 @@ def calculate_sector_metrics(
     rs_momentum = (rs_ratio / rs_ratio.rolling(rrg_short_window).mean()) * 100
 
     # ── 6. 板塊寬度 (Sector Breadth) ─────────────────────────────────────────
-    # 向量化計算：不需要額外 for loop，利用已下載的 data[tickers]
-    stocks_ma20      = data[tickers].rolling(20).mean()
-    is_above_ma20    = data[tickers] > stocks_ma20
-    valid_stock_cnt  = data[tickers].notna().sum(axis=1)
+    # 向量化計算：不需要額外 for loop，利用已下載的 data[valid_tickers]
+    stocks_ma20      = data[valid_tickers].rolling(20).mean()
+    is_above_ma20    = data[valid_tickers] > stocks_ma20
+    valid_stock_cnt  = data[valid_tickers].notna().sum(axis=1)
 
     sector_breadth = (
         is_above_ma20.sum(axis=1)
@@ -136,7 +133,7 @@ def calculate_sector_metrics(
 
     # ── 7. 板塊擁擠度 (Dollar Volume Crowdedness) ─────────────────────────────
     dollar_volume          = data * vol_data
-    sector_dollar_volume   = dollar_volume[tickers].sum(axis=1)
+    sector_dollar_volume   = dollar_volume[valid_tickers].sum(axis=1)
     spy_dollar_vol_smooth  = dollar_volume['SPY'].rolling(20).mean()
 
     crowdedness_ratio = sector_dollar_volume / (spy_dollar_vol_smooth + 1e-9)
@@ -186,11 +183,15 @@ def calculate_sector_metrics(
 
 
 @st.cache_data(ttl=3600, show_spinner=False)
-def scan_vcp_candidates(tickers, period="2y"):
+def scan_vcp_candidates(tickers, period="2y", raw_data: pd.DataFrame = None):
     """VCP 掃描器：趨勢模板 + 波動收縮 + 量縮 + 大戶吃貨"""
     results     = []
-    all_tickers = list(set(tickers + ['SPY']))
-    data        = yf.download(all_tickers, period=period, progress=False, auto_adjust=False)
+    
+    if raw_data is None:
+        all_tickers = list(set(tickers + ['SPY']))
+        data        = yf.download(all_tickers, period=period, progress=False, auto_adjust=False)
+    else:
+        data = raw_data
 
     spy_3m_ret = 0
     if isinstance(data.columns, pd.MultiIndex):

@@ -7,6 +7,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
+import yfinance as yf
 
 # 匯入後端大腦
 from data_engine.market.sector_engine import calculate_sector_metrics, scan_vcp_candidates
@@ -78,10 +79,23 @@ def render_sector_rotation():
     st.markdown("---")
 
     # === 預先計算所有板塊資料（一次載入，4個 Tab 共用，避免殘留）===
-    with st.spinner("🔄 正在載入全部板塊資料，請稍候..."):
+    with st.spinner("🔄 正在從 Yahoo Finance 批量下載所有追蹤標的，確保不漏接..."):
         all_sector_data = {}
+        
+        # 1. 蒐集所有板塊中的獨立 tickers
+        all_unique_tickers = set(['SPY'])
+        for _s_tickers in TRACKED_SECTORS.values():
+            all_unique_tickers.update(_s_tickers)
+            
+        @st.cache_data(ttl=3600, show_spinner=False)
+        def fetch_bulk_data(tickers_list, period):
+            return yf.download(tickers_list, period=period, progress=False, auto_adjust=False)
+            
+        bulk_raw_data = fetch_bulk_data(list(all_unique_tickers), period_opt)
+
+        # 2. 本地超高速計算各個板塊的指標 (無網路請求)
         for _s_name, _s_tickers in TRACKED_SECTORS.items():
-            _df, _ = calculate_sector_metrics(_s_tickers, period=period_opt)
+            _df, _ = calculate_sector_metrics(_s_tickers, period=period_opt, raw_data=bulk_raw_data)
             if _df is not None and not _df.empty:
                 all_sector_data[_s_name] = _df
 
@@ -148,7 +162,7 @@ def render_sector_rotation():
     # === 主畫面：單一板塊數據視覺化 ===
     if tickers:
         with st.spinner(f"正在計算 {sector_name} 詳細動能與 VCP 訊號..."):
-            df_sector, vol_data = calculate_sector_metrics(tickers, period=period_opt)
+            df_sector, vol_data = calculate_sector_metrics(tickers, period=period_opt, raw_data=bulk_raw_data)
             
             if df_sector is None or df_sector.empty:
                 st.error("資料獲取失敗，請檢查該板塊內的 Ticker 是否正確或已下市。")
@@ -299,7 +313,7 @@ def render_sector_rotation():
             st.subheader(f"🎯 {sector_name} 內部 VCP 掃描器")
             st.markdown("尋找趨勢向上且出現**波動收縮**與**成交量枯竭**的標的。")
             
-            df_vcp = scan_vcp_candidates(tickers, period=period_opt)
+            df_vcp = scan_vcp_candidates(tickers, period=period_opt, raw_data=bulk_raw_data)
             
             if not df_vcp.empty:
                 df_vcp['Ticker'] = df_vcp['Ticker'].apply(
