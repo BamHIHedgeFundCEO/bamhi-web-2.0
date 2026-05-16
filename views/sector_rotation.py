@@ -179,19 +179,18 @@ def render_sector_rotation():
             daily_pct = ((today_close - yest_close) / yest_close) * 100
             
             col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
-            col1.metric("今日漲跌幅", f"{daily_pct:.2f}%", delta=f"{daily_pct:.2f}%", delta_color="normal" if daily_pct > 0 else "inverse")
+            col1.metric("今日漲跌幅", f"{daily_pct:.2f}%", delta=f"{daily_pct:.2f}%")
             col2.metric("5日極速動能", f"{latest['M5']:.2f}%")
             col3.metric("10日波段動能", f"{latest['M10']:.2f}%")
             col4.metric("20日中線動能", f"{latest['M20']:.2f}%")
             
             # 動能差值 (M10 vs M20)
             diff = latest['Momentum_Diff']
-            diff_color = "normal" if diff > 0 else "inverse"
-            col5.metric("動能差值 (M10-M20)", f"{diff:.2f}%", delta_color=diff_color)
+            col5.metric("動能差值 (M10-M20)", f"{diff:.2f}%", delta=f"{diff:.2f}%")
             
             # RS 斜率
-            rs_slope = latest['RS_Slope']
-            col6.metric("RS 線 5日斜率", f"{rs_slope:.4f}", delta="向上" if rs_slope > 0 else "向下", delta_color="normal" if rs_slope > 0 else "inverse")
+            rs_slope_pct = latest['RS_Slope'] * 100
+            col6.metric("RS 線 5日斜率", f"{rs_slope_pct:.2f}%", delta=f"{rs_slope_pct:.2f}%")
             
             # 擁擠度雷達
             crowd_ratio = latest['Crowdedness'] * 100
