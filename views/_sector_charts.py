@@ -439,8 +439,8 @@ def render_institutional_flow_chart(df_sector: pd.DataFrame, sector_name: str):
     col_m, col_c = st.columns([1, 5])
 
     with col_m:
-        st.metric("機構吃貨強度", f"{latest_ud:.2f}x",
-                  delta=signal, delta_color="normal" if latest_ud >= 1.0 else "inverse")
+        st.metric("機構吃貨強度", f"{latest_ud:.2f}x")
+        st.markdown(f"**狀態:** <span style='color:{s_color}'>{signal}</span>", unsafe_allow_html=True)
         st.caption(s_desc)
         st.markdown(f"""
 <div style='margin-top:12px;padding:8px;border-radius:6px;border-left:3px solid {s_color};
