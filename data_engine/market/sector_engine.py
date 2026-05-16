@@ -164,7 +164,7 @@ def calculate_sector_metrics(
         'M5'            : m5,
         'M10'           : m10,
         'M20'           : m20,
-        'Momentum_Diff' : m5 - m20,
+        'Momentum_Diff' : m10 - m20,
         'RS_Line'       : rs_line,
         'RS_Slope'      : rs_slope,
         'RS_Ratio'      : rs_ratio,       # RRG X 軸（中軸 ≈ 100）

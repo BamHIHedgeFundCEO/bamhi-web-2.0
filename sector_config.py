@@ -10,7 +10,6 @@ config/sectors.py
 TRACKED_SECTORS = {
     "太空概念股 (Space)": ["RKLB", "PL", "LUNR", "ASTS", "RDW","SATS", "VSAT", "FLY", "MDA", "IRDM","YSS","VOYG","SPIR","BKSY","SPCE","TSAT"],
     "存儲記憶體 (Storage)": ["MU", "WDC", "STX", "NTAP","SNDK","RMBS","SIMO"],
-    "AI 伺服器 (AI Server)": ["SMCI", "DELL", "HPE", "VRT"],
     "散熱與液冷 (Cooling)": ["MOD", "VERT", "NVT"],
     "AI 應用軟體 (AI Apps)": ["ADBE", "ADP", "AI", "APP", "APPS", "ASAN", "BRZE", "CLBT", "CRM", "CVLT", "DDOG", "DOCS", "DOCU", "DUOL", "ESTC", "FIG", "FSLY", "GTLB", "GWRE", "HUBS", "INTU", "IOT", "KVYO", "LIF", "MDB", "MNDY", "NET", "NOW", "PATH", "PCOR", "PINS", "PLTR", "RBLX", "RBRK", "RDDT", "SAP", "SHOP", "SNAP", "SNOW", "SOUN", "SPOT", "TEAM", "TEM", "TTD", "TWLO", "U", "VEEV", "ZETA", "ZM"],
     "稀土與戰略金屬 (Rare Earths)": ["MP", "UUUU", "AREC", "CRML", "NB", "TMC", "IDR", "PPTA", "CLF", "UAMY", "USAR"],
@@ -35,7 +34,6 @@ TRACKED_SECTORS = {
 SECTOR_LEADERS = {
     "太空概念股 (Space)": ["RKLB", "ASTS", "PL"],
     "存儲記憶體 (Storage)": ["MU", "SNDK", "STX"],
-    "AI 伺服器 (AI Server)": ["SMCI", "DELL"],
     "散熱與液冷 (Cooling)": ["VRT"],
     "AI 應用軟體 (AI Apps)": ["PLTR", "APP", "NET", "SNOW", "NOW"],
     "稀土與戰略金屬 (Rare Earths)": ["MP", "UUUU", "UAMY", "USAR"],

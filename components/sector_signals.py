@@ -40,7 +40,7 @@ def get_signal_for_sector(sector_name, period="1y"):
             return ("🔴", "空頭弱勢",
                     f"指數跌破月線（收盤 {close_val:.2f} < MA20 {ma20_val:.2f}），建議觀望。",
                     "orange")
-        elif close_val > ma20_val and ma20_val > ma60_val and rs_slope > 0 and latest.get('M5', 0) > 0:
+        elif close_val > ma20_val and ma20_val > ma60_val and rs_slope > 0 and latest.get('M10', 0) > 0:
             return ("🟢", "強勢多頭",
                     f"Close > MA20 > MA60，RS 向上發散，板塊處於主升段，可尋找 VCP 突破點。",
                     "green")

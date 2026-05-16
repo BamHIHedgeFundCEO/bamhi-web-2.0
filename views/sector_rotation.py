@@ -127,7 +127,7 @@ def render_sector_rotation():
                 custom_data=['Momentum_Diff']
             )
             fig_heat.update_traces(
-                hovertemplate="<b>%{label}</b><br>動能差值 (M5 - M20): %{customdata[0]:.2f}%<extra></extra>",
+                hovertemplate="<b>%{label}</b><br>動能差值 (M10 - M20): %{customdata[0]:.2f}%<extra></extra>",
                 texttemplate="<b>%{label}</b><br>%{customdata[0]:.2f}%",
                 textposition="middle center",
                 textfont=dict(size=18)
@@ -184,10 +184,10 @@ def render_sector_rotation():
             col3.metric("10日波段動能", f"{latest['M10']:.2f}%")
             col4.metric("20日中線動能", f"{latest['M20']:.2f}%")
             
-            # 動能差值 (M5 vs M20)
+            # 動能差值 (M10 vs M20)
             diff = latest['Momentum_Diff']
             diff_color = "normal" if diff > 0 else "inverse"
-            col5.metric("動能差值 (M5-M20)", f"{diff:.2f}%", delta_color=diff_color)
+            col5.metric("動能差值 (M10-M20)", f"{diff:.2f}%", delta_color=diff_color)
             
             # RS 斜率
             rs_slope = latest['RS_Slope']
@@ -231,7 +231,7 @@ def render_sector_rotation():
                 st.error(f"🚨 **【擁擠度防護罩觸發】** 該板塊資金佔大盤均量比例 ({crowd_ratio:.2f}%) 已突破過去一年 90% 絕對高位 ({crowd_90p:.2f}%)。散戶情緒極度擁擠，隨時可能面臨大戶派發反轉，請嚴格執行減碼紀律，切勿盲目追高！")
             elif close_val < ma20_val:
                 st.warning(f"🔴 **【空頭弱勢 / 跌破月線】** 指數跌破 20 日均線 ({close_val:.2f} < {ma20_val:.2f})，板塊處於回檔或空頭格局，建議觀望，等待突破壓力或 VCP 右側收縮完成。")
-            elif close_val > ma20_val and ma20_val > ma60_val and rs_slope > 0 and latest['M5'] > 0:
+            elif close_val > ma20_val and ma20_val > ma60_val and rs_slope > 0 and latest['M10'] > 0:
                 st.success("🟢 **【強勢多頭排列】** 價格站上月線與季線 (Close > MA20 > MA60)，且相對強度 (RS) 向上發散。板塊處於主升段，是尋找 VCP 突破與順勢建倉的最佳時機！")
             elif close_val > ma20_val and rs_slope > 0:
                 st.info("🔵 **【初步轉強訊號】** 指數剛站上 20 日均線且 RS 開始向上翻轉，板塊有落底回升跡象。可開始把注意力放在下方掃描出的 VCP 潛力股。")

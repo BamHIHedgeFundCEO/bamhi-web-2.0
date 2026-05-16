@@ -508,8 +508,8 @@ background:rgba(0,0,0,0.2);font-size:0.8rem;color:#9ca3af;'>
 def render_momentum_crossover_chart(df_sector: pd.DataFrame, sector_name: str):
     """
     渲染 M5/M10/M20 動能三線走勢圖，並標記黃金交叉（▲）與死亡交叉（▽）。
-    黃金交叉：M5 由下往上穿越 M20 → 短期動能加速，潛在進場訊號
-    死亡交叉：M5 由上往下穿越 M20 → 短期動能衰減，注意減倉
+    黃金交叉：M10 由下往上穿越 M20 → 波段動能確立，進場訊號
+    死亡交叉：M10 由上往下穿越 M20 → 波段動能衰減，注意減倉
     """
     needed = ['M5', 'M10', 'M20']
     if not all(c in df_sector.columns for c in needed):
@@ -521,31 +521,31 @@ def render_momentum_crossover_chart(df_sector: pd.DataFrame, sector_name: str):
 
     st.markdown("---")
     st.subheader(f"📊 {sector_name} 動能三線交叉圖 (M5 / M10 / M20)")
-    st.caption("黃金交叉 🔺 = M5 上穿 M20（短期動能加速）｜死亡交叉 🔻 = M5 下穿 M20（動能衰減）")
+    st.caption("黃金交叉 🔺 = M10 上穿 M20（波段動能確立）｜死亡交叉 🔻 = M10 下穿 M20（動能衰減）")
 
-    # 找出 M5 穿越 M20 的交叉點
-    m5  = df_m['M5']
+    # 找出 M10 穿越 M20 的交叉點
+    m10_series = df_m['M10']
     m20 = df_m['M20']
-    prev_diff = (m5 - m20).shift(1)
-    curr_diff = (m5 - m20)
+    prev_diff = (m10_series - m20).shift(1)
+    curr_diff = (m10_series - m20)
 
-    golden_cross = df_m.index[(prev_diff < 0) & (curr_diff >= 0)]  # M5 上穿 M20
-    death_cross  = df_m.index[(prev_diff > 0) & (curr_diff <= 0)]  # M5 下穿 M20
+    golden_cross = df_m.index[(prev_diff < 0) & (curr_diff >= 0)]  # M10 上穿 M20
+    death_cross  = df_m.index[(prev_diff > 0) & (curr_diff <= 0)]  # M10 下穿 M20
 
     # 最新訊號
-    latest_m5  = float(m5.iloc[-1])
-    latest_m10 = float(df_m['M10'].iloc[-1])
+    latest_m5  = float(df_m['M5'].iloc[-1])
+    latest_m10 = float(m10_series.iloc[-1])
     latest_m20 = float(m20.iloc[-1])
 
     col_m, col_c = st.columns([1, 5])
     with col_m:
-        if latest_m5 > 0 and latest_m5 > latest_m20:
-            st.metric("動能狀態", f"M5 {latest_m5:+.1f}%", delta="🔺 短線加速", delta_color="normal")
-        elif latest_m5 < 0 and latest_m5 < latest_m20:
-            st.metric("動能狀態", f"M5 {latest_m5:+.1f}%", delta="🔻 動能衰減", delta_color="inverse")
+        if latest_m10 > 0 and latest_m10 > latest_m20:
+            st.metric("動能狀態", f"M10 {latest_m10:+.1f}%", delta="🔺 波段轉強", delta_color="normal")
+        elif latest_m10 < 0 and latest_m10 < latest_m20:
+            st.metric("動能狀態", f"M10 {latest_m10:+.1f}%", delta="🔻 波段衰減", delta_color="inverse")
         else:
-            st.metric("動能狀態", f"M5 {latest_m5:+.1f}%", delta="⚖️ 多空拉鋸", delta_color="off")
-        st.caption(f"M10: {latest_m10:+.1f}%\nM20: {latest_m20:+.1f}%")
+            st.metric("動能狀態", f"M10 {latest_m10:+.1f}%", delta="⚖️ 多空拉鋸", delta_color="off")
+        st.caption(f"M5: {latest_m5:+.1f}%\nM20: {latest_m20:+.1f}%")
 
     with col_c:
         fig_mom = go.Figure()
@@ -569,26 +569,26 @@ def render_momentum_crossover_chart(df_sector: pd.DataFrame, sector_name: str):
 
         # 黃金交叉標記（▲）
         if len(golden_cross) > 0:
-            gc_y = [float(m5.loc[d]) for d in golden_cross if d in m5.index]
+            gc_y = [float(m10_series.loc[d]) for d in golden_cross if d in m10_series.index]
             fig_mom.add_trace(go.Scatter(
                 x=list(golden_cross), y=gc_y,
                 mode="markers",
                 marker=dict(symbol="triangle-up", size=14,
                             color="#22c55e", line=dict(color='white', width=1)),
                 name="黃金交叉 🔺",
-                hovertemplate="🔺 黃金交叉<br>%{x|%Y-%m-%d}<br>M5: %{y:.2f}%<extra></extra>",
+                hovertemplate="🔺 黃金交叉<br>%{x|%Y-%m-%d}<br>M10: %{y:.2f}%<extra></extra>",
             ))
 
         # 死亡交叉標記（▽）
         if len(death_cross) > 0:
-            dc_y = [float(m5.loc[d]) for d in death_cross if d in m5.index]
+            dc_y = [float(m10_series.loc[d]) for d in death_cross if d in m10_series.index]
             fig_mom.add_trace(go.Scatter(
                 x=list(death_cross), y=dc_y,
                 mode="markers",
                 marker=dict(symbol="triangle-down", size=14,
                             color="#ef4444", line=dict(color='white', width=1)),
                 name="死亡交叉 🔻",
-                hovertemplate="🔻 死亡交叉<br>%{x|%Y-%m-%d}<br>M5: %{y:.2f}%<extra></extra>",
+                hovertemplate="🔻 死亡交叉<br>%{x|%Y-%m-%d}<br>M10: %{y:.2f}%<extra></extra>",
             ))
 
         fig_mom.add_hline(y=0, line_dash="solid", line_color="rgba(255,255,255,0.2)")
