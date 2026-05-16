@@ -265,17 +265,17 @@ def render_sector_rotation():
             
             colors = {'MA10': 'orange', 'MA20': 'yellow', 'MA60': 'red', 'MA120': 'purple', 'MA200': 'cyan'}
             for ma_name, color in colors.items():
-                fig.add_trace(go.Scatter(
+                fig.add_trace(go.Scattergl(
                     x=df_sector.index, y=df_sector[ma_name],
                     line=dict(color=color, width=1.5), name=ma_name
                 ), row=1, col=1)
                 
             # Row 2: 疊圖分析 (Sector vs SPY)
-            fig.add_trace(go.Scatter(x=df_sector.index, y=df_sector['Sector_Index'], name=f"{sector_name} 指數", line=dict(color='blue', width=2)), row=2, col=1)
-            fig.add_trace(go.Scatter(x=df_sector.index, y=df_sector['SPY_Index'], name="SPY 指數", line=dict(color='gray', width=1.5, dash='dot')), row=2, col=1)
+            fig.add_trace(go.Scattergl(x=df_sector.index, y=df_sector['Sector_Index'], name=f"{sector_name} 指數", line=dict(color='blue', width=2)), row=2, col=1)
+            fig.add_trace(go.Scattergl(x=df_sector.index, y=df_sector['SPY_Index'], name="SPY 指數", line=dict(color='gray', width=1.5, dash='dot')), row=2, col=1)
             
             # Row 3: RS Line
-            fig.add_trace(go.Scatter(x=df_sector.index, y=df_sector['RS_Line'], name="RS Line", line=dict(color='green', width=2)), row=3, col=1)
+            fig.add_trace(go.Scattergl(x=df_sector.index, y=df_sector['RS_Line'], name="RS Line", line=dict(color='green', width=2)), row=3, col=1)
             
             fig.add_hline(
                 y=1.0,

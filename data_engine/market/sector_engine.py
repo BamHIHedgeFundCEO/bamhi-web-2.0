@@ -184,109 +184,134 @@ def calculate_sector_metrics(
 
 @st.cache_data(ttl=3600, show_spinner=False)
 def scan_vcp_candidates(tickers, period="2y", raw_data: pd.DataFrame = None):
-    """VCP 掃描器：趨勢模板 + 波動收縮 + 量縮 + 大戶吃貨"""
-    results     = []
-    
+    """VCP 掃描器：趨勢模板 + 波動收縮 + 量縮 + 大戶吃貨 (向量化提速版)"""
     if raw_data is None:
         all_tickers = list(set(tickers + ['SPY']))
-        data        = yf.download(all_tickers, period=period, progress=False, auto_adjust=False)
+        data = yf.download(all_tickers, period=period, progress=False, auto_adjust=False)
     else:
         data = raw_data
 
-    spy_3m_ret = 0
+    # 確保資料格式正確 (MultiIndex 或單一 Ticker)
     if isinstance(data.columns, pd.MultiIndex):
-        spy_df = data.xs('SPY', level=1, axis=1).copy()
-        spy_df.dropna(inplace=True)
-        if len(spy_df) >= 60:
-            spy_3m_ret = spy_df['Close'].pct_change(60).iloc[-1] * 100
+        close_data = data['Close']
+        vol_data = data['Volume']
+        high_data = data['High']
+        low_data = data['Low']
+    else:
+        # 單一 ticker (例如只傳入一個股票)，轉成 DataFrame 方便統一處理
+        close_data = data[['Close']].rename(columns={'Close': tickers[0]}) if not data.empty else pd.DataFrame()
+        vol_data = data[['Volume']].rename(columns={'Volume': tickers[0]}) if not data.empty else pd.DataFrame()
+        high_data = data[['High']].rename(columns={'High': tickers[0]}) if not data.empty else pd.DataFrame()
+        low_data = data[['Low']].rename(columns={'Low': tickers[0]}) if not data.empty else pd.DataFrame()
 
-    for ticker in tickers:
-        try:
-            if ticker == 'SPY':
-                continue
+    if close_data.empty:
+        return pd.DataFrame()
 
-            if isinstance(data.columns, pd.MultiIndex):
-                df = data.xs(ticker, level=1, axis=1).copy()
-            else:
-                df = data.copy()
+    # 過濾出實際有效的 Tickers，排除 SPY 與無資料者
+    valid_tickers = [t for t in tickers if t in close_data.columns and t != 'SPY']
+    if not valid_tickers:
+        return pd.DataFrame()
 
-            df.dropna(inplace=True)
-            if len(df) < 200:
-                continue
+    # 擷取有效資料
+    df_c = close_data[valid_tickers].dropna(how='all')
+    df_v = vol_data[valid_tickers].dropna(how='all')
+    df_h = high_data[valid_tickers].dropna(how='all')
+    df_l = low_data[valid_tickers].dropna(how='all')
 
-            close = df['Close'].iloc[-1]
-            vol   = df['Volume'].iloc[-1]
+    # 過濾長度不足 200 天的標的
+    valid_mask = df_c.notna().sum() >= 200
+    valid_tickers = valid_mask[valid_mask].index.tolist()
+    if not valid_tickers:
+        return pd.DataFrame()
 
-            # --- Trend Template -----------------------------------------------
-            ma50  = df['Close'].rolling(50).mean().iloc[-1]
-            ma150 = df['Close'].rolling(150).mean().iloc[-1]
-            ma200 = df['Close'].rolling(200).mean().iloc[-1]
+    df_c = df_c[valid_tickers]
+    df_v = df_v[valid_tickers]
+    df_h = df_h[valid_tickers]
+    df_l = df_l[valid_tickers]
 
-            # [Bug Fix v2.1] 真正的 52 周高點 (252 交易日)，而非整段 period 最高
-            high_52w  = df['Close'].iloc[-252:].max()
-            trend_pass = (
-                close > ma150 and close > ma200
-                and ma50 > ma150 and close >= (high_52w * 0.75)
-            )
+    # SPY 3M Return 計算
+    spy_3m_ret = 0
+    if 'SPY' in close_data.columns:
+        spy_close = close_data['SPY'].dropna()
+        if len(spy_close) >= 60:
+            spy_3m_ret = spy_close.pct_change(60).iloc[-1] * 100
 
-            # --- Volatility Contraction (v2.1: 改用相對 ATR%) ------------------
-            df['TR']      = df['High'] - df['Low']
-            # 「短期 ATR」 vs 「中期 ATR」：比較窗口期而非時間點，正確實腳「最近 N 日渢動明顯低於過去 20 日平均」
-            atr_5d  = df['TR'].iloc[-5:].mean()    # 最近 5 日平均波動
-            atr_20d = df['TR'].iloc[-20:].mean()   # 過去 20 日平均波動
-            # 相對 ATR％：用股價歸一化，讓不同價位的股票可互相比較
-            atr_pct_now  = (atr_5d  / close) * 100 if close > 0 else 0
-            atr_pct_base = (atr_20d / close) * 100 if close > 0 else 1
-            # 收縮比：< 0.7 代表波動已顯著收縮（VCP 黄金區間），> 1 代表波動擴張
-            atr_contraction = atr_pct_now / atr_pct_base if atr_pct_base > 0 else 1.0
-            atr_pct_now     = round(atr_pct_now, 2)
+    # 取得最新一天的數值
+    close_last = df_c.iloc[-1]
+    vol_last = df_v.iloc[-1]
 
-            # --- Volume Dry-up & Up/Down Volume --------------------------------
-            vol_ma20 = df['Volume'].rolling(20).mean().iloc[-1]
-            vol_dry  = 1 if vol < (vol_ma20 * 0.6) else 0
+    # --- Trend Template -----------------------------------------------
+    ma50 = df_c.rolling(50).mean().iloc[-1]
+    ma150 = df_c.rolling(150).mean().iloc[-1]
+    ma200 = df_c.rolling(200).mean().iloc[-1]
+    high_52w = df_c.iloc[-252:].max()
 
-            df_50        = df.iloc[-50:].copy()
-            df_50['Ret'] = df_50['Close'].pct_change()
-            up_vol       = df_50[df_50['Ret'] > 0]['Volume'].sum()
-            down_vol     = df_50[df_50['Ret'] < 0]['Volume'].sum()
-            up_down_vol_ratio = up_vol / down_vol if down_vol > 0 else 0
+    trend_pass = (close_last > ma150) & (close_last > ma200) & (ma50 > ma150) & (close_last >= (high_52w * 0.75))
 
-            # --- 動能、均線乖離率 & RS vs SPY ----------------------------------
-            ma20      = df['Close'].rolling(20).mean().iloc[-1]
-            dist_ma20 = (close / ma20 - 1) * 100 if ma20 else 0
+    # --- Volatility Contraction ---------------------------------------
+    tr = df_h - df_l
+    atr_5d = tr.iloc[-5:].mean()
+    atr_20d = tr.iloc[-20:].mean()
 
-            m1  = df['Close'].pct_change(1).iloc[-1]  * 100
-            m10 = df['Close'].pct_change(10).iloc[-1] * 100
-            m20 = df['Close'].pct_change(20).iloc[-1] * 100
-            m60 = df['Close'].pct_change(60).iloc[-1] * 100
+    # 防呆：若 close_last <= 0，用 1 取代避免除零
+    safe_close = close_last.replace(0, 1)
+    atr_pct_now = (atr_5d / safe_close) * 100
+    atr_pct_base = (atr_20d / safe_close) * 100
 
-            ticker_3m_ret = df['Close'].pct_change(60).iloc[-1] * 100
-            rs_3m = ticker_3m_ret - spy_3m_ret if pd.notna(ticker_3m_ret) else 0
+    atr_contraction = np.where(atr_pct_base > 0, atr_pct_now / atr_pct_base, 1.0)
+    atr_contraction = pd.Series(atr_contraction, index=valid_tickers)
 
-            results.append({
-                "Ticker"          : ticker,
-                "Price"           : round(close, 2),
-                "M1"              : round(m1, 2),
-                "M10"             : round(m10, 2),
-                "M20"             : round(m20, 2),
-                "M60"             : round(m60, 2),
-                "Dist_MA20"       : round(dist_ma20, 2),
-                "ATR_Pct"         : atr_pct_now,          # ATR% = ATR/Price (相對波動率)
-                "ATR_Contraction" : round(atr_contraction, 2), # ATR_5d / ATR_20d (<0.7=收縮)
-                "Up_Down_Vol"     : round(up_down_vol_ratio, 2),
-                "RS_3M"           : round(rs_3m, 2),
-                "Dist_to_High"    : f"{round((close / high_52w - 1) * 100, 1)}%",
-                "Trend_Pass"      : "✅ 是" if trend_pass else "❌ 否",
-                "Vol_Dry_Up"      : "✅ 是" if vol_dry  else "❌ 否",
-            })
-        except Exception:
-            continue
+    # --- Volume Dry-up & Up/Down Volume --------------------------------
+    vol_ma20 = df_v.rolling(20).mean().iloc[-1]
+    vol_dry = vol_last < (vol_ma20 * 0.6)
 
-    df_out = pd.DataFrame(results)
-    if not df_out.empty and 'RS_3M' in df_out.columns:
-        # RS_Rank: 板塊內部相對強度百分位排行 (100 = 板塊最強, 0 = 最弱)
-        df_out['RS_Rank'] = df_out['RS_3M'].rank(pct=True).mul(100).round(0).astype(int)
-    return df_out
+    df_c_50 = df_c.iloc[-50:]
+    df_v_50 = df_v.iloc[-50:]
+    ret_50 = df_c_50.pct_change()
+
+    # Numpy 廣播運算：計算上漲日與下跌日的成交量總和
+    up_vol = (df_v_50 * (ret_50 > 0)).sum()
+    down_vol = (df_v_50 * (ret_50 < 0)).sum()
+    
+    up_down_vol_ratio = np.where(down_vol > 0, up_vol / down_vol, 0.0)
+    up_down_vol_ratio = pd.Series(up_down_vol_ratio, index=valid_tickers)
+
+    # --- 動能、均線乖離率 & RS vs SPY ----------------------------------
+    ma20 = df_c.rolling(20).mean().iloc[-1]
+    dist_ma20 = np.where(ma20 > 0, (close_last / ma20 - 1) * 100, 0)
+    
+    m1 = df_c.pct_change(1).iloc[-1] * 100
+    m10 = df_c.pct_change(10).iloc[-1] * 100
+    m20 = df_c.pct_change(20).iloc[-1] * 100
+    m60 = df_c.pct_change(60).iloc[-1] * 100
+
+    ticker_3m_ret = df_c.pct_change(60).iloc[-1] * 100
+    rs_3m = ticker_3m_ret - spy_3m_ret
+    
+    dist_to_high = (close_last / high_52w - 1) * 100
+
+    # 建立回傳 DataFrame
+    results = pd.DataFrame({
+        "Ticker": valid_tickers,
+        "Price": close_last.round(2).values,
+        "M1": m1.round(2).values,
+        "M10": m10.round(2).values,
+        "M20": m20.round(2).values,
+        "M60": m60.round(2).values,
+        "Dist_MA20": pd.Series(dist_ma20).round(2).values,
+        "ATR_Pct": atr_pct_now.round(2).values,
+        "ATR_Contraction": atr_contraction.round(2).values,
+        "Up_Down_Vol": pd.Series(up_down_vol_ratio).round(2).values,
+        "RS_3M": rs_3m.round(2).values,
+        "Dist_to_High": pd.Series(dist_to_high).round(1).astype(str) + "%",
+        "Trend_Pass": np.where(trend_pass, "✅ 是", "❌ 否"),
+        "Vol_Dry_Up": np.where(vol_dry, "✅ 是", "❌ 否"),
+    })
+
+    if not results.empty and 'RS_3M' in results.columns:
+        results['RS_Rank'] = results['RS_3M'].rank(pct=True).mul(100).round(0).astype(int)
+
+    return results
 
 
 @st.cache_data(ttl=3600, show_spinner=False)

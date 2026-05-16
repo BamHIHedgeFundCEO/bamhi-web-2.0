@@ -12,13 +12,16 @@ def fetch_data(ticker: str):
     df = load_csv("gdp_fedfunds_rstar.csv")
     if df is None: return None
 
-    # 取出有效歷史資料
-    history = df[["date", "r_star", "GDP_Growth", "FEDFUNDS"]].copy()
+    # 取出有效歷史資料，容忍 r_star 不存在的情況
+    cols_to_extract = ["date", "GDP_Growth", "FEDFUNDS"]
+    if "r_star" in df.columns:
+        cols_to_extract.append("r_star")
+        
+    history = df[cols_to_extract].copy()
     
     # 選定一個主指標作為最新數值的代表 (優先顯示 r-star，若無則顯示名目利率)
-    valid_rstar = df["r_star"].dropna()
-    if not valid_rstar.empty:
-        series = valid_rstar
+    if "r_star" in df.columns and not df["r_star"].dropna().empty:
+        series = df["r_star"].dropna()
     else:
         series = df["FEDFUNDS"].dropna()
 
