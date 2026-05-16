@@ -10,7 +10,7 @@ config/sectors.py
 TRACKED_SECTORS = {
     "太空概念股 (Space)": ["RKLB", "PL", "LUNR", "ASTS", "RDW","SATS", "VSAT", "FLY", "MDA", "IRDM","YSS","VOYG","SPIR","BKSY","SPCE","TSAT"],
     "存儲記憶體 (Storage)": ["MU", "WDC", "STX", "NTAP","SNDK","RMBS","SIMO"],
-    "散熱與液冷 (Cooling)": ["MOD", "VERT", "NVT"],
+    "散熱與液冷 (Cooling)": ["MOD", "NVT"],
     "AI 應用軟體 (AI Apps)": ["ADBE", "ADP", "AI", "APP", "APPS", "ASAN", "BRZE", "CLBT", "CRM", "CVLT", "DDOG", "DOCS", "DOCU", "DUOL", "ESTC", "FIG", "FSLY", "GTLB", "GWRE", "HUBS", "INTU", "IOT", "KVYO", "LIF", "MDB", "MNDY", "NET", "NOW", "PATH", "PCOR", "PINS", "PLTR", "RBLX", "RBRK", "RDDT", "SAP", "SHOP", "SNAP", "SNOW", "SOUN", "SPOT", "TEAM", "TEM", "TTD", "TWLO", "U", "VEEV", "ZETA", "ZM"],
     "稀土與戰略金屬 (Rare Earths)": ["MP", "UUUU", "AREC", "CRML", "NB", "TMC", "IDR", "PPTA", "CLF", "UAMY", "USAR"],
     "光通訊 (Optical Communication)": ["GLW", "LITE", "COHR", "FN", "AAOI", "POET", "MRVL", "CRDO", "ALAB", "ANET", "AVGO", "CIEN", "VIAV", "CLFD", "NOK", "LUMN", "APH"],

@@ -8,6 +8,10 @@ pandas-datareader>=0.10.0
 # --- UI Components (網頁前端元件 - 新增) ---
 streamlit-option-menu>=0.3.6
 
+# --- Backend API (後端伺服器引擎 - 新增) ---
+fastapi>=0.100.0
+uvicorn>=0.23.0
+
 # --- Translation Engine (翻譯引擎 - 新增) ---
 deep-translator>=1.11.4
 

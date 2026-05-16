@@ -4,6 +4,7 @@ components/sector_signals.py
 """
 import streamlit as st
 from data_engine.market.sector_engine import calculate_sector_metrics
+from data_engine.api_client import fetch_sector_metrics_from_api
 from sector_config import TRACKED_SECTORS, SECTOR_LEADERS
 
 def get_signal_for_sector(sector_name, period="1y"):
@@ -16,7 +17,10 @@ def get_signal_for_sector(sector_name, period="1y"):
         return ("⚪", "無資料", "無法取得板塊資料", "gray")
 
     try:
-        df_sector, _ = calculate_sector_metrics(tickers, period=period)
+        # 優先嘗試 API
+        df_sector = fetch_sector_metrics_from_api(sector_name, period=period)
+        if df_sector is None:
+            df_sector, _ = calculate_sector_metrics(tickers, period=period)
         if df_sector is None or df_sector.empty:
             return ("⚪", "無資料", "無法計算板塊指標", "gray")
 

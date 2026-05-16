@@ -11,6 +11,7 @@ import yfinance as yf
 
 # 匯入後端大腦
 from data_engine.market.sector_engine import calculate_sector_metrics, scan_vcp_candidates
+from data_engine.api_client import fetch_sector_metrics_from_api, fetch_vcp_from_api
 from views._sector_charts import (render_rrg_tab, render_breadth_chart, get_rrg_quadrant,
                                    render_rrg_trail_tab, render_correlation_heatmap,
                                    render_institutional_flow_chart, render_momentum_crossover_chart)
@@ -162,7 +163,12 @@ def render_sector_rotation():
     # === 主畫面：單一板塊數據視覺化 ===
     if tickers:
         with st.spinner(f"正在計算 {sector_name} 詳細動能與 VCP 訊號..."):
-            df_sector, vol_data = calculate_sector_metrics(tickers, period=period_opt, raw_data=bulk_raw_data)
+            # 優先嘗試透過 FastAPI 取得
+            df_sector = fetch_sector_metrics_from_api(sector_name, period=period_opt)
+            
+            # 若 API 沒開或斷線，退回原本的本地計算 (安全降級)
+            if df_sector is None:
+                df_sector, vol_data = calculate_sector_metrics(tickers, period=period_opt, raw_data=bulk_raw_data)
             
             if df_sector is None or df_sector.empty:
                 st.error("資料獲取失敗，請檢查該板塊內的 Ticker 是否正確或已下市。")
@@ -311,8 +317,12 @@ def render_sector_rotation():
             st.markdown("---")
             st.subheader(f"🎯 {sector_name} 內部 VCP 掃描器")
             st.markdown("尋找趨勢向上且出現**波動收縮**與**成交量枯竭**的標的。")
+            # 優先嘗試透過 FastAPI 取得 VCP 掃描結果
+            df_vcp = fetch_vcp_from_api(sector_name, period=period_opt)
             
-            df_vcp = scan_vcp_candidates(tickers, period=period_opt, raw_data=bulk_raw_data)
+            # 若 API 沒開或斷線，退回原本的本地計算 (安全降級)
+            if df_vcp is None:
+                df_vcp = scan_vcp_candidates(tickers, period=period_opt, raw_data=bulk_raw_data)
             
             if not df_vcp.empty:
                 df_vcp['Ticker'] = df_vcp['Ticker'].apply(
