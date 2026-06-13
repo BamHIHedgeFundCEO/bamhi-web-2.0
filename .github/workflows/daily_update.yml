@@ -49,12 +49,16 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}  # 💡 新增：如果暗池腳本也需要傳 Discord 就用得到
         run: python data_pipeline/market/update_darkpool_pipeline.py
 
-      # 5. 把新的 CSV 檔上傳回 Github
+      # 4.6 預算板塊輪動資料 (產出 JSON 供 Vue 後端秒讀，避免線上即時下載數百檔)
+      - name: Precompute Sector Rotation
+        run: python data_pipeline/market/precompute_sector_rotation.py
+
+      # 5. 把新的 CSV / JSON 上傳回 Github
       - name: Commit and push changes
         run: |
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "actions@github.com"
-          git add data/*.csv
+          git add data/*.csv data/sector_rotation/*.json
           # 如果有資料更新才 commit，沒更新就不做動作 (避免報錯)
           git commit -m "📈 Auto-update market data [skip ci]" || exit 0
           git push

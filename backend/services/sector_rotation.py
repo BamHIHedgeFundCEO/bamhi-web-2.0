@@ -4,6 +4,9 @@
 純 pandas / numpy；yfinance 僅用於全板塊唯一一次 bulk download，
 依 period 行程內快取，overview 與 detail 共用。
 """
+import hashlib
+import json
+import os
 import time
 
 import numpy as np
@@ -17,6 +20,54 @@ _BULK_TTL = 3600
 
 RRG_SHORT = 14
 RRG_LONG = 50
+
+# 預先算好的 JSON 目錄 (由 pipeline 產出，後端優先讀檔以求秒開)
+_BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+PRECOMPUTE_DIR = os.path.join(_BASE_DIR, "data", "sector_rotation")
+PRECOMPUTE_PERIOD = "2y"  # 預算好的區間；其他區間才即時計算
+
+
+def _detail_filename(sector: str) -> str:
+    return f"detail_{hashlib.md5(sector.encode('utf-8')).hexdigest()[:12]}.json"
+
+
+def _load_precomputed(filename: str):
+    path = os.path.join(PRECOMPUTE_DIR, filename)
+    if not os.path.exists(path):
+        return None
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"[sector_rotation] 讀預算檔失敗 {filename}: {e}")
+        return None
+
+
+# ── 對外：優先讀預算檔，沒有才即時計算 (router 呼叫這三個) ──
+def overview_cached(period: str):
+    if period == PRECOMPUTE_PERIOD:
+        data = _load_precomputed("overview.json")
+        if data is not None:
+            return data
+    return get_overview(period)
+
+
+def signals_cached(period: str):
+    if period == PRECOMPUTE_PERIOD:
+        data = _load_precomputed("signals.json")
+        if data is not None:
+            return data
+    return get_signals(period)
+
+
+def detail_cached(sector: str, period: str):
+    if sector not in TRACKED_SECTORS:
+        return None
+    if period == PRECOMPUTE_PERIOD:
+        data = _load_precomputed(_detail_filename(sector))
+        if data is not None:
+            return data
+    return get_detail(sector, period)
 
 
 def _all_unique_tickers() -> list[str]:

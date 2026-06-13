@@ -22,7 +22,7 @@ def signals(
     _user: dict = Depends(get_current_user),
 ):
     """首頁板塊即時訊號推播（所有板塊進出場狀態）。"""
-    result = svc.get_signals(period)
+    result = svc.signals_cached(period)
     if result is None:
         raise HTTPException(status_code=503, detail="資料獲取失敗（yfinance 下載為空）")
     return result
@@ -34,7 +34,7 @@ def overview(
     _user: dict = Depends(get_current_user),
 ):
     """全板塊全覽：動能熱力圖 + RRG 即時 + RRG 軌跡 + 相關係數矩陣。"""
-    result = svc.get_overview(period)
+    result = svc.overview_cached(period)
     if result is None:
         raise HTTPException(status_code=503, detail="資料獲取失敗（yfinance 下載為空）")
     return result
@@ -47,7 +47,7 @@ def detail(
     _user: dict = Depends(get_current_user),
 ):
     """單一板塊深度：頂部指標 + 狀態 + K線/RS/寬度/機構流/動能圖序列 + VCP 掃描。"""
-    result = svc.get_detail(sector, period)
+    result = svc.detail_cached(sector, period)
     if result is None:
         raise HTTPException(status_code=404, detail=f"未知板塊：{sector}")
     return result

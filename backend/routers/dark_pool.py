@@ -24,7 +24,10 @@ _TREND_TTL = 900
 
 
 def _fetch_trends(tickers: list[str]) -> dict:
-    """用 yfinance 抓 ~50 檔近 60 日收盤，給迷你線用。失敗回空 dict。"""
+    """用 yfinance 抓 ~50 檔近 60 日收盤，給迷你線用。失敗回空 dict。
+    預設關閉（避免拖慢免費方案）；設環境變數 ENABLE_LIVE_TRENDS=true 才啟用。"""
+    if os.getenv("ENABLE_LIVE_TRENDS", "").lower() != "true":
+        return {}
     if _TREND_CACHE["data"] and time.time() - _TREND_CACHE["ts"] < _TREND_TTL:
         return _TREND_CACHE["data"]
     out: dict = {}
