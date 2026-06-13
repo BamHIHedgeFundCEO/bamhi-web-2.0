@@ -68,7 +68,7 @@ function goSector(sector) {
 }
 
 onMounted(() => {
-  if (!store.signals) store.fetchSignals('1y')
+  if (!store.signals) store.fetchSignals('2y')
 })
 </script>
 

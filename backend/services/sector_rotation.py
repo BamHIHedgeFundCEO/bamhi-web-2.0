@@ -53,10 +53,10 @@ def overview_cached(period: str):
 
 
 def signals_cached(period: str):
-    if period == PRECOMPUTE_PERIOD:
-        data = _load_precomputed("signals.json")
-        if data is not None:
-            return data
+    # 訊號是「當下狀態快照」，不分區間都用最新預算檔，避免線上即時下載
+    data = _load_precomputed("signals.json")
+    if data is not None:
+        return data
     return get_signals(period)
 
 
