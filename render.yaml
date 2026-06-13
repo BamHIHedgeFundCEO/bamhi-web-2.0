@@ -1,0 +1,19 @@
+# Render Blueprint — 後端 FastAPI 服務
+# 在 Render → New → Blueprint，選這個 repo 即可自動套用。
+services:
+  - type: web
+    name: bamhi-quant-api
+    runtime: python
+    plan: free
+    rootDir: .                       # 從 repo 根目錄跑，才能讀到 data/、sector_config、notes
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: SUPABASE_URL          # 你的 Supabase 專案網址，部署時在 Dashboard 填
+        sync: false
+      - key: FRONTEND_ORIGIN       # 你的 Vercel 網址 (CORS 白名單)，部署時填
+        sync: false
+      # ⚠️ 絕對不要在這裡設 AUTH_DISABLED

@@ -1,0 +1,11 @@
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+python-jose[cryptography]==3.3.0
+python-dotenv==1.0.1
+# 資料層 (重用既有 data_engine / data_pipeline)
+pandas
+numpy
+yfinance          # ETF 成分股即時鑽取 (on-demand)
+requests
+pandas_datareader
+deep_translator   # 個股公司簡介中譯
