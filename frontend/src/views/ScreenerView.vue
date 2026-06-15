@@ -20,6 +20,7 @@
     <!-- VCP -->
     <section v-show="tab === 'vcp'">
       <div v-if="loading.vcp" class="ph">彙整全板塊 VCP 候選中…</div>
+      <p v-else-if="errors.vcp" class="err">⚠️ {{ errors.vcp }} <button class="retry" @click="vcp = null; loadVcp()">重試</button></p>
       <template v-else-if="vcp">
         <p class="meta">共 {{ vcp.count }} 檔（VCP 分數 ≥ {{ vcp.min_score }} 或 🎯 強訊），跨板塊去重後依分數排序。</p>
         <DataTable v-if="vcpRows.length" :columns="vcpCols" :rows="vcpRows" row-key="ticker" />
@@ -30,6 +31,7 @@
     <!-- Alpha / Genesis (分級) -->
     <section v-for="eng in ['alpha', 'genesis']" :key="eng" v-show="tab === eng">
       <div v-if="loading[eng]" class="ph">套用市值分級篩選中…</div>
+      <p v-else-if="errors[eng]" class="err">⚠️ {{ errors[eng] }} <button class="retry" @click="models[eng] = null; loadModels(eng)">重試</button></p>
       <template v-else-if="models[eng]">
         <p class="meta">
           更新：{{ models[eng].updated_at || '—' }}　共選出 {{ models[eng].total_picked }} 檔（每級最多 10 檔，依 Resonance_Score）
@@ -86,8 +88,14 @@ const TABS = [
 ]
 const tab = ref('vcp')
 const loading = reactive({ vcp: false, alpha: false, genesis: false })
+const errors = reactive({ vcp: '', alpha: '', genesis: '' })
 const vcp = ref(null)
 const models = reactive({ alpha: null, genesis: null })
+
+const errMsg = (e) =>
+  e?.response?.status
+    ? `讀取失敗 (HTTP ${e.response.status})${e.response.data?.detail ? '：' + e.response.data.detail : ''}`
+    : e?.message || '讀取失敗'
 
 const signed = (v) => (v > 0 ? 'var(--color-bull)' : v < 0 ? 'var(--color-bear)' : '')
 const fixed = (d) => (v) => (v === null || v === undefined ? '—' : Number(v).toFixed(d))
@@ -99,8 +107,11 @@ function tierLabel(t) {
 async function loadVcp() {
   if (vcp.value || loading.vcp) return
   loading.vcp = true
+  errors.vcp = ''
   try {
     vcp.value = (await apiClient.get('/api/screener/vcp', { params: { min_score: 60 } })).data
+  } catch (e) {
+    errors.vcp = errMsg(e)
   } finally {
     loading.vcp = false
   }
@@ -108,8 +119,11 @@ async function loadVcp() {
 async function loadModels(eng) {
   if (models[eng] || loading[eng]) return
   loading[eng] = true
+  errors[eng] = ''
   try {
     models[eng] = (await apiClient.get('/api/screener/models', { params: { engine: eng } })).data
+  } catch (e) {
+    errors[eng] = errMsg(e)
   } finally {
     loading[eng] = false
   }
@@ -184,6 +198,8 @@ const genesisCols = [
 .tier .gate { font-size: 12px; font-weight: 400; color: var(--color-text-muted); }
 .tier .cnt { margin-left: auto; font-size: 12px; color: var(--color-text-secondary); background: var(--color-bg-raised); padding: 2px 10px; border-radius: 10px; }
 .ph { color: var(--color-text-muted); padding: 24px 0; }
+.err { color: var(--color-warning); background: rgba(245, 158, 11, 0.1); border: 1px solid var(--color-warning); padding: 12px 16px; border-radius: var(--radius-md); font-size: 13px; }
+.retry { margin-left: 10px; background: none; border: 1px solid var(--color-warning); color: var(--color-warning); border-radius: var(--radius-sm); padding: 3px 10px; cursor: pointer; font-size: 12px; }
 .ph.small { padding: 8px 0; font-size: 13px; }
 .playbook { margin-top: 30px; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-bg-surface); }
 .playbook summary { cursor: pointer; padding: 14px 18px; font-weight: 600; font-size: 14px; }
