@@ -158,6 +158,21 @@ def compute_sector_metrics(tickers: list[str], raw_data: pd.DataFrame) -> pd.Dat
     return df.loc[fvi:] if fvi is not None else df
 
 
+# ── VCP 評分權重 (可調) ───────────────────────────────────────────
+# 設計原則：trend_pass 是「閘門」不是分數——沒過上升趨勢模板的票，分數會被
+# 折到 GATE_FAIL_FACTOR(壓到榜尾)，因為 VCP 的前提就是已在確認的上升趨勢。
+# 其餘 6 項加總 = 100，重心放在「相對強弱 + VCP 結構(收斂/收緊) + 吸籌」。
+VCP_WEIGHTS = {
+    "rs": 25,         # 相對強弱(板塊內 RS 百分位)——實證最強的領先指標
+    "converge": 20,   # 連續波動收斂(真 VCP 結構)
+    "tight": 10,      # 最新一段收得多緊
+    "accum": 20,      # 吸籌(漲量 ÷ 跌量)
+    "dry": 10,        # 量能枯竭(突破前沉默)
+    "near_high": 15,  # 貼近 52 週高(8% 內線性給分；不與趨勢閘門重複計)
+}
+GATE_FAIL_FACTOR = 0.2  # 未過 trend_pass 的折扣(保留排序資訊但壓到榜尾)
+
+
 # ── VCP 掃描 (移植 scan_vcp_candidates) ──
 def scan_vcp(tickers: list[str], raw_data: pd.DataFrame) -> list[dict]:
     if raw_data is None or raw_data.empty:
@@ -231,20 +246,21 @@ def scan_vcp(tickers: list[str], raw_data: pd.DataFrame) -> list[dict]:
     })
     res["rs_rank"] = res["rs_3m"].rank(pct=True).mul(100).round(0).astype(int)
 
-    # 綜合 VCP 評分 (0~100)：趨勢模板 30 + 連續收斂 15 + 收緊度 10 + 吸籌 15
-    #                         + 相對強弱 20 + 量縮 5 + 貼近高點 5
-    near = np.clip(1 + dist_high.values / 25.0, 0, 1)  # 離 52 週高 25% 內線性給分
-    score = (
-        30 * trend_pass.values.astype(float)
-        + 15 * converging.values.astype(float)
-        + 10 * tightness.values
-        + 15 * np.clip(ud_ratio.values / 2.0, 0, 1)
-        + 20 * (res["rs_rank"].values / 100.0)
-        + 5 * vol_dry.values.astype(float)
-        + 5 * near
+    # 綜合 VCP 評分：其餘 6 項加總 0~100，再乘趨勢閘門折扣
+    w = VCP_WEIGHTS
+    near_high = np.clip(1 + dist_high.values / 8.0, 0, 1)  # 離 52 週高 8% 內線性給分
+    quality = (
+        w["rs"] * (res["rs_rank"].values / 100.0)
+        + w["converge"] * converging.values.astype(float)
+        + w["tight"] * tightness.values
+        + w["accum"] * np.clip(ud_ratio.values / 2.0, 0, 1)
+        + w["dry"] * vol_dry.values.astype(float)
+        + w["near_high"] * near_high
     )
-    res["vcp_score"] = np.round(score, 0).astype(int)
-    # ⭐ 高把握組合：趨勢過 + 連續收斂 + 吸籌(漲量>跌量) + 跑贏大盤
+    # 趨勢閘門：沒過上升趨勢模板 → 折到 GATE_FAIL_FACTOR(壓到榜尾)
+    gate = np.where(trend_pass.values, 1.0, GATE_FAIL_FACTOR)
+    res["vcp_score"] = np.round(quality * gate, 0).astype(int)
+    # 🎯 高把握組合：趨勢過 + 連續收斂 + 吸籌(漲量>跌量) + 跑贏大盤
     res["vcp_pass"] = (trend_pass.values & converging.values & (ud_ratio.values > 1) & (rs_3m.values > 0))
     res = res.sort_values("vcp_score", ascending=False).reset_index(drop=True)
 
