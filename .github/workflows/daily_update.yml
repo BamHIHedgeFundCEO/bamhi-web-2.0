@@ -49,7 +49,11 @@ jobs:
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}  # 💡 新增：將 Discord Webhook 注入環境變數
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}        # GDP/FEDFUNDS 走 FRED 官方 API
-        run: python update_data.py
+        # AAII 爬蟲用 undetected-chromedriver 且非 headless（Incapsula 會識破 headless），
+        # 需要虛擬顯示器 xvfb 才能在 CI 起 Chrome。
+        run: |
+          sudo apt-get update && sudo apt-get install -y xvfb
+          xvfb-run -a python update_data.py
 
       # 4.5 執行暗池監控管線
       - name: Run Darkpool Pipeline
