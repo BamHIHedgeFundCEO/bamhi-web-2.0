@@ -3,7 +3,6 @@ streamlit>=1.35.0
 plotly>=5.18.0
 pandas>=2.0.0
 yfinance>=0.2.37
-pandas-datareader>=0.10.0
 
 # --- UI Components (網頁前端元件 - 新增) ---
 streamlit-option-menu>=0.3.6

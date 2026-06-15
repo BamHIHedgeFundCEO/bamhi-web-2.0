@@ -2,20 +2,18 @@
 data_pipeline/rates/gdp_fedfunds_rstar.py
 功能：自動下載 名目GDP、聯邦基金利率、r-star 並存成 gdp_fedfunds_rstar.csv
 """
-import pandas_datareader.data as web
 import pandas as pd
-import datetime as dt
 import os
+
+from data_pipeline.rates._fred import fetch
 
 def update():
     print("   ↳ 🌐 [Macro Data] 正在同步：名目GDP成長率、聯邦基金利率、r-star...")
-    
+
     try:
-        # 1. 抓取 FRED 數據 (GDP 與 FEDFUNDS)
-        start = dt.datetime(1980, 1, 1)
-        end = dt.datetime.now()
-        df_fred = web.DataReader(["GDP", "FEDFUNDS"], "fred", start, end)
-        
+        # 1. 抓取 FRED 數據 (GDP 與 FEDFUNDS) — 改用直接下載 FRED CSV
+        df_fred = fetch(["GDP", "FEDFUNDS"]).set_index("date")
+
         # 因為加入了月頻率的 FEDFUNDS，DataFrame 會變成月頻率
         # 必須先 forward fill GDP，再計算 YoY (12個月 = 12 periods)
         df_fred["GDP"] = df_fred["GDP"].ffill()
