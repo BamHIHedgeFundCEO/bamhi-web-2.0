@@ -33,6 +33,7 @@
       <div v-if="loading[eng]" class="ph">套用市值分級篩選中…</div>
       <p v-else-if="errors[eng]" class="err">⚠️ {{ errors[eng] }} <button class="retry" @click="models[eng] = null; loadModels(eng)">重試</button></p>
       <template v-else-if="models[eng]">
+        <p v-if="models[eng].error" class="err">⚠️ 後端：{{ models[eng].error }}</p>
         <p class="meta">
           更新：{{ models[eng].updated_at || '—' }}　共選出 {{ models[eng].total_picked }} 檔（每級最多 10 檔，依 Resonance_Score）
         </p>

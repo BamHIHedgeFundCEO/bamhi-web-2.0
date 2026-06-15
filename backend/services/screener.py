@@ -34,6 +34,15 @@ GENESIS_COLS = ["Ticker", "Resonance_Score", "Win_Prob", "Price", "MA_Conv", "Vo
 
 
 def screen_models(engine: str) -> dict:
+    """對外入口：包住例外，確保任何錯誤都回傳清楚訊息而非 500。"""
+    try:
+        return _screen_models(engine)
+    except Exception as e:  # noqa: BLE001
+        return {"engine": engine, "tiers": [], "total_picked": 0,
+                "error": f"{type(e).__name__}: {e}"}
+
+
+def _screen_models(engine: str) -> dict:
     """Alpha / Genesis 戰報套市值分級篩選，回傳每級最多 10 檔（依 Resonance_Score）。"""
     prefix = "BamHI_Dashboard" if engine == "alpha" else "BamHI_Genesis_Dashboard"
     path = os.path.join(DATA_DIR, f"{prefix}_Latest.csv")
@@ -68,7 +77,12 @@ def screen_models(engine: str) -> dict:
             elif engine == "genesis" and "Vol_Z" in seg.columns:
                 seg = seg[seg["Vol_Z"] > 1.5]
         seg = seg.sort_values("Resonance_Score", ascending=False).head(PER_TIER)
-        items = seg[keep].where(pd.notnull(seg[keep]), None).round(3).to_dict(orient="records")
+        # 只對數值欄 round（避免某些 pandas 版本對字串欄 .round() 直接拋例外）
+        sub = seg[keep].copy()
+        for c in sub.columns:
+            if pd.api.types.is_numeric_dtype(sub[c]):
+                sub[c] = sub[c].round(3)
+        items = sub.where(pd.notnull(sub), None).to_dict(orient="records")
         picked += len(items)
         tiers_out.append({
             "tier": name,
@@ -79,7 +93,7 @@ def screen_models(engine: str) -> dict:
 
     updated_at = _mtime(path)
     return {"engine": engine, "updated_at": updated_at, "columns": keep,
-            "total_picked": picked, "tiers": tiers_out}
+            "rows_read": int(len(df)), "total_picked": picked, "tiers": tiers_out}
 
 
 def screen_vcp(min_score: int = 60) -> dict:
