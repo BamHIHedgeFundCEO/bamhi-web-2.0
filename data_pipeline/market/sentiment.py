@@ -30,7 +30,8 @@ def get_aaii_latest():
         
         # ⚠️ 注意：不使用 headless=True，因為 Incapsula 能識破所有 Headless 指紋
         # 視窗會在背景安靜出現約 30 秒後自動關閉，不影響您的操作
-        driver = uc.Chrome(options=options, version_main=147)
+        # version_main 不寫死，讓 undetected-chromedriver 自動對齊當前環境的 Chrome 版本
+        driver = uc.Chrome(options=options)
         driver.get(url)
         
         # 動態等待，直到網頁出現表格為止 (最多 25 秒)
