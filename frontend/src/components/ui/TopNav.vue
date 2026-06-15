@@ -44,7 +44,8 @@ const open = ref(false)
 const q = ref('')
 
 const TOOLS = [
-  { name: 'darkPool', label: '🎯 暗池異常資金監控' },
+  { name: 'screener', label: '🎯 BamHI 模型選股' },
+  { name: 'darkPool', label: '🕳️ 暗池異常資金監控' },
   { name: 'sectorRotation', label: '🔄 板塊輪動 + VCP' },
   { name: 'sectorStrength', label: '🧭 美股板塊強弱' },
   { name: 'worldSectors', label: '🐫 全球市場強弱' },
@@ -94,20 +95,20 @@ async function logout() {
   position: absolute;
   top: 100%;
   left: 0;
-  margin-top: 4px;
+  margin-top: 6px;
   background: var(--color-bg-raised);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 6px;
-  min-width: 200px;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+  border-radius: var(--radius-lg);
+  padding: 8px;
+  min-width: 280px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55);
 }
 .menu-item {
   display: block;
   color: var(--color-text-secondary);
-  font-size: 13px;
-  padding: 8px 12px;
-  border-radius: var(--radius-sm);
+  font-size: 15px;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
   white-space: nowrap;
 }
 .menu-item:hover { background: var(--color-bg-surface); color: var(--color-text-primary); }

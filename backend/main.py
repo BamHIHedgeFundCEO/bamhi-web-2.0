@@ -17,7 +17,7 @@ from fastapi import Depends, FastAPI  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 
 from backend.auth import get_current_user  # noqa: E402
-from backend.routers import dark_pool, equity, macro, models, notes, sector_rotation, sector_strength, world_sectors  # noqa: E402
+from backend.routers import dark_pool, equity, macro, models, notes, screener, sector_rotation, sector_strength, world_sectors  # noqa: E402
 
 app = FastAPI(title="BamHI Quant API", version="2.0.0")
 
@@ -60,3 +60,4 @@ app.include_router(models.router)
 app.include_router(sector_rotation.router)
 app.include_router(equity.router)
 app.include_router(notes.router)
+app.include_router(screener.router)

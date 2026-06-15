@@ -33,6 +33,7 @@ const routes = [
       { path: 'world-sectors', name: 'worldSectors', component: () => import('@/views/WorldSectorsView.vue') },
       { path: 'models', name: 'models', component: () => import('@/views/TradingModelsView.vue') },
       { path: 'sector-rotation', name: 'sectorRotation', component: () => import('@/views/SectorRotationView.vue') },
+      { path: 'screener', name: 'screener', component: () => import('@/views/ScreenerView.vue') },
       { path: 'search', name: 'search', component: () => import('@/views/SearchView.vue') },
     ],
   },
