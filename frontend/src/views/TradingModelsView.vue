@@ -53,7 +53,15 @@
         <button class="btn-primary" :disabled="!report.items.length" @click="downloadCsv">📥 下載戰報 CSV</button>
       </div>
       <p v-if="report.updated_at" class="updated mono">🔄 最後更新：{{ report.updated_at }}</p>
-      <DataTable :columns="cols" :rows="report.items" row-key="Ticker" />
+      <div class="tierbar">
+        <label>🏷️ 市值級別</label>
+        <select v-model="activeTier">
+          <option value="all">全部</option>
+          <option v-for="t in TIERS_OPT" :key="t" :value="t">{{ t }}</option>
+        </select>
+        <span class="tier-count">{{ filteredRows.length }} 檔</span>
+      </div>
+      <DataTable :columns="cols" :rows="filteredRows" row-key="Ticker" />
       <p v-if="!report.items.length" class="hint">⏳ 該引擎資料尚未產生或同步中…</p>
     </template>
   </div>
@@ -76,11 +84,18 @@ const ENGINE_INFO = {
   genesis: { title: 'Genesis 底部翻轉模型 (V1.0)', goal: '專攻均線極度糾結、底部帶量突破的潛在轉折股，追求極致盈虧比。' },
 }
 
+const TIERS_OPT = ['Mega', 'Large', 'Mid', 'Small', 'Micro']
+
 const activeEngine = ref('alpha')
 const activeDate = ref('latest')
+const activeTier = ref('all')
 
 const activeEngineInfo = computed(() => ENGINE_INFO[activeEngine.value])
 const report = computed(() => store.reports[`${activeEngine.value}:${activeDate.value}`] ?? null)
+const filteredRows = computed(() => {
+  const items = report.value?.items ?? []
+  return activeTier.value === 'all' ? items : items.filter((r) => r.Cap_Tier === activeTier.value)
+})
 
 const n = (v, d = 2) => (v === null || v === undefined ? '—' : Number(v).toFixed(d))
 const signedColor = (v) => (v > 0 ? 'var(--color-bull)' : v < 0 ? 'var(--color-bear)' : '')
@@ -130,10 +145,10 @@ function reload() {
 }
 
 function downloadCsv() {
-  const r = report.value
-  if (!r?.items.length) return
+  const rows = filteredRows.value
+  if (!rows.length) return
   const header = cols.value.map((c) => c.label)
-  const lines = r.items.map((row) => cols.value.map((c) => row[c.key] ?? '').join(','))
+  const lines = rows.map((row) => cols.value.map((c) => row[c.key] ?? '').join(','))
   const csv = '﻿' + [header.join(','), ...lines].join('\n')
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
@@ -185,6 +200,17 @@ onMounted(async () => {
 .list-head h3 { margin: 0; }
 h3 { font-size: 15px; margin: 0 0 12px; }
 .updated { color: var(--color-text-muted); font-size: 11px; margin: 4px 0 12px; }
+.tierbar { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; }
+.tierbar label { font-size: 12px; color: var(--color-text-secondary); }
+.tierbar select {
+  background: var(--color-bg-raised);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  padding: 6px 10px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+}
+.tier-count { font-size: 12px; color: var(--color-text-muted); }
 .btn-primary {
   background: var(--color-accent);
   color: #fff;
