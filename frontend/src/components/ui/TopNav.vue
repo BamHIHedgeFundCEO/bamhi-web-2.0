@@ -4,20 +4,20 @@
 -->
 <template>
   <header class="nav">
-    <RouterLink to="/" class="logo">🌌 BamHI Quant</RouterLink>
+    <RouterLink :to="{ name: 'home' }" class="logo">🌌 BamHI Quant</RouterLink>
 
     <nav class="links">
-      <RouterLink to="/" class="link" active-class="active" exact-active-class="active">首頁</RouterLink>
-      <RouterLink to="/macro" class="link" active-class="active">總經市場</RouterLink>
+      <RouterLink :to="{ name: 'home' }" class="link" active-class="active" exact-active-class="active">首頁</RouterLink>
+      <RouterLink :to="{ name: 'macro' }" class="link" active-class="active">總經市場</RouterLink>
 
       <div class="dropdown" @mouseenter="open = true" @mouseleave="open = false">
         <span class="link" :class="{ active: toolActive }">交易工具 ▾</span>
         <div v-show="open" class="menu">
-          <RouterLink v-for="t in TOOLS" :key="t.to" :to="t.to" class="menu-item" @click="open = false">{{ t.label }}</RouterLink>
+          <RouterLink v-for="t in TOOLS" :key="t.name" :to="{ name: t.name }" class="menu-item" @click="open = false">{{ t.label }}</RouterLink>
         </div>
       </div>
 
-      <RouterLink to="/models" class="link" active-class="active">交易模型</RouterLink>
+      <RouterLink :to="{ name: 'models' }" class="link" active-class="active">交易模型</RouterLink>
     </nav>
 
     <form class="search" @submit.prevent="doSearch">
@@ -44,12 +44,12 @@ const open = ref(false)
 const q = ref('')
 
 const TOOLS = [
-  { to: '/dark-pool', label: '🎯 暗池異常資金監控' },
-  { to: '/sector-rotation', label: '🔄 板塊輪動 + VCP' },
-  { to: '/sector-strength', label: '🧭 美股板塊強弱' },
-  { to: '/world-sectors', label: '🐫 全球市場強弱' },
+  { name: 'darkPool', label: '🎯 暗池異常資金監控' },
+  { name: 'sectorRotation', label: '🔄 板塊輪動 + VCP' },
+  { name: 'sectorStrength', label: '🧭 美股板塊強弱' },
+  { name: 'worldSectors', label: '🐫 全球市場強弱' },
 ]
-const toolActive = computed(() => TOOLS.some((t) => route.path === t.to))
+const toolActive = computed(() => TOOLS.some((t) => route.name === t.name))
 
 function doSearch() {
   const t = q.value.trim().toUpperCase()

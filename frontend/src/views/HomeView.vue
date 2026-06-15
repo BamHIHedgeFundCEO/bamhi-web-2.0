@@ -14,9 +14,9 @@
           整合出一套每天可以直接執行的研究工作流。
         </p>
         <div class="cta">
-          <RouterLink to="/sector-rotation" class="btn-primary">🔄 板塊輪動掃描</RouterLink>
-          <RouterLink to="/models" class="btn-ghost">🤖 今日 AI 戰報</RouterLink>
-          <RouterLink to="/macro" class="btn-ghost">📊 總經市場</RouterLink>
+          <RouterLink :to="{ name: 'sectorRotation' }" class="btn-primary">🔄 板塊輪動掃描</RouterLink>
+          <RouterLink :to="{ name: 'models' }" class="btn-ghost">🤖 今日 AI 戰報</RouterLink>
+          <RouterLink :to="{ name: 'macro' }" class="btn-ghost">📊 總經市場</RouterLink>
         </div>
       </div>
       <div class="hero-right">
@@ -76,15 +76,15 @@ onMounted(() => {
 .home { padding: 32px 28px; max-width: 1320px; margin: 0 auto; }
 .hero { display: grid; grid-template-columns: 1.2fr 1fr; gap: 36px; margin-bottom: 44px; }
 .tag { color: var(--color-accent); font-size: 12px; letter-spacing: 0.1em; font-weight: 600; margin-bottom: 14px; }
-.hero-title { font-size: 40px; line-height: 1.15; margin: 0 0 18px; font-weight: 700; }
+.hero-title { font-size: 40px; line-height: 1.15; margin: 0 0 18px; font-weight: 700; font-family: var(--font-display); letter-spacing: -0.02em; }
 .hero-sub { color: var(--color-text-secondary); font-size: 15px; line-height: 1.7; margin: 0 0 26px; }
 .cta { display: flex; gap: 12px; flex-wrap: wrap; }
 .btn-primary, .btn-ghost {
   padding: 11px 18px; border-radius: var(--radius-md); font-size: 14px; font-weight: 600; cursor: pointer;
   border: 1px solid var(--color-border);
 }
-.btn-primary { background: var(--color-accent); color: #fff; border-color: var(--color-accent); }
-.btn-primary:hover { background: var(--color-accent-dim); }
+.btn-primary { background: var(--grad-cyan); color: #06121a; border-color: transparent; box-shadow: var(--shadow-glow); }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 28px rgba(80, 180, 230, 0.42); }
 .btn-ghost { background: var(--color-bg-surface); color: var(--color-text-secondary); }
 .btn-ghost:hover { color: var(--color-text-primary); border-color: var(--color-accent); }
 .bento { background: var(--color-bg-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 24px; }

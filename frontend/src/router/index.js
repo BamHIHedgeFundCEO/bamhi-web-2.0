@@ -7,15 +7,22 @@ import { useAuthStore } from '@/stores/auth'
  * 各功能 View 先以動態 import 佔位，模組遷移時逐一補上。
  */
 const routes = [
+  // 公開行銷首頁（未登入訪客的門面）
+  {
+    path: '/',
+    name: 'landing',
+    component: () => import('@/views/LandingView.vue'),
+    meta: { public: true },
+  },
   {
     path: '/login',
     name: 'login',
     component: () => import('@/views/LoginView.vue'),
     meta: { public: true },
   },
-  // 登入後的頁面共用 AppShell（頂部導覽列）
+  // 登入後的頁面共用 AppShell（頂部導覽列），掛在 /app 之下
   {
-    path: '/',
+    path: '/app',
     component: () => import('@/views/AppShell.vue'),
     meta: { requiresAuth: true },
     children: [
@@ -57,8 +64,8 @@ router.beforeEach(async (to) => {
     return { name: 'login', query: { redirect: to.fullPath } }
   }
 
-  // 已登入者不該再看到登入頁
-  if (to.name === 'login' && auth.isAuthenticated) {
+  // 已登入者不該再看到登入頁或行銷首頁，直接進 App
+  if ((to.name === 'login' || to.name === 'landing') && auth.isAuthenticated) {
     return { name: 'home' }
   }
 

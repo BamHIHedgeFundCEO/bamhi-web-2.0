@@ -45,7 +45,7 @@ const route = useRoute()
 const auth = useAuthStore()
 const toast = useToastStore()
 
-const mode = ref('login')
+const mode = ref(route.query.mode === 'signup' ? 'signup' : 'login')
 const email = ref('')
 const password = ref('')
 
@@ -58,7 +58,7 @@ async function submit() {
     if (mode.value === 'login') {
       await auth.login(email.value, password.value)
       toast.success('登入成功')
-      router.replace(route.query.redirect || '/')
+      router.replace(route.query.redirect || { name: 'home' })
     } else {
       await auth.signup(email.value, password.value)
       toast.success('註冊成功，請查收驗證信後登入')
@@ -129,16 +129,17 @@ async function submit() {
 }
 .submit-btn {
   margin-top: 8px;
-  background: var(--color-accent);
-  color: #fff;
+  background: var(--grad-cyan);
+  color: #06121a;
   border: none;
   border-radius: var(--radius-md);
   padding: 11px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+  box-shadow: var(--shadow-glow);
 }
-.submit-btn:hover:not(:disabled) { background: var(--color-accent-dim); }
+.submit-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 10px 28px rgba(80, 180, 230, 0.42); }
 .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 .toggle {
   margin-top: 18px;

@@ -15,6 +15,13 @@
   /* 主色調 */
   --color-accent:     #3b82f6;   /* 主動作藍 */
   --color-accent-dim: #1d4ed8;
+  --color-accent-cyan: #3fd0e6;  /* 電光青（與 landing 同家族，重點高亮用） */
+
+  /* 漸層（與行銷首頁 landing 共用視覺語彙；CTA / logo / 高亮數據用） */
+  --grad-cyan:  linear-gradient(135deg, #58c7e8, #3b82f6);
+  --grad-violet: linear-gradient(135deg, #a98bff, #7c6bff);
+  --grad-mint:  linear-gradient(135deg, #6fe3b8, #34d399);
+  --shadow-glow: 0 6px 20px rgba(80, 180, 230, 0.3);
 
   /* 數據語義色 */
   --color-bull:       #10b981;   /* 漲 / 正值 */
@@ -34,6 +41,7 @@
   /* 字型 */
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', -apple-system, sans-serif;
 
   /* 圓角 / 間距 */
   --radius-sm: 4px;

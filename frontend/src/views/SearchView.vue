@@ -5,7 +5,7 @@
 -->
 <template>
   <div class="sv">
-    <RouterLink to="/" class="back">← 返回首頁</RouterLink>
+    <RouterLink :to="{ name: 'home' }" class="back">← 返回首頁</RouterLink>
 
     <!-- 參數 -->
     <div class="params">
