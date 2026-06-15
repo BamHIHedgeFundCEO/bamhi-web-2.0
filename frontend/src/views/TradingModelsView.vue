@@ -93,6 +93,9 @@ const COMMON = {
   Price: { key: 'Price', label: '價格($)', align: 'right', format: (v) => n(v) },
   Ov_Supply: { key: 'Ov_Supply', label: '套牢%', align: 'right', format: (v) => `${n(v, 1)}%` },
   POC_Dist: { key: 'POC_Dist', label: 'POC距離%', align: 'right', format: (v) => `${n(v, 1)}%` },
+  Dollar_Vol_M: { key: 'Dollar_Vol_M', label: '成交額($M)', align: 'right', format: (v) => n(v, 1) },
+  MktCap_B: { key: 'MktCap_B', label: '市值($B)', align: 'right', format: (v) => n(v, 2) },
+  Cap_Tier: { key: 'Cap_Tier', label: '市值級別', align: 'center', format: (v) => v ?? '—' },
 }
 const ALPHA_COLS = [
   COMMON.Ticker, COMMON.Resonance_Score, COMMON.Win_Prob, COMMON.Price,
@@ -101,6 +104,7 @@ const ALPHA_COLS = [
   { key: 'MA20_DP', label: 'MA20乖離', align: 'right', format: (v) => n(v, 2), color: signedColor },
   { key: 'Vol_Dry_Up', label: '量縮', align: 'right', format: (v) => n(v, 2) },
   { key: 'Turtle', label: '海龜突破', align: 'center', format: (v) => (Number(v) ? '✅' : '—') },
+  COMMON.Dollar_Vol_M, COMMON.MktCap_B, COMMON.Cap_Tier,
 ]
 const GENESIS_COLS = [
   COMMON.Ticker, COMMON.Resonance_Score, COMMON.Win_Prob, COMMON.Price,
@@ -109,6 +113,7 @@ const GENESIS_COLS = [
   { key: 'Breakout', label: '破線位階%', align: 'right', format: (v) => `${n(v, 1)}%` },
   { key: 'MA20_Slope', label: '20MA拐頭%', align: 'right', format: (v) => n(v, 2), color: signedColor },
   COMMON.Ov_Supply, COMMON.POC_Dist,
+  COMMON.Dollar_Vol_M, COMMON.MktCap_B, COMMON.Cap_Tier,
 ]
 const cols = computed(() => (activeEngine.value === 'alpha' ? ALPHA_COLS : GENESIS_COLS))
 

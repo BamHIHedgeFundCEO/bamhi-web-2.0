@@ -18,8 +18,8 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 
 # 各引擎顯示欄位 (對應 ai_models.draw_ai_table)
-ALPHA_COLS = ["Ticker", "Resonance_Score", "Win_Prob", "Price", "RS_Rating", "Ov_Supply", "POC_Dist", "MA20_DP", "Vol_Dry_Up", "Turtle"]
-GENESIS_COLS = ["Ticker", "Resonance_Score", "Win_Prob", "Price", "MA_Conv", "Vol_Z", "Breakout", "MA20_Slope", "Ov_Supply", "POC_Dist"]
+ALPHA_COLS = ["Ticker", "Resonance_Score", "Win_Prob", "Price", "RS_Rating", "Ov_Supply", "POC_Dist", "MA20_DP", "Vol_Dry_Up", "Turtle", "Dollar_Vol_M", "MktCap_B", "Cap_Tier"]
+GENESIS_COLS = ["Ticker", "Resonance_Score", "Win_Prob", "Price", "MA_Conv", "Vol_Z", "Breakout", "MA20_Slope", "Ov_Supply", "POC_Dist", "Dollar_Vol_M", "MktCap_B", "Cap_Tier"]
 
 ENGINE_PREFIX = {"alpha": "BamHI_Dashboard", "genesis": "BamHI_Genesis_Dashboard"}
 
