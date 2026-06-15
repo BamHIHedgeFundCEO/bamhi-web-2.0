@@ -42,6 +42,7 @@ jobs:
       - name: Run Data Pipeline
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}  # 💡 新增：將 Discord Webhook 注入環境變數
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}        # GDP/FEDFUNDS 走 FRED 官方 API
         run: python update_data.py
 
       # 4.5 執行暗池監控管線
