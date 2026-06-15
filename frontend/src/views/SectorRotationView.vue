@@ -301,6 +301,8 @@ const vcpRows = computed(() =>
 )
 const vcpCols = [
   { key: 'ticker', label: '代碼', align: 'left' },
+  { key: 'vcp_score', label: 'VCP分數', align: 'right', format: (v) => (v >= 70 ? `🔥${v}` : v) },
+  { key: 'vcp_pass', label: '強訊', align: 'center', format: (v) => (v ? '🎯' : '') },
   { key: 'price', label: '收盤價', align: 'right', format: (v) => `$${Number(v).toFixed(2)}` },
   { key: 'trend', label: '60D 走勢', align: 'center' },
   { key: 'm1', label: '日漲跌', align: 'right', format: pf, color: signedColor },
@@ -312,6 +314,7 @@ const vcpCols = [
   { key: 'rs_rank', label: '板塊RS排行', align: 'right', format: (v) => (v >= 80 ? `🥇${v}` : v >= 50 ? `🥈${v}` : v) },
   { key: 'atr_pct', label: 'ATR%(相對)', align: 'right', format: (v) => (v < 1.5 ? `🔥${Number(v).toFixed(2)}%` : `${Number(v).toFixed(2)}%`) },
   { key: 'atr_contraction', label: '波動收縮比', align: 'right', format: (v) => (v < 0.7 ? `🔥${Number(v).toFixed(2)}` : v > 1.2 ? `⚠️${Number(v).toFixed(2)}` : Number(v).toFixed(2)) },
+  { key: 'contractions', label: '收縮段數', align: 'right', format: (v) => (v >= 2 ? `🔥${v}` : v) },
   { key: 'up_down_vol', label: '吃貨量比', align: 'right', format: (v) => (v > 1.2 ? `🐳${Number(v).toFixed(2)}` : Number(v).toFixed(2)) },
   { key: 'dist_to_high', label: '距52W高', align: 'right', format: (v) => `${Number(v).toFixed(1)}%`, color: signedColor },
   { key: 'trend_pass', label: '多頭趨勢', align: 'center', format: (v) => (v ? '✅' : '❌') },

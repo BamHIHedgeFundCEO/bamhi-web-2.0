@@ -192,6 +192,20 @@ def scan_vcp(tickers: list[str], raw_data: pd.DataFrame) -> list[dict]:
     atr_base = tr.iloc[-20:].mean() / safe_close * 100
     atr_contr = pd.Series(np.where(atr_base > 0, atr_now / atr_base, 1.0), index=valid)
 
+    # 多段波動收縮 (真 VCP：連續、且一次比一次小的回檔)。
+    # 近 60 交易日切 3 段(各 20 日)，比較每段「高低區間 ÷ 均價」，逐段變小 = 波動收斂，
+    # 比單一 5d/20d 比值更貼近 VCP 的「連續收縮」結構。
+    def _win_range(sl):
+        base = df_c.iloc[sl].mean().replace(0, np.nan)
+        return (df_h.iloc[sl].max() - df_l.iloc[sl].min()) / base * 100
+
+    r_old, r_mid, r_new = _win_range(slice(-60, -40)), _win_range(slice(-40, -20)), _win_range(slice(-20, None))
+    shrink1, shrink2 = r_mid < r_old, r_new < r_mid
+    contractions = shrink1.astype(int) + shrink2.astype(int)          # 0~2 段收縮
+    converging = shrink1 & shrink2                                    # 連續收斂
+    tightness = (1 - r_new / r_old.replace(0, np.nan)).clip(0, 1).fillna(0)  # 收得多緊 0~1
+    contraction_ok = converging & (r_new < 12)                        # 連續收斂 + 最新段夠緊
+
     vol_ma20 = df_v.rolling(20).mean().iloc[-1]
     vol_dry = vol_last < vol_ma20 * 0.6
     ret_50 = df_c.iloc[-50:].pct_change()
@@ -213,8 +227,27 @@ def scan_vcp(tickers: list[str], raw_data: pd.DataFrame) -> list[dict]:
         "atr_contraction": atr_contr.round(2).values, "up_down_vol": ud_ratio.round(2).values,
         "rs_3m": rs_3m.round(2).values, "dist_to_high": dist_high.round(1).values,
         "trend_pass": trend_pass.values, "vol_dry_up": vol_dry.values,
+        "contractions": contractions.values, "contraction_ok": contraction_ok.values,
     })
     res["rs_rank"] = res["rs_3m"].rank(pct=True).mul(100).round(0).astype(int)
+
+    # 綜合 VCP 評分 (0~100)：趨勢模板 30 + 連續收斂 15 + 收緊度 10 + 吸籌 15
+    #                         + 相對強弱 20 + 量縮 5 + 貼近高點 5
+    near = np.clip(1 + dist_high.values / 25.0, 0, 1)  # 離 52 週高 25% 內線性給分
+    score = (
+        30 * trend_pass.values.astype(float)
+        + 15 * converging.values.astype(float)
+        + 10 * tightness.values
+        + 15 * np.clip(ud_ratio.values / 2.0, 0, 1)
+        + 20 * (res["rs_rank"].values / 100.0)
+        + 5 * vol_dry.values.astype(float)
+        + 5 * near
+    )
+    res["vcp_score"] = np.round(score, 0).astype(int)
+    # ⭐ 高把握組合：趨勢過 + 連續收斂 + 吸籌(漲量>跌量) + 跑贏大盤
+    res["vcp_pass"] = (trend_pass.values & converging.values & (ud_ratio.values > 1) & (rs_3m.values > 0))
+    res = res.sort_values("vcp_score", ascending=False).reset_index(drop=True)
+
     records = res.where(pd.notnull(res), None).to_dict(orient="records")
     # 加上 60 日走勢迷你線 (取自已下載的收盤序列)
     for r in records:
