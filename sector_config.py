@@ -31,15 +31,21 @@ TRACKED_SECTORS = {
     "半導體設備 (Semiconductor Equipment)": ["AMAT", "LRCX", "KLAC", "ASML", "KEYS", "TER", "ENTG", "ONTO", "ACLS", "KLIC", "COHU", "FORM", "UCTT", "ICHR", "AEIS", "NVMI", "CAMT", "VECO", "AEHR", "ASYS", "ACMR", "INTT"],
     "無人機 (Drones)": ["AVAV", "KTOS", "RCAT", "ONDS", "UMAC", "DPRO", "PDYN", "UAVS", "ZENA"],
     "軍工 (Defense)": ["LMT", "RTX", "NOC", "GD", "PLTR", "LHX", "BA", "HII", "LDOS", "AXON", "KTOS", "AVAV", "BAH", "HWM", "TDG", "CW", "KRMN"],
-    "機器人 (Robotics)": ["ISRG", "SYM", "SERV", "KSCP", "PATH", "ABB", "NNDM", "OUST", "PDYN"],
-    "機器人供應鏈 (Robotics Supply Chain)": ["TER", "MP", "AMBA", "QCOM", "CGNX", "ZBRA", "ROK", "EMR", "ABB", "APH", "TEL", "ST", "ALNT", "NVT", "LAZR"],
+    "機器人 (Robotics)": ["TSLA", "ISRG", "SYM", "SERV", "KSCP", "PATH", "ABB", "NNDM", "OUST", "PDYN"],
+    "機器人供應鏈 (Robotics Supply Chain)": ["TER", "MP", "AMBA", "CGNX", "ZBRA", "ROK", "EMR", "ABB", "APH", "TEL", "ST", "ALNT", "NVT", "LAZR"],
     "銅 (Copper)": ["FCX", "SCCO", "TECK", "ERO", "HBM", "TGB", "IE", "BHP", "RIO", "VALE"],
     "鋰礦 (Lithium)": ["ALB", "SQM", "LAC", "LAAC", "SLI", "PLL", "SGML", "ATLX", "LITM"],
     "激光 (Laser)": ["IPGP", "LASR", "OUST", "HSAI", "COHR", "MKSI", "LAZR", "AEVA", "INVZ", "MVIS"],
     "封測 (OSAT)": ["AMKR", "ASX", "KLIC", "COHU", "FORM", "ONTO", "CAMT"],
     "資安 (Cybersecurity)": ["CRWD", "PANW", "ZS", "FTNT", "S", "NET", "OKTA", "TENB", "QLYS", "RPD", "VRNS", "GEN", "FFIV", "RBRK"],
-    "科技儀器 (Scientific Instruments)": ["KEYS", "TDY", "FTV", "GRMN", "TRMB", "MLAB", "ESE", "BMI", "VPG", "VNT", "ITRN", "ITRI", "NOVT", "GNSS", "MIND", "MINDP", "WRAP", "ARBE", "LGL", "ODYS", "ELSE", "AIMD", "SOTK", "SOBR", "ACFN", "USBC", "SVRE", "FCUV", "ARAI", "ASTC"],
-    "半導體材料 (Semiconductor Materials)": ["AXTI", "PLAB", "ATOM", "SMTK", "DQ", "Q"]
+    "科技儀器 (Scientific Instruments)": ["KEYS", "TDY", "FTV", "GRMN", "TRMB", "NOVT", "BMI", "VNT", "ITRI", "MLAB", "ESE", "ITRN"],
+    "半導體材料 (Semiconductor Materials)": ["ENTG", "MKSI", "AXTI", "PLAB", "IOSP", "AVTR", "ATOM", "SMTK", "DQ", "Q"],
+    "半導體/GPU 設計 (Semiconductors & GPU)": ["NVDA", "AMD", "AVGO", "TSM", "MRVL", "QCOM", "ARM", "MU", "INTC", "NXPI", "ON", "ADI", "TXN", "MCHP", "MPWR", "LSCC"],
+    "網路平台與新經濟 (Internet Platforms)": ["RDDT", "APP", "HIMS", "DASH", "ABNB", "SPOT", "PINS", "RBLX", "DUOL", "ROKU", "BMBL", "CHWY", "ETSY", "CART", "TTD"],
+    "太陽能 (Solar)": ["FSLR", "ENPH", "NXT", "SEDG", "RUN", "ARRY", "SHLS", "FLNC", "CSIQ", "JKS", "MAXN", "NOVA"],
+    "電動車 (Electric Vehicles)": ["TSLA", "RIVN", "LI", "LCID", "NIO", "XPEV", "BYDDY", "ZK", "PSNY"],
+    "金融科技與支付 (Fintech & Payments)": ["V", "MA", "XYZ", "PYPL", "FI", "GPN", "SOFI", "AFRM", "NU", "UPST", "KLAR", "SEZL", "TOST", "BILL", "DLO"],
+    "黃金礦 (Gold Miners)": ["NEM", "AEM", "GOLD", "WPM", "FNV", "AGI", "KGC", "RGLD", "GFI", "AU", "HMY", "BTG", "EGO", "IAG", "PAAS", "SSRM", "NGD", "OR"]
 }
 
 # ==========================================
@@ -69,7 +75,7 @@ SECTOR_LEADERS = {
     "醫療保險 (Managed Care)": ["UNH", "ELV", "CI"],
     "半導體設備 (Semiconductor Equipment)": ["AMAT", "LRCX", "KLAC", "ASML", "KEYS"],
     "無人機 (Drones)": ["AVAV", "KTOS", "RCAT"],
-    "軍工 (Defense)": ["LMT", "RTX", "NOC", "GD", "PLTR"],
+    "軍工 (Defense)": ["LMT", "RTX", "NOC", "GD"],
     "機器人 (Robotics)": ["ISRG", "SYM"],
     "機器人供應鏈 (Robotics Supply Chain)": ["TER", "MP"],
     "銅 (Copper)": ["FCX", "SCCO"],
@@ -78,5 +84,11 @@ SECTOR_LEADERS = {
     "封測 (OSAT)": ["AMKR", "ASX"],
     "資安 (Cybersecurity)": ["CRWD", "PANW", "ZS"],
     "科技儀器 (Scientific Instruments)": ["KEYS", "TDY", "FTV"],
-    "半導體材料 (Semiconductor Materials)": ["AXTI", "PLAB"]
+    "半導體材料 (Semiconductor Materials)": ["AXTI", "PLAB"],
+    "半導體/GPU 設計 (Semiconductors & GPU)": ["NVDA", "AMD", "AVGO", "TSM", "MRVL"],
+    "網路平台與新經濟 (Internet Platforms)": ["RDDT", "APP", "HIMS"],
+    "太陽能 (Solar)": ["FSLR", "ENPH", "NXT"],
+    "電動車 (Electric Vehicles)": ["TSLA", "RIVN", "LI"],
+    "金融科技與支付 (Fintech & Payments)": ["V", "MA", "XYZ"],
+    "黃金礦 (Gold Miners)": ["NEM", "AEM", "GOLD", "WPM", "FNV"]
 }
