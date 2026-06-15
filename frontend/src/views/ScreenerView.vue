@@ -21,32 +21,33 @@
     <section v-show="tab === 'vcp'">
       <div v-if="loading.vcp" class="ph">彙整全板塊 VCP 候選中…</div>
       <p v-else-if="errors.vcp" class="err">⚠️ {{ errors.vcp }} <button class="retry" @click="vcp = null; loadVcp()">重試</button></p>
-      <template v-else-if="vcp">
+      <div v-else-if="vcp">
         <p class="meta">共 {{ vcp.count }} 檔（VCP 分數 ≥ {{ vcp.min_score }} 或 🎯 強訊），跨板塊去重後依分數排序。</p>
         <DataTable v-if="vcpRows.length" :columns="vcpCols" :rows="vcpRows" row-key="ticker" />
         <p v-else class="ph">目前無符合的標的。</p>
-      </template>
+      </div>
     </section>
 
-    <!-- Alpha / Genesis (分級) -->
-    <section v-for="eng in ['alpha', 'genesis']" :key="eng" v-show="tab === eng">
-      <div v-if="loading[eng]" class="ph">套用市值分級篩選中…</div>
-      <p v-else-if="errors[eng]" class="err">⚠️ {{ errors[eng] }} <button class="retry" @click="models[eng] = null; loadModels(eng)">重試</button></p>
-      <template v-else-if="models[eng]">
-        <p v-if="models[eng].error" class="err">⚠️ 後端：{{ models[eng].error }}</p>
+    <!-- Alpha / Genesis (分級) — 單一 section 以 tab 當引擎鍵，避免 v-for 常數陣列在
+         production build 被靜態 hoist、導致內層 v-show 失去對 tab 的反應性 -->
+    <section v-show="tab === 'alpha' || tab === 'genesis'">
+      <div v-if="loading[tab]" class="ph">套用市值分級篩選中…</div>
+      <p v-else-if="errors[tab]" class="err">⚠️ {{ errors[tab] }} <button class="retry" @click="models[tab] = null; loadModels(tab)">重試</button></p>
+      <div v-else-if="models[tab]">
+        <p v-if="models[tab].error" class="err">⚠️ 後端：{{ models[tab].error }}</p>
         <p class="meta">
-          更新：{{ models[eng].updated_at || '—' }}　共選出 {{ models[eng].total_picked }} 檔（每級最多 10 檔，依 Resonance_Score）
+          更新：{{ models[tab].updated_at || '—' }}　共選出 {{ models[tab].total_picked }} 檔（每級最多 10 檔，依 Resonance_Score）
         </p>
-        <div v-for="ti in models[eng].tiers" :key="ti.tier" class="tier">
+        <div v-for="ti in models[tab].tiers" :key="ti.tier" class="tier">
           <h3>
             {{ tierLabel(ti.tier) }}
             <span class="gate">流動性≥${{ ti.gate.dollar_vol_min }}M · 套牢&lt;{{ ti.gate.ov_supply_max }}% <template v-if="ti.gate.need_confirm">· 須當日確認</template></span>
             <span class="cnt">{{ ti.count }} 檔</span>
           </h3>
-          <DataTable v-if="ti.count" :columns="eng === 'alpha' ? alphaCols : genesisCols" :rows="ti.items" row-key="Ticker" />
+          <DataTable v-if="ti.count" :columns="tab === 'alpha' ? alphaCols : genesisCols" :rows="ti.items" row-key="Ticker" />
           <p v-else class="ph small">本級無符合門檻的標的。</p>
         </div>
-      </template>
+      </div>
     </section>
 
     <!-- 使用方法 / Playbook 說明 -->
