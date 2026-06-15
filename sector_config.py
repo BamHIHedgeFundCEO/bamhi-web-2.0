@@ -10,7 +10,7 @@ config/sectors.py
 TRACKED_SECTORS = {
     "太空概念股 (Space)": ["RKLB", "PL", "LUNR", "ASTS", "RDW","SATS", "VSAT", "FLY", "MDA", "IRDM","YSS","VOYG","SPIR","BKSY","SPCE","TSAT"],
     "存儲記憶體 (Storage)": ["MU", "WDC", "STX", "NTAP","SNDK","RMBS","SIMO"],
-    "散熱與液冷 (Cooling)": ["MOD", "NVT"],
+    "散熱與液冷 (Cooling)": ["VRT", "MOD", "NVT", "SMCI", "AAON", "CARR", "JCI"],
     "AI 應用軟體 (AI Apps)": ["ADBE", "ADP", "AI", "APP", "APPS", "ASAN", "BRZE", "CLBT", "CRM", "CVLT", "DDOG", "DOCS", "DOCU", "DUOL", "ESTC", "FIG", "FSLY", "GTLB", "GWRE", "HUBS", "INTU", "IOT", "KVYO", "LIF", "MDB", "MNDY", "NET", "NOW", "PATH", "PCOR", "PINS", "PLTR", "RBLX", "RBRK", "RDDT", "SAP", "SHOP", "SNAP", "SNOW", "SOUN", "SPOT", "TEAM", "TEM", "TTD", "TWLO", "U", "VEEV", "ZETA", "ZM"],
     "稀土與戰略金屬 (Rare Earths)": ["MP", "UUUU", "AREC", "CRML", "NB", "TMC", "IDR", "PPTA", "CLF", "UAMY", "USAR"],
     "光通訊 (Optical Communication)": ["GLW", "LITE", "COHR", "FN", "AAOI", "POET", "MRVL", "CRDO", "ALAB", "ANET", "AVGO", "CIEN", "VIAV", "CLFD", "NOK", "LUMN", "APH"],
@@ -24,7 +24,22 @@ TRACKED_SECTORS = {
     "電網工程設備 (Grid Infrastructure)": ["PWR", "MYRG", "ETN", "HUBB", "APH", "TEL", "GEV", "DY", "TTEK", "AMRC"],
     "AI 伺服器與硬體 (AI Computing Hardware)": ["SMCI", "DELL","HPE", "LNVGY", "HPQ","OSS","AVGO"], 
     "資料中心基建(Data_Center_Infra)": ["FIX","EME","VRT","IESC","MTZ","ECG","PRIM","AGX","LGN","APG","STRL","J","ACM","CAT","BNC","TEX","MTW"],
-    "加密貨幣(Crypto)": ["MSTR", "COIN", "GLXY", "HOOD", "CRCL", "BKKT", "CNCK", "EXOD", "BTCS", "MARA", "RIOT", "CLSK", "IREN", "HUT", "CIFR", "WULF", "BTBT", "ARBK", "BTDR", "CORZ", "APLD", "CAN", "NA", "NCTY", "BGIN", "ICG", "GPUS", "ABTC"]
+    "加密貨幣(Crypto)": ["MSTR", "COIN", "GLXY", "HOOD", "CRCL", "BKKT", "CNCK", "EXOD", "BTCS", "MARA", "RIOT", "CLSK", "IREN", "HUT", "CIFR", "WULF", "BTBT", "ARBK", "BTDR", "CORZ", "APLD", "CAN", "NA", "NCTY", "BGIN", "ICG", "GPUS", "ABTC"],
+    "醫療生技 (Biotech & Pharma)": ["LLY", "NVO", "VRTX", "REGN", "JNJ", "MRK", "ABBV", "PFE", "BMY", "AMGN", "GILD", "ALNY", "NBIX", "ARGX", "INSM", "BNTX", "MRNA", "BIIB", "TEM", "CRSP", "NTLA", "BEAM", "EXAS", "NTRA"],
+    "金融 (Financials)": ["JPM", "GS", "MS", "BLK", "BAC", "WFC", "C", "SCHW", "AXP", "BX", "KKR", "APO", "BK", "USB", "PNC", "COF", "SPGI", "ICE", "CME"],
+    "醫療保險 (Managed Care)": ["UNH", "ELV", "CI", "HUM", "CVS", "CNC", "MOH", "OSCR"],
+    "半導體設備 (Semiconductor Equipment)": ["AMAT", "LRCX", "KLAC", "ASML", "KEYS", "TER", "ENTG", "ONTO", "ACLS", "KLIC", "COHU", "FORM", "UCTT", "ICHR", "AEIS", "NVMI", "CAMT", "VECO", "AEHR", "ASYS", "ACMR", "INTT"],
+    "無人機 (Drones)": ["AVAV", "KTOS", "RCAT", "ONDS", "UMAC", "DPRO", "PDYN", "UAVS", "ZENA"],
+    "軍工 (Defense)": ["LMT", "RTX", "NOC", "GD", "PLTR", "LHX", "BA", "HII", "LDOS", "AXON", "KTOS", "AVAV", "BAH", "HWM", "TDG", "CW", "KRMN"],
+    "機器人 (Robotics)": ["ISRG", "SYM", "SERV", "KSCP", "PATH", "ABB", "NNDM", "OUST", "PDYN"],
+    "機器人供應鏈 (Robotics Supply Chain)": ["TER", "MP", "AMBA", "QCOM", "CGNX", "ZBRA", "ROK", "EMR", "ABB", "APH", "TEL", "ST", "ALNT", "NVT", "LAZR"],
+    "銅 (Copper)": ["FCX", "SCCO", "TECK", "ERO", "HBM", "TGB", "IE", "BHP", "RIO", "VALE"],
+    "鋰礦 (Lithium)": ["ALB", "SQM", "LAC", "LAAC", "SLI", "PLL", "SGML", "ATLX", "LITM"],
+    "激光 (Laser)": ["IPGP", "LASR", "OUST", "HSAI", "COHR", "MKSI", "LAZR", "AEVA", "INVZ", "MVIS"],
+    "封測 (OSAT)": ["AMKR", "ASX", "KLIC", "COHU", "FORM", "ONTO", "CAMT"],
+    "資安 (Cybersecurity)": ["CRWD", "PANW", "ZS", "FTNT", "S", "NET", "OKTA", "TENB", "QLYS", "RPD", "VRNS", "GEN", "FFIV", "RBRK"],
+    "科技儀器 (Scientific Instruments)": ["KEYS", "TDY", "FTV", "GRMN", "TRMB", "MLAB", "ESE", "BMI", "VPG", "VNT", "ITRN", "ITRI", "NOVT", "GNSS", "MIND", "MINDP", "WRAP", "ARBE", "LGL", "ODYS", "ELSE", "AIMD", "SOTK", "SOBR", "ACFN", "USBC", "SVRE", "FCUV", "ARAI", "ASTC"],
+    "半導體材料 (Semiconductor Materials)": ["AXTI", "PLAB", "ATOM", "SMTK", "DQ", "Q"]
 }
 
 # ==========================================
@@ -34,7 +49,7 @@ TRACKED_SECTORS = {
 SECTOR_LEADERS = {
     "太空概念股 (Space)": ["RKLB", "ASTS", "PL"],
     "存儲記憶體 (Storage)": ["MU", "SNDK", "STX"],
-    "散熱與液冷 (Cooling)": ["VRT"],
+    "散熱與液冷 (Cooling)": ["VRT", "MOD"],
     "AI 應用軟體 (AI Apps)": ["PLTR", "APP", "NET", "SNOW", "NOW"],
     "稀土與戰略金屬 (Rare Earths)": ["MP", "UUUU", "UAMY", "USAR"],
     "光通訊 (Optical Communication)": ["LITE", "COHR", "GLW"],
@@ -48,5 +63,20 @@ SECTOR_LEADERS = {
     "電網工程設備 (Grid Infrastructure)": ["PWR", "MYRG", "ETN"],
     "AI 伺服器與硬體 (AI Computing Hardware)": ["SMCI", "DELL","HPE","OSS","AVGO"],
     "資料中心基建(Data_Center_Infra)": ["FIX","VRT","MTZ","CAT"],
-    "加密貨幣(Crypto)": ["MSTR", "COIN", "HOOD", "CRCL"]
+    "加密貨幣(Crypto)": ["MSTR", "COIN", "HOOD", "CRCL"],
+    "醫療生技 (Biotech & Pharma)": ["LLY", "NVO", "VRTX", "REGN"],
+    "金融 (Financials)": ["JPM", "GS", "MS", "BLK"],
+    "醫療保險 (Managed Care)": ["UNH", "ELV", "CI"],
+    "半導體設備 (Semiconductor Equipment)": ["AMAT", "LRCX", "KLAC", "ASML", "KEYS"],
+    "無人機 (Drones)": ["AVAV", "KTOS", "RCAT"],
+    "軍工 (Defense)": ["LMT", "RTX", "NOC", "GD", "PLTR"],
+    "機器人 (Robotics)": ["ISRG", "SYM"],
+    "機器人供應鏈 (Robotics Supply Chain)": ["TER", "MP"],
+    "銅 (Copper)": ["FCX", "SCCO"],
+    "鋰礦 (Lithium)": ["ALB", "SQM"],
+    "激光 (Laser)": ["IPGP", "LASR", "OUST", "HSAI"],
+    "封測 (OSAT)": ["AMKR", "ASX"],
+    "資安 (Cybersecurity)": ["CRWD", "PANW", "ZS"],
+    "科技儀器 (Scientific Instruments)": ["KEYS", "TDY", "FTV"],
+    "半導體材料 (Semiconductor Materials)": ["AXTI", "PLAB"]
 }
