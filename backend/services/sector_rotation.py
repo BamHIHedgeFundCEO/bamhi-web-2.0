@@ -244,11 +244,12 @@ def scan_vcp(tickers: list[str], raw_data: pd.DataFrame) -> list[dict]:
         "trend_pass": trend_pass.values, "vol_dry_up": vol_dry.values,
         "contractions": contractions.values, "contraction_ok": contraction_ok.values,
     })
-    res["rs_rank"] = res["rs_3m"].rank(pct=True).mul(100).round(0).astype(int)
+    # rs_3m 可能含 NaN（新股/資料不足）→ rank 出 NaN，需先補 0 再轉 int，否則 astype 會炸
+    res["rs_rank"] = res["rs_3m"].rank(pct=True).mul(100).round(0).fillna(0).astype(int)
 
     # 綜合 VCP 評分：其餘 6 項加總 0~100，再乘趨勢閘門折扣
     w = VCP_WEIGHTS
-    near_high = np.clip(1 + dist_high.values / 8.0, 0, 1)  # 離 52 週高 8% 內線性給分
+    near_high = np.nan_to_num(np.clip(1 + dist_high.values / 8.0, 0, 1))  # 離 52 週高 8% 內線性給分
     quality = (
         w["rs"] * (res["rs_rank"].values / 100.0)
         + w["converge"] * converging.values.astype(float)
@@ -259,7 +260,7 @@ def scan_vcp(tickers: list[str], raw_data: pd.DataFrame) -> list[dict]:
     )
     # 趨勢閘門：沒過上升趨勢模板 → 折到 GATE_FAIL_FACTOR(壓到榜尾)
     gate = np.where(trend_pass.values, 1.0, GATE_FAIL_FACTOR)
-    res["vcp_score"] = np.round(quality * gate, 0).astype(int)
+    res["vcp_score"] = np.round(np.nan_to_num(quality * gate), 0).astype(int)
     # 🎯 高把握組合：趨勢過 + 連續收斂 + 吸籌(漲量>跌量) + 跑贏大盤
     res["vcp_pass"] = (trend_pass.values & converging.values & (ud_ratio.values > 1) & (rs_3m.values > 0))
     res = res.sort_values("vcp_score", ascending=False).reset_index(drop=True)
