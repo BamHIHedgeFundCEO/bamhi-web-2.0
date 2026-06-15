@@ -77,10 +77,14 @@ def get_aaii_latest():
         df['Date'] = df['Date'].apply(parse_aaii_date)
         df = df.dropna(subset=['Date'])
         
+        # 無條件清洗成數值（新版 pandas 可能是 string dtype，不能只靠 dtype==object 判斷）
         for col in ['Bullish', 'Neutral', 'Bearish']:
-            if df[col].dtype == object:
-                df[col] = df[col].astype(str).str.replace('%', '').astype(float)
-        
+            df[col] = pd.to_numeric(
+                df[col].astype(str).str.replace('%', '', regex=False).str.strip(),
+                errors='coerce',
+            )
+        df = df.dropna(subset=['Bullish', 'Bearish'])
+
         df['Spread'] = df['Bullish'] - df['Bearish']
         return df
         
