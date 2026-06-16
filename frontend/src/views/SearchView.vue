@@ -89,6 +89,68 @@
         </div>
         <p v-else class="ph">無法取得損益表資料。</p>
       </template>
+
+      <!-- 內部人交易 -->
+      <template v-else-if="tab === 'insider'">
+        <div class="insider-header">
+          <h3>內部人交易 (SEC Form 4) — 近 1 年</h3>
+          <span v-if="!insiderStore.stockLoading" class="insider-count">共 {{ insiderStore.stockItems.length }} 筆</span>
+        </div>
+        <div v-if="insiderStore.stockLoading" class="ph">載入內部人交易資料中…</div>
+        <div v-else-if="insiderStore.stockError" class="alert">⚠️ {{ insiderStore.stockError }}</div>
+        <div v-else-if="!insiderStore.stockItems.length" class="ph">無內部人交易紀錄。</div>
+        <template v-else>
+          <!-- 價格走勢 + 內部人買賣標記 -->
+          <CandleChart
+            v-if="p?.chart?.dates?.length"
+            :dates="p.chart.dates"
+            :candle="p.chart.candle"
+            :mas="{}"
+            :log="false"
+            :height="360"
+            :insider-marks="insiderMarks"
+          />
+          <div class="marks-legend">
+            <span class="mark-bull">▲ 買入 (Purchase)</span>
+            <span class="mark-bear">▼ 賣出 (Sale)</span>
+          </div>
+          <!-- 交易明細 -->
+          <div class="fin-wrap" style="margin-top:16px">
+            <table class="fin insider-tbl">
+              <thead>
+                <tr>
+                  <th class="left">NAME</th>
+                  <th>TYPE</th>
+                  <th class="right">SHARES</th>
+                  <th class="right">PRICE</th>
+                  <th class="right">金額</th>
+                  <th class="right">DATE</th>
+                  <th class="right">REPORTED</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, i) in insiderStore.stockItems" :key="i">
+                  <td class="left">
+                    <div class="insider-name">{{ row.reporting_name }}</div>
+                    <div class="insider-role">{{ row.reporting_role }}</div>
+                  </td>
+                  <td class="center">
+                    <span class="type-badge" :class="typeBadgeClass(row.transaction_type)">
+                      {{ txnLabel(row.transaction_type) }}
+                    </span>
+                  </td>
+                  <td class="mono right">{{ Math.abs(row.shares || 0).toLocaleString() }}</td>
+                  <td class="mono right">{{ row.price ? '$' + row.price.toFixed(2) : '—' }}</td>
+                  <td class="mono right">{{ row.amount ? '$' + row.amount.toLocaleString() : '—' }}</td>
+                  <td class="mono right">{{ row.transaction_date || '—' }}</td>
+                  <td class="mono right">{{ row.filing_date || '—' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="insider-disclaimer">內部人交易由 SEC Form 4 取得，限近 1 年 P/S 交易。</p>
+        </template>
+      </template>
     </template>
   </div>
 </template>
@@ -97,18 +159,21 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import { useEquityStore } from '@/stores/equity'
+import { useInsiderStore } from '@/stores/insider'
 import MetricCard from '@/components/ui/MetricCard.vue'
 import CandleChart from '@/components/charts/CandleChart.vue'
 import TimeSeriesChart from '@/components/charts/TimeSeriesChart.vue'
 
 const route = useRoute()
 const store = useEquityStore()
+const insiderStore = useInsiderStore()
 
 const PERIODS = ['6mo', '1y', '2y', '5y', '10y', 'max']
 const TABS = [
   { key: 'chart', label: '📈 技術線圖' },
   { key: 'info', label: '🏢 基本資料' },
   { key: 'finance', label: '📊 財務報表' },
+  { key: 'insider', label: '👤 內部人交易' },
 ]
 
 const ticker = ref((route.query.q || '').toString().toUpperCase())
@@ -118,6 +183,31 @@ const tab = ref('chart')
 
 const p = computed(() => store.profile)
 const up = computed(() => (p.value?.price.change ?? 0) >= 0)
+
+// Build insider chart marks from stock transactions
+const insiderMarks = computed(() => {
+  const dates = p.value?.chart?.dates ?? []
+  const items = insiderStore.stockItems.filter(t => t.price > 0)
+  if (!dates.length || !items.length) return { buys: [], sells: [] }
+
+  function nearestDate(d) {
+    if (dates.includes(d)) return d
+    for (let i = dates.length - 1; i >= 0; i--) {
+      if (dates[i] <= d) return dates[i]
+    }
+    return dates[0]
+  }
+
+  // P = 公開買入 (🟢 強訊號) | S = 公開賣出 (🔴 強訊號) | S+M = 行權套現 (不標記) | F = 稅務代售 (不標記)
+  const buys = items
+    .filter(t => t.transaction_code === 'P')
+    .map(t => ({ date: nearestDate(t.transaction_date), price: t.price, name: `${t.reporting_name} [公開買入]`, amount: t.amount }))
+  const sells = items
+    .filter(t => t.transaction_code === 'S' && !t.is_exercise_sale)
+    .map(t => ({ date: nearestDate(t.transaction_date), price: t.price, name: `${t.reporting_name} [公開賣出]`, amount: t.amount }))
+
+  return { buys, sells }
+})
 
 const PCT_ROWS = new Set(['營收年增率 (YoY)', '毛利率 (Gross Margin)', '淨利率 (Net Margin)'])
 const MONEY_ROWS = new Set(['營收 (Revenue)', '營運現金流 (Operating CF)', '自由現金流 (Free CF)'])
@@ -143,13 +233,46 @@ const compositeOption = computed(() => ({
 }))
 
 function reload() {
-  if (ticker.value) store.fetchProfile(ticker.value, period.value, interval.value)
+  if (ticker.value) {
+    store.fetchProfile(ticker.value, period.value, interval.value)
+    insiderStore.resetStock()
+  }
 }
+
+// 切換到內部人 tab 時 lazy load
+watch(tab, (t) => {
+  if (t === 'insider' && ticker.value && !insiderStore.stockItems.length) {
+    insiderStore.fetchStock(ticker.value)
+  }
+})
 
 // 從導覽列搜尋跳轉時 query 改變要重抓
 watch(() => route.query.q, (q) => {
   if (q) { ticker.value = q.toString().toUpperCase(); reload() }
 })
+
+function txnLabel(type) {
+  const map = {
+    'P-Purchase': '公開買入',
+    'S-Sale': '公開賣出',
+    'S-ExerciseSale': '行權套現',
+    'F-TaxSale': '稅務代售',
+    'S-Sale+OE': '公開賣出',
+    'S-SaleAndExercise': '公開賣出',
+    'A-Award': 'Award',
+    'G-Gift': 'Gift',
+    'M-Exempt': 'Exempt',
+  }
+  return map[type] || type || '—'
+}
+
+function typeBadgeClass(type) {
+  if (type === 'P-Purchase') return 'buy'
+  if (type === 'S-ExerciseSale') return 'exercise'
+  if (type === 'F-TaxSale') return 'tax'
+  if (type?.startsWith('S-')) return 'sell'
+  return 'neutral'
+}
 
 onMounted(reload)
 </script>
@@ -192,4 +315,30 @@ h3 { font-size: 14px; margin: 22px 0 10px; color: var(--color-text-secondary); }
 .ph { color: var(--color-text-muted); padding: 30px 0; }
 .alert { background: rgba(245, 158, 11, 0.1); border: 1px solid var(--color-warning); color: var(--color-warning); padding: 14px 18px; border-radius: var(--radius-md); }
 @media (max-width: 800px) { .info-grid { grid-template-columns: 1fr; } }
+/* insider tab */
+.insider-header { display: flex; align-items: center; gap: 12px; margin: 22px 0 10px; }
+.insider-header h3 { font-size: 14px; color: var(--color-text-secondary); margin: 0; }
+.insider-count { color: var(--color-text-muted); font-size: 12px; }
+.insider-tbl th.left { text-align: left; }
+.insider-tbl .left { text-align: left; }
+.insider-tbl .center { text-align: center; }
+.insider-name { font-weight: 600; color: var(--color-text-primary); font-size: 13px; }
+.insider-role { color: var(--color-text-muted); font-size: 11px; margin-top: 2px; }
+.type-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  margin: 1px 2px;
+}
+.type-badge.buy { background: rgba(34, 197, 94, 0.15); color: var(--color-bull); }
+.type-badge.sell { background: rgba(239, 68, 68, 0.15); color: var(--color-bear); }
+.type-badge.exercise { background: rgba(234, 179, 8, 0.15); color: #eab308; }
+.type-badge.tax { background: rgba(100, 116, 139, 0.15); color: var(--color-text-muted); }
+.type-badge.neutral { background: var(--color-bg-surface); color: var(--color-text-muted); }
+.insider-disclaimer { color: var(--color-text-muted); font-size: 11px; margin-top: 12px; }
+.marks-legend { display: flex; gap: 18px; margin: 8px 0 4px; font-size: 12px; }
+.mark-bull { color: var(--color-bull); font-weight: 600; }
+.mark-bear { color: var(--color-bear); font-weight: 600; }
 </style>

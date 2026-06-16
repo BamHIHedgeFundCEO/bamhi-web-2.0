@@ -1,6 +1,6 @@
 <!--
-  CandleChart.vue — K 線 + 多條均線 (對應 sector_rotation K線主圖)
-  支援對數座標切換。data.candle 為 [open, close, low, high] 陣列。
+  CandleChart.vue — K 線 + 多條均線 + 可選內部人買賣標記
+  insiderMarks: { buys: [{date,price,name,amount}], sells: [...] }
 -->
 <template>
   <div class="candle-wrap">
@@ -19,6 +19,7 @@ const props = defineProps({
   mas: { type: Object, default: () => ({}) }, // { MA10:[...], MA20:[...], ... }
   log: { type: Boolean, default: true },
   height: { type: Number, default: 460 },
+  insiderMarks: { type: Object, default: () => ({ buys: [], sells: [] }) },
 })
 
 const MA_COLORS = { MA10: '#f59e0b', MA20: '#fbbf24', MA60: '#ef4444', MA120: '#a855f7', MA200: '#22d3ee' }
@@ -30,11 +31,36 @@ const option = computed(() => {
       itemStyle: { color: '#10b981', color0: '#ef4444', borderColor: '#10b981', borderColor0: '#ef4444' },
     },
   ]
+
   for (const [name, color] of Object.entries(MA_COLORS)) {
     if (props.mas[name]) {
       series.push({ name, type: 'line', showSymbol: false, data: props.mas[name], lineStyle: { color, width: 1.4 }, itemStyle: { color } })
     }
   }
+
+  const buys = props.insiderMarks?.buys ?? []
+  const sells = props.insiderMarks?.sells ?? []
+
+  const mkScatter = (name, data, color, rotate = 0) => ({
+    name,
+    type: 'scatter',
+    symbol: 'triangle',
+    symbolRotate: rotate,
+    symbolSize: 13,
+    itemStyle: { color },
+    data: data.map(m => ({ value: [m.date, m.price], name: m.name, amount: m.amount })),
+    tooltip: {
+      formatter: (p) => {
+        const d = p.data
+        return `${d.value[0]}<br><b style="color:${color}">${d.name}</b><br>$${Number(d.amount).toLocaleString()}`
+      },
+    },
+    z: 10,
+  })
+
+  if (buys.length) series.push(mkScatter('公開買入 (P)', buys, '#22c55e'))
+  if (sells.length) series.push(mkScatter('公開賣出 (S)', sells, '#ef4444', 180))
+
   return {
     backgroundColor: 'transparent',
     tooltip: { trigger: 'axis', backgroundColor: '#1c2333', borderColor: '#1f2d40', textStyle: { color: '#f1f5f9' } },

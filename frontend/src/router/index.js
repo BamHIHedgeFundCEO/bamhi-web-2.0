@@ -35,6 +35,7 @@ const routes = [
       { path: 'sector-rotation', name: 'sectorRotation', component: () => import('@/views/SectorRotationView.vue') },
       { path: 'screener', name: 'screener', component: () => import('@/views/ScreenerView.vue') },
       { path: 'search', name: 'search', component: () => import('@/views/SearchView.vue') },
+      { path: 'insider', name: 'insider', component: () => import('@/views/InsiderView.vue') },
     ],
   },
   {
