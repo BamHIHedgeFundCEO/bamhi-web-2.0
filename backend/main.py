@@ -8,14 +8,13 @@
 """
 import os
 import threading
-import time
 
 from dotenv import load_dotenv
 
 # 先載入 backend/.env，再 import 會讀取環境變數的模組 (auth.py 在 import 時讀 secret)
 load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
 
-from datetime import date
+from datetime import date, datetime, timedelta
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -44,20 +43,15 @@ def _run_daily_digest():
         print(f"[scheduler] daily digest 失敗: {e}")
 
 
-# Load persisted cache on startup (Supabase → JSON fallback)
+# Load persisted cache on startup (Supabase → JSON fallback, no EDGAR fetch at startup)
 init_cache()
-
-def _delayed_bg_update():
-    time.sleep(30)   # 讓 server 先完全啟動再跑 EDGAR fetch
-    bg_update(n=20)
-
-threading.Thread(target=_delayed_bg_update, daemon=True).start()
 
 _digest_hour = int(os.getenv("DIGEST_HOUR_EST", "22"))
 _scheduler = BackgroundScheduler(timezone="US/Eastern")
 _scheduler.add_job(_run_daily_digest, CronTrigger(hour=_digest_hour, minute=0))
-# Accumulate new Form 4 filings every 30 min (small batch — Supabase keeps history)
-_scheduler.add_job(lambda: bg_update(50), IntervalTrigger(minutes=30))
+# First EDGAR fetch: 5 min after startup. Subsequent: every 30 min.
+_first_fetch = datetime.now() + timedelta(minutes=5)
+_scheduler.add_job(lambda: bg_update(20), IntervalTrigger(minutes=30, start_date=_first_fetch))
 _scheduler.start()
 
 # ── CORS (§1.2)：開發 localhost:5173 + 生產 Vercel domain ──
