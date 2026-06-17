@@ -233,6 +233,7 @@ def init_cache():
 def bg_update(n: int = 200):
     """Fetch n newest Form 4 filings, skip already processed, append new ones."""
     global _CACHE_TXNS, _CACHE_ACCESSIONS, _CACHE_UPDATED_AT
+    print(f"[insider] bg_update called (n={n})", flush=True)
 
     try:
         filings_obj = edgar.get_filings(form="4")
