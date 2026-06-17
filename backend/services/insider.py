@@ -114,11 +114,14 @@ def _load_from_supabase(sb) -> list[dict]:
 def _upsert_to_supabase(sb, txns: list[dict]):
     if not txns:
         return
-    try:
-        records = [{**_strip_sb_fields(t), "txn_id": _make_txn_id(t)} for t in txns]
-        sb.table(_SUPABASE_TABLE).upsert(records, on_conflict="txn_id").execute()
-    except Exception as e:
-        print(f"[insider] Supabase upsert error: {e}")
+    from itertools import groupby as _groupby
+    txns_sorted = sorted(txns, key=lambda t: t["accession_no"])
+    for _, group in _groupby(txns_sorted, key=lambda t: t["accession_no"]):
+        records = [_strip_sb_fields(t) for t in group]
+        try:
+            sb.table(_SUPABASE_TABLE).insert(records).execute()
+        except Exception as e:
+            print(f"[insider] Supabase insert error: {e}")
 
 
 # ── filing parser ─────────────────────────────────────────────────────────────
