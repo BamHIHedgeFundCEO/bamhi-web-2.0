@@ -8,6 +8,7 @@
 """
 import os
 import threading
+import time
 
 from dotenv import load_dotenv
 
@@ -45,14 +46,18 @@ def _run_daily_digest():
 
 # Load persisted cache on startup (Supabase → JSON fallback)
 init_cache()
-# Fetch only recent filings — bulk data already in Supabase; accessions seen → skipped automatically
-threading.Thread(target=bg_update, kwargs={"n": 50}, daemon=True).start()
+
+def _delayed_bg_update():
+    time.sleep(30)   # 讓 server 先完全啟動再跑 EDGAR fetch
+    bg_update(n=20)
+
+threading.Thread(target=_delayed_bg_update, daemon=True).start()
 
 _digest_hour = int(os.getenv("DIGEST_HOUR_EST", "22"))
 _scheduler = BackgroundScheduler(timezone="US/Eastern")
 _scheduler.add_job(_run_daily_digest, CronTrigger(hour=_digest_hour, minute=0))
-# Accumulate new Form 4 filings every 30 min
-_scheduler.add_job(lambda: bg_update(200), IntervalTrigger(minutes=30))
+# Accumulate new Form 4 filings every 30 min (small batch — Supabase keeps history)
+_scheduler.add_job(lambda: bg_update(50), IntervalTrigger(minutes=30))
 _scheduler.start()
 
 # ── CORS (§1.2)：開發 localhost:5173 + 生產 Vercel domain ──

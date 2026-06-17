@@ -12,6 +12,7 @@ Transaction code 語意：
   若 SUPABASE_URL + SUPABASE_SERVICE_KEY 設定 → 使用 Supabase DB。
   否則 fallback → data/insider_cache.json（本地 / Render Persistent Disk）。
 """
+import gc
 import json
 import os
 import threading
@@ -258,7 +259,7 @@ def bg_update(n: int = 200):
     new_txns: list[dict] = []
     new_accs: set[str] = set()
 
-    with ThreadPoolExecutor(max_workers=6) as pool:
+    with ThreadPoolExecutor(max_workers=2) as pool:
         futures = {pool.submit(_parse_one, f): f for f in to_process}
         for fut in as_completed(futures):
             try:
@@ -303,6 +304,7 @@ def bg_update(n: int = 200):
     else:
         _save_cache_file(snapshot, now_str)
 
+    gc.collect()
     print(f"[insider] bg_update done: +{len(new_txns)} txns ({len(new_accs)} filings), cache={len(snapshot)}")
 
 
