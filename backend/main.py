@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 # 先載入 backend/.env，再 import 會讀取環境變數的模組 (auth.py 在 import 時讀 secret)
 load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
 
-from datetime import date, datetime, timedelta, timezone
+from datetime import date
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -49,9 +49,9 @@ init_cache()
 _digest_hour = int(os.getenv("DIGEST_HOUR_EST", "22"))
 _scheduler = BackgroundScheduler(timezone="US/Eastern")
 _scheduler.add_job(_run_daily_digest, CronTrigger(hour=_digest_hour, minute=0))
-# EDGAR fetch: 1 min after startup, then every 30 min
-_first_fetch = datetime.now(timezone.utc) + timedelta(minutes=1)
-_scheduler.add_job(lambda: bg_update(20), IntervalTrigger(minutes=30, start_date=_first_fetch))
+# EDGAR fetch: 60 sec after startup via Timer, then every 30 min via scheduler
+threading.Timer(60.0, lambda: bg_update(20)).start()
+_scheduler.add_job(lambda: bg_update(20), IntervalTrigger(minutes=30))
 _scheduler.start()
 
 # ── CORS (§1.2)：開發 localhost:5173 + 生產 Vercel domain ──
