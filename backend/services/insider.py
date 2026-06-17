@@ -13,6 +13,7 @@ Transaction code 語意：
   否則 fallback → data/insider_cache.json（本地 / Render Persistent Disk）。
 """
 import gc
+import hashlib
 import json
 import os
 import threading
@@ -59,6 +60,11 @@ _sb_lock = threading.Lock()
 
 _SUPABASE_TABLE = "insider_transactions"
 _SUPABASE_STRIP_KEYS = {"id", "created_at"}
+
+
+def _make_txn_id(t: dict) -> str:
+    key = f"{t['accession_no']}|{t['transaction_code']}|{t['transaction_date']}|{t['shares']}"
+    return hashlib.md5(key.encode()).hexdigest()
 
 
 def _supabase():
@@ -109,8 +115,8 @@ def _upsert_to_supabase(sb, txns: list[dict]):
     if not txns:
         return
     try:
-        records = [_strip_sb_fields(t) for t in txns]
-        sb.table(_SUPABASE_TABLE).upsert(records, on_conflict="accession_no").execute()
+        records = [{**_strip_sb_fields(t), "txn_id": _make_txn_id(t)} for t in txns]
+        sb.table(_SUPABASE_TABLE).upsert(records, on_conflict="txn_id").execute()
     except Exception as e:
         print(f"[insider] Supabase upsert error: {e}")
 
