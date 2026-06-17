@@ -11,3 +11,4 @@ deep_translator   # 個股公司簡介中譯
 httpx             # discord webhook HTTP client
 apscheduler==3.10.4  # 每日摘要排程
 edgartools        # SEC Form 4 解析 (wrap SEC EDGAR XML)
+supabase>=2.0.0   # Supabase Python client (insider transactions 持久化)

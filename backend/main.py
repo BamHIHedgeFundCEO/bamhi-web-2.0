@@ -43,10 +43,10 @@ def _run_daily_digest():
         print(f"[scheduler] daily digest 失敗: {e}")
 
 
-# Load persisted cache on startup
+# Load persisted cache on startup (Supabase → JSON fallback)
 init_cache()
-# Initial big fetch in background thread (non-blocking, ~5 min)
-threading.Thread(target=bg_update, kwargs={"n": 500}, daemon=True).start()
+# Fetch only recent filings — bulk data already in Supabase; accessions seen → skipped automatically
+threading.Thread(target=bg_update, kwargs={"n": 50}, daemon=True).start()
 
 _digest_hour = int(os.getenv("DIGEST_HOUR_EST", "22"))
 _scheduler = BackgroundScheduler(timezone="US/Eastern")

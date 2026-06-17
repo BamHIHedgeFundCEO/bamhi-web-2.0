@@ -8,7 +8,9 @@ Transaction code 語意：
   F  稅務代售      → 噪音（sell-to-cover，強制賣出抵稅款）
   A/G 獎勵/贈與   → 不追蹤
 
-Cache 存 data/insider_cache.json（本地）或 $INSIDER_CACHE_DIR/insider_cache.json（Render Persistent Disk）。
+持久化層：
+  若 SUPABASE_URL + SUPABASE_SERVICE_KEY 設定 → 使用 Supabase DB。
+  否則 fallback → data/insider_cache.json（本地 / Render Persistent Disk）。
 """
 import json
 import os
@@ -47,6 +49,69 @@ _CACHE_TXNS: list[dict] = []
 _CACHE_ACCESSIONS: set[str] = set()
 _CACHE_LOCK = threading.Lock()
 _CACHE_UPDATED_AT: str = ""
+
+# ── Supabase client (lazy init) ───────────────────────────────────────────────
+
+_sb_client = None
+_sb_init_done = False
+_sb_lock = threading.Lock()
+
+_SUPABASE_TABLE = "insider_transactions"
+_SUPABASE_STRIP_KEYS = {"id", "created_at"}
+
+
+def _supabase():
+    """Lazy-init Supabase client. Returns None if env vars not set."""
+    global _sb_client, _sb_init_done
+    if _sb_init_done:
+        return _sb_client
+    with _sb_lock:
+        if _sb_init_done:
+            return _sb_client
+        url = os.getenv("SUPABASE_URL")
+        key = os.getenv("SUPABASE_SERVICE_KEY")
+        if url and key:
+            try:
+                from supabase import create_client
+                _sb_client = create_client(url, key)
+                print("[insider] Supabase client initialized")
+            except Exception as e:
+                print(f"[insider] Supabase init error: {e}")
+                _sb_client = None
+        else:
+            print("[insider] SUPABASE_SERVICE_KEY not set — using local JSON cache")
+        _sb_init_done = True
+    return _sb_client
+
+
+def _strip_sb_fields(record: dict) -> dict:
+    return {k: v for k, v in record.items() if k not in _SUPABASE_STRIP_KEYS}
+
+
+def _load_from_supabase(sb) -> list[dict]:
+    cutoff = (date.today() - timedelta(days=90)).isoformat()
+    try:
+        resp = (
+            sb.table(_SUPABASE_TABLE)
+            .select("*")
+            .gte("transaction_date", cutoff)
+            .execute()
+        )
+        rows = resp.data or []
+        return [_strip_sb_fields(r) for r in rows]
+    except Exception as e:
+        print(f"[insider] Supabase load error: {e}")
+        return []
+
+
+def _upsert_to_supabase(sb, txns: list[dict]):
+    if not txns:
+        return
+    try:
+        records = [_strip_sb_fields(t) for t in txns]
+        sb.table(_SUPABASE_TABLE).upsert(records, on_conflict="accession_no").execute()
+    except Exception as e:
+        print(f"[insider] Supabase upsert error: {e}")
 
 
 # ── filing parser ─────────────────────────────────────────────────────────────
@@ -118,7 +183,7 @@ def _filing_to_txns(f, file_date: str = "", accession_no: str = "") -> list[dict
     return txns
 
 
-# ── cache persistence ─────────────────────────────────────────────────────────
+# ── cache persistence (local JSON fallback) ───────────────────────────────────
 
 def _load_cache_file() -> tuple[list[dict], set[str]]:
     if not CACHE_FILE.exists():
@@ -146,14 +211,20 @@ def _save_cache_file(txns: list[dict], updated_at: str):
 
 
 def init_cache():
-    """Startup: load persisted cache into memory."""
+    """Startup: load persisted cache into memory (Supabase → JSON fallback)."""
     global _CACHE_TXNS, _CACHE_ACCESSIONS, _CACHE_UPDATED_AT
-    txns, accessions = _load_cache_file()
+    sb = _supabase()
+    if sb:
+        txns = _load_from_supabase(sb)
+        source = "supabase"
+    else:
+        txns, _ = _load_cache_file()
+        source = "json"
     with _CACHE_LOCK:
         _CACHE_TXNS = txns
-        _CACHE_ACCESSIONS = accessions
+        _CACHE_ACCESSIONS = {t["accession_no"] for t in txns}
         _CACHE_UPDATED_AT = datetime.now().isoformat(timespec="seconds")
-    print(f"[insider] cache loaded: {len(txns)} transactions")
+    print(f"[insider] cache loaded: {len(txns)} transactions (source={source})")
 
 
 # ── background accumulator ────────────────────────────────────────────────────
@@ -225,7 +296,13 @@ def bg_update(n: int = 200):
         _CACHE_UPDATED_AT = now_str
         snapshot = list(_CACHE_TXNS)
 
-    _save_cache_file(snapshot, now_str)
+    # Persist: Supabase (only new txns) → JSON fallback (full snapshot)
+    sb = _supabase()
+    if sb:
+        _upsert_to_supabase(sb, new_txns)
+    else:
+        _save_cache_file(snapshot, now_str)
+
     print(f"[insider] bg_update done: +{len(new_txns)} txns ({len(new_accs)} filings), cache={len(snapshot)}")
 
 
