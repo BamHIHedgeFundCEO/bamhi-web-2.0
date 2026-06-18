@@ -44,6 +44,8 @@ def _load_prices() -> pd.DataFrame:
         return pd.DataFrame()
     df = pd.read_csv(path)
     df["date"] = pd.to_datetime(df["date"])
+    float_cols = df.select_dtypes("float64").columns
+    df[float_cols] = df[float_cols].astype("float32")
     return df
 
 

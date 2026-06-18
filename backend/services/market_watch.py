@@ -21,6 +21,8 @@ def get_kings() -> dict:
     try:
         df = pd.read_csv(path)
         df["Pullback_Buy"] = df["Pullback_Buy"].astype(bool)
+        float_cols = df.select_dtypes("float64").columns
+        df[float_cols] = df[float_cols].astype("float32")
         items = df.where(pd.notnull(df), None).to_dict(orient="records")
         return {"items": items, "total": len(items), "updated_at": _mtime(path)}
     except Exception as e:
@@ -33,6 +35,8 @@ def get_rising_stars() -> dict:
         return {"items": [], "total": 0, "updated_at": "", "error": "資料尚未生成，請先跑 Pipeline"}
     try:
         df = pd.read_csv(path)
+        float_cols = df.select_dtypes("float64").columns
+        df[float_cols] = df[float_cols].astype("float32")
         items = df.where(pd.notnull(df), None).to_dict(orient="records")
         return {"items": items, "total": len(items), "updated_at": _mtime(path)}
     except Exception as e:
