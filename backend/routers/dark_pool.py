@@ -21,6 +21,8 @@ RESULTS_PATH = os.path.join(BASE_DIR, "data", "darkpool_results.csv")
 # 60 日走勢迷你線快取 (best-effort，失敗不影響表格)
 _TREND_CACHE: dict = {"ts": 0, "data": {}}
 _TREND_TTL = 900
+# CSV 結果快取 (mtime-keyed)
+_SURGE_CACHE: dict = {}
 
 
 def _fetch_trends(tickers: list[str]) -> dict:
@@ -89,6 +91,13 @@ def get_surge_list(_user: dict = Depends(get_current_user)) -> DarkPoolResponse:
             detail="暫無暗池資料，請確認 update_darkpool_pipeline.py 是否已執行。",
         )
 
+    try:
+        _mt = os.path.getmtime(RESULTS_PATH)
+    except OSError:
+        _mt = 0.0
+    if _SURGE_CACHE.get("mtime") == _mt and _mt:
+        return _SURGE_CACHE["data"]
+
     df = pd.read_csv(RESULTS_PATH)
     df = df.rename(columns=COLUMN_MAP)
     if "above_ma200" in df.columns:
@@ -102,12 +111,13 @@ def get_surge_list(_user: dict = Depends(get_current_user)) -> DarkPoolResponse:
     for r in records:
         r["trend"] = trends.get(r.get("ticker"))
 
-    as_of = datetime.fromtimestamp(
-        os.path.getmtime(RESULTS_PATH), tz=timezone.utc
-    ).strftime("%Y-%m-%d")
+    as_of = datetime.fromtimestamp(_mt, tz=timezone.utc).strftime("%Y-%m-%d")
 
-    return DarkPoolResponse(
+    result = DarkPoolResponse(
         as_of=as_of,
         count=len(records),
         items=[DarkPoolItem(**r) for r in records],
     )
+    _SURGE_CACHE["mtime"] = _mt
+    _SURGE_CACHE["data"] = result
+    return result

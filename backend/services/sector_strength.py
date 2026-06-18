@@ -10,6 +10,8 @@ import time
 import numpy as np
 import pandas as pd
 
+_OVERVIEW_CACHE: dict = {}  # {"mtime": float, "data": dict}
+
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 BENCHMARK = "VTI"
@@ -116,6 +118,14 @@ def compute_metrics(close_df: pd.DataFrame, benchmark: str = BENCHMARK) -> pd.Da
 
 
 def get_overview():
+    _path = os.path.join(DATA_DIR, "sector_strength.csv")
+    try:
+        _mt = os.path.getmtime(_path)
+    except OSError:
+        _mt = 0.0
+    if _OVERVIEW_CACHE.get("mtime") == _mt and _mt:
+        return _OVERVIEW_CACHE["data"]
+
     prices = _load_prices()
     if prices.empty:
         return None
@@ -136,11 +146,14 @@ def get_overview():
         return d[strat_cols].sort_values("ret3", ascending=False).round(4).to_dict(orient="records")
 
     items = df.sort_values(["group", "total_rank"], ascending=[True, False]).round(4)
-    return {
+    result = {
         "as_of": as_of,
         "items": items.to_dict(orient="records"),
         "strategies": {"a": _strat(a), "b": _strat(b), "c": _strat(c)},
     }
+    _OVERVIEW_CACHE["mtime"] = _mt
+    _OVERVIEW_CACHE["data"] = result
+    return result
 
 
 def get_heatmap(period: int):

@@ -8,6 +8,8 @@ import os
 import numpy as np
 import pandas as pd
 
+_MOMENTUM_CACHE: dict = {}  # period → {"mtime": float, "data": dict}
+
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 
@@ -31,6 +33,8 @@ def _load_prices() -> pd.DataFrame:
     if not os.path.exists(path):
         return pd.DataFrame()
     df = pd.read_csv(path, parse_dates=["date"])
+    float_cols = df.select_dtypes("float64").columns
+    df[float_cols] = df[float_cols].astype("float32")
     return df
 
 
@@ -74,6 +78,15 @@ def _strategies(df_indexed: pd.DataFrame) -> dict:
 
 
 def get_momentum(period: int):
+    _path = os.path.join(DATA_DIR, "world_sectors.csv")
+    try:
+        _mt = os.path.getmtime(_path)
+    except OSError:
+        _mt = 0.0
+    cached = _MOMENTUM_CACHE.get(period)
+    if cached and cached["mtime"] == _mt and _mt:
+        return cached["data"]
+
     prices = _load_prices()
     if prices.empty:
         return None
@@ -102,5 +115,7 @@ def get_momentum(period: int):
                               "chg_pct": round(pchg * 100, 4), "vol_pct": round(vol_val, 4), "score": round(score, 4),
                               "trend": [round(float(x), 4) for x in df[t].dropna().tail(60).tolist()]})
 
-    return {"as_of": as_of, "period": period, "mode": mode, "items": items,
-            "strategies": _strategies(df), "groups": list(PORTFOLIO_STRUCTURE.keys())}
+    result = {"as_of": as_of, "period": period, "mode": mode, "items": items,
+              "strategies": _strategies(df), "groups": list(PORTFOLIO_STRUCTURE.keys())}
+    _MOMENTUM_CACHE[period] = {"mtime": _mt, "data": result}
+    return result

@@ -13,8 +13,12 @@ import os
 
 import pandas as pd
 
-DATA_DIR = "data"
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+DATA_DIR = os.path.join(BASE_DIR, "data")
 SR_DIR = os.path.join(DATA_DIR, "sector_rotation")
+
+_MODEL_CACHE: dict = {}   # engine → {"mtime": float, "data": dict}
+_VCP_CACHE: dict = {}     # {"mtime": float, "data": dict}
 
 # 市值分級門檻 (對應 SCREENING_PLAYBOOK.md 第二節)
 # (級別, MktCap_B 下界, 上界, Dollar_Vol_M 閘門, Ov_Supply 上限, 是否需當日突破確認)
@@ -48,6 +52,13 @@ def _screen_models(engine: str) -> dict:
     path = os.path.join(DATA_DIR, f"{prefix}_Latest.csv")
     if not os.path.exists(path):
         return {"engine": engine, "tiers": [], "total_picked": 0, "error": "找不到戰報資料"}
+    try:
+        _mt = os.path.getmtime(path)
+    except OSError:
+        _mt = 0.0
+    cached = _MODEL_CACHE.get(engine)
+    if cached and cached["mtime"] == _mt and _mt:
+        return cached["data"]
 
     df = pd.read_csv(path)
     if df.empty or "Resonance_Score" not in df.columns or "MktCap_B" not in df.columns:
@@ -92,14 +103,25 @@ def _screen_models(engine: str) -> dict:
         })
 
     updated_at = _mtime(path)
-    return {"engine": engine, "updated_at": updated_at, "columns": keep,
-            "rows_read": int(len(df)), "total_picked": picked, "tiers": tiers_out}
+    result = {"engine": engine, "updated_at": updated_at, "columns": keep,
+              "rows_read": int(len(df)), "total_picked": picked, "tiers": tiers_out}
+    _MODEL_CACHE[engine] = {"mtime": _mt, "data": result}
+    return result
 
 
 def screen_vcp(min_score: int = 60) -> dict:
     """跨所有板塊彙整 VCP：取 🎯 強訊或分數 >= min_score，依代碼去重(留最高分)後排序。"""
+    json_files = glob.glob(os.path.join(SR_DIR, "detail_*.json"))
+    try:
+        _mt = max((os.path.getmtime(f) for f in json_files), default=0.0)
+    except OSError:
+        _mt = 0.0
+    cached = _VCP_CACHE.get(min_score)
+    if cached and cached["mtime"] == _mt and _mt:
+        return cached["data"]
+
     rows = []
-    for f in glob.glob(os.path.join(SR_DIR, "detail_*.json")):
+    for f in json_files:
         try:
             d = json.load(open(f, encoding="utf-8"))
         except Exception:
@@ -129,7 +151,9 @@ def screen_vcp(min_score: int = 60) -> dict:
         else:
             best[t]["sectors"].append(r["sector"])
     items = sorted(best.values(), key=lambda x: x["vcp_score"], reverse=True)
-    return {"min_score": min_score, "count": len(items), "items": items}
+    result = {"min_score": min_score, "count": len(items), "items": items}
+    _VCP_CACHE[min_score] = {"mtime": _mt, "data": result}
+    return result
 
 
 def _mtime(path: str):
