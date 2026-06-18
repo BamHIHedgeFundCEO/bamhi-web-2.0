@@ -30,12 +30,9 @@
         <span class="chg">{{ p.price.change >= 0 ? '+' : '' }}{{ p.price.change.toFixed(2) }} ({{ p.price.change_pct >= 0 ? '+' : '' }}{{ p.price.change_pct.toFixed(2) }}%)</span>
       </div>
 
-      <!-- 估值四宮格 -->
+      <!-- 估值 -->
       <div class="metrics">
         <MetricCard label="總市值" :value="p.valuation.market_cap_b !== null ? p.valuation.market_cap_b + ' B' : 'N/A'" delta-suffix="" />
-        <MetricCard label="本益比 (P/E)" :value="p.valuation.pe ?? 'N/A'" delta-suffix="" />
-        <MetricCard label="股價淨值比 (P/B)" :value="p.valuation.pb ?? 'N/A'" delta-suffix="" />
-        <MetricCard label="股東權益報酬率 (ROE)" :value="p.valuation.roe_pct !== null ? p.valuation.roe_pct + '%' : 'N/A'" delta-suffix="" />
       </div>
 
       <!-- 趨勢/訊號 -->

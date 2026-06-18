@@ -59,12 +59,6 @@ def _fmp_fundamentals(ticker: str, info: dict) -> None:
                          "industry": p.get("industry", "N/A"), "longBusinessSummary": p.get("description", "暫無公司業務介紹。"),
                          "website": p.get("website", "N/A"), "fullTimeEmployees": p.get("fullTimeEmployees", "N/A"),
                          "marketCap": p.get("mktCap", 0)})
-        m = requests.get(f"https://financialmodelingprep.com/stable/key-metrics-ttm?symbol={ticker}&apikey={FMP_API_KEY}", timeout=10).json()
-        if m:
-            m = m[0] if isinstance(m, list) else m
-            info["trailingPE"] = m.get("peRatioTTM")
-            info["priceToBook"] = m.get("pbRatioTTM")
-            info["returnOnEquity"] = m.get("roeTTM")
     except Exception as e:
         print(f"FMP 基本資料失敗: {e}")
 
@@ -128,7 +122,6 @@ def get_profile(ticker: str, period: str = "2y", interval: str = "1d"):
     cur = info["currentPrice"]
     prev = info["previousClose"]
     mc = info.get("marketCap") or 0
-    roe = info.get("returnOnEquity")
 
     data = {
         "ticker": ticker, "company_name": info.get("shortName", ticker),
@@ -138,10 +131,7 @@ def get_profile(ticker: str, period: str = "2y", interval: str = "1d"):
         "summary_zh": _translate_zh(info.get("longBusinessSummary", "")),
         "price": {"current": round(cur, 2), "prev_close": round(prev, 2),
                   "change": round(cur - prev, 2), "change_pct": round((cur - prev) / prev * 100, 2) if prev else 0},
-        "valuation": {"market_cap_b": round(mc / 1e9, 2) if mc else None,
-                      "pe": round(float(info["trailingPE"]), 2) if isinstance(info.get("trailingPE"), (int, float)) else None,
-                      "pb": round(float(info["priceToBook"]), 2) if isinstance(info.get("priceToBook"), (int, float)) else None,
-                      "roe_pct": round(float(roe) * 100, 2) if isinstance(roe, (int, float)) else None},
+        "valuation": {"market_cap_b": round(mc / 1e9, 2) if mc else None},
         "trend_status": trend, "signal_status": signal, "composite": round(comp, 1),
         "chart": {
             "dates": dates, "interval": interval,
