@@ -17,6 +17,7 @@ BENCHMARK = "VTI"
 # ETF 成分股鑽取的行程內快取 (TTL 1 小時)，避免重複打 yfinance
 _HOLDINGS_CACHE: dict = {}
 _HOLDINGS_TTL = 3600
+_HOLDINGS_MAX = 50
 
 PORTFOLIO_STRUCTURE = {
     "通訊服務 (Communication)": {"XLC": "通訊服務 SPDR", "SOCL": "社群媒體", "HERO": "電競與遊戲"},
@@ -192,6 +193,9 @@ def get_holdings_metrics(etf: str):
     golden = df[df["signal"] == "🔥"].to_dict(orient="records")
 
     data = {"etf": etf, "holdings_count": len(holdings), "golden": golden, "all": all_rows}
+    if len(_HOLDINGS_CACHE) >= _HOLDINGS_MAX:
+        oldest = min(_HOLDINGS_CACHE, key=lambda k: _HOLDINGS_CACHE[k]["ts"])
+        del _HOLDINGS_CACHE[oldest]
     _HOLDINGS_CACHE[etf] = {"ts": time.time(), "data": data}
     return data
 

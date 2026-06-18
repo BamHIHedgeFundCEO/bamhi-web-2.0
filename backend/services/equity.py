@@ -14,6 +14,7 @@ FMP_API_KEY = os.getenv("FMP_API_KEY", "29epqrFbGsBfasHJHyU7fnFT8CcUdeaF")
 
 _CACHE: dict = {}
 _TTL = 3600
+_CACHE_MAX = 200
 
 
 def _compute_indicators(hist: pd.DataFrame) -> pd.DataFrame:
@@ -201,5 +202,8 @@ def get_profile(ticker: str, period: str = "2y", interval: str = "1d"):
         },
         "financials": _financials_to_records(income_stmt),
     }
+    if len(_CACHE) >= _CACHE_MAX:
+        oldest = min(_CACHE, key=lambda k: _CACHE[k]["ts"])
+        del _CACHE[oldest]
     _CACHE[key] = {"ts": time.time(), "data": data}
     return data
