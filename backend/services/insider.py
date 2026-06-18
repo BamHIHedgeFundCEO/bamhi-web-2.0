@@ -34,6 +34,7 @@ CACHE_FILE = _cache_dir / "insider_cache.json"
 
 _STOCK_CACHE: dict[str, dict] = {}
 _STOCK_TTL = 900
+_STOCK_CACHE_MAX = 500
 
 BUY_CODES = {"P"}
 SELL_CODES = {"S"}
@@ -411,5 +412,8 @@ def fetch_stock(symbol: str, limit: int = 50) -> list[dict]:
 
     all_txns.sort(key=lambda x: x.get("transaction_date", ""), reverse=True)
     result = all_txns[:limit]
+    if len(_STOCK_CACHE) >= _STOCK_CACHE_MAX:
+        oldest = min(_STOCK_CACHE, key=lambda k: _STOCK_CACHE[k]["ts"])
+        del _STOCK_CACHE[oldest]
     _STOCK_CACHE[sym] = {"ts": now, "items": result}
     return result

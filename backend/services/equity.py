@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import requests
 
-FMP_API_KEY = os.getenv("FMP_API_KEY", "29epqrFbGsBfasHJHyU7fnFT8CcUdeaF")
+FMP_API_KEY = os.getenv("FMP_API_KEY", "")
 
 _CACHE: dict = {}
 _TTL = 3600
