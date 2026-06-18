@@ -22,6 +22,7 @@ from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 from fastapi import Depends, FastAPI  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
+from fastapi.middleware.gzip import GZipMiddleware  # noqa: E402
 
 from backend.auth import get_current_user  # noqa: E402
 from backend.routers import dark_pool, equity, insider, macro, market_watch, models, notes, screener, sector_rotation, sector_strength, world_sectors  # noqa: E402
@@ -81,6 +82,7 @@ _vercel_origin = os.getenv("FRONTEND_ORIGIN")  # 例：https://bamhi-quant.verce
 if _vercel_origin:
     ALLOWED_ORIGINS.append(_vercel_origin)
 
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,

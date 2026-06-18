@@ -10,7 +10,8 @@ import time
 import numpy as np
 import pandas as pd
 
-_OVERVIEW_CACHE: dict = {}  # {"mtime": float, "data": dict}
+_OVERVIEW_CACHE: dict = {}   # {"mtime": float, "data": dict}
+_HEATMAP_CACHE: dict = {}   # period → {"mtime": float, "data": dict}
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 DATA_DIR = os.path.join(BASE_DIR, "data")
@@ -97,7 +98,7 @@ def compute_metrics(close_df: pd.DataFrame, benchmark: str = BENCHMARK) -> pd.Da
             "price": curr, "ret1": ret1, "ret3": ret3, "ret10": ret10,
             "rel5": rel5, "rel20": rel20, "_ret20": ret20, "_ret60": ret60, "_ret120": ret120,
             "rsi": rsi, "rs_above_ma": rs_above, "atr_pct": atr_pct,
-            "trend": [round(x, 4) for x in c.tail(126).tolist()],
+            "trend": [round(x, 2) for x in c.tail(126).tolist()],
         })
 
     df = pd.DataFrame(rows)
@@ -157,6 +158,15 @@ def get_overview():
 
 
 def get_heatmap(period: int):
+    _path = os.path.join(DATA_DIR, "sector_strength.csv")
+    try:
+        _mt = os.path.getmtime(_path)
+    except OSError:
+        _mt = 0.0
+    cached = _HEATMAP_CACHE.get(period)
+    if cached and cached["mtime"] == _mt and _mt:
+        return cached["data"]
+
     prices = _load_prices()
     if prices.empty:
         return None
@@ -170,8 +180,10 @@ def get_heatmap(period: int):
         for t, name in tickers.items():
             if t in df.columns and pd.notna(latest.get(t)) and prev.get(t, 0) > 0:
                 chg = (latest[t] - prev[t]) / prev[t] * 100
-                items.append({"ticker": t, "name": name, "group": group, "price": round(float(latest[t]), 4), "chg_pct": round(float(chg), 4), "score": round(float(chg), 4)})
-    return {"period": period, "items": items}
+                items.append({"ticker": t, "name": name, "group": group, "price": round(float(latest[t]), 2), "chg_pct": round(float(chg), 2), "score": round(float(chg), 2)})
+    result = {"period": period, "items": items}
+    _HEATMAP_CACHE[period] = {"mtime": _mt, "data": result}
+    return result
 
 
 def get_holdings_metrics(etf: str):
@@ -202,6 +214,8 @@ def get_holdings_metrics(etf: str):
     if yf_df.empty or "Close" not in yf_df.columns:
         return {"etf": etf, "holdings_count": len(holdings), "golden": [], "all": []}
 
+    float_cols = yf_df.select_dtypes("float64").columns
+    yf_df[float_cols] = yf_df[float_cols].astype("float32")
     close_df = yf_df["Close"] if isinstance(yf_df.columns, pd.MultiIndex) else yf_df
     df = compute_metrics(close_df).sort_values("total_rank", ascending=False).round(4)
     all_rows = df.to_dict(orient="records")
