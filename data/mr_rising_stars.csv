@@ -1,0 +1,92 @@
+ticker,sector,sub_industry,20R,60R,120R,Accel,Rank,Price
+SMTK,BamHI,半導體材料 (Semiconductor Materials),96.7,89.6,0.1,96.6,55.2,0.34
+WING,"Consumer, Cyclical",Retail,93.5,20.2,7.1,86.4,29.6,158.19
+CERT,"Consumer, Non-cyclical",Biotechnology,93.6,20.6,9.0,84.7,30.5,5.78
+ZENA,BamHI,無人機 (Drones),83.7,0.6,0.5,83.2,17.2,1.41
+KLAR,BamHI,金融科技與支付 (Fintech & Payments),88.1,87.9,6.8,81.3,55.5,18.84
+EU,BamHI,鈾礦 (Uranium),90.5,18.2,10.3,80.2,29.5,1.68
+LIF,BamHI,AI 應用軟體 (AI Apps),91.0,68.9,12.8,78.2,50.9,47.67
+CAI,"Consumer, Non-cyclical",Healthcare-Products,85.6,22.5,8.1,77.5,29.3,17.97
+DUOL,Technology,Software,87.3,80.0,10.9,76.5,53.8,124.31
+RBLX,Technology,Software,83.5,23.7,7.6,76.0,29.2,51.81
+ELF,"Consumer, Non-cyclical",Cosmetics/Personal Care,94.9,24.5,19.8,75.1,36.7,63.98
+SOFI,Financial,Diversified Finan Serv,83.6,49.6,8.7,74.9,40.1,17.75
+ARQQ,BamHI,純血量子計算 (Pure Quantum),99.4,93.9,26.4,73.1,68.0,21.96
+RIVN,"Consumer, Cyclical",Auto Manufacturers,88.8,36.6,16.1,72.6,38.8,16.15
+BMI,BamHI,科技儀器 (Scientific Instruments),85.4,16.0,14.5,70.9,29.3,134.42
+HOOD,Communications,Internet,97.3,92.0,26.7,70.6,66.9,104.68
+RDDT,Communications,Internet,84.9,76.2,14.6,70.3,53.3,167.29
+UPST,BamHI,金融科技與支付 (Fintech & Payments),80.1,72.8,10.0,70.1,49.1,31.97
+RGEN,"Consumer, Non-cyclical",Healthcare-Products,88.8,63.1,18.9,70.0,50.6,131.53
+FBIN,Industrial,Building Materials,92.5,53.4,23.4,69.0,49.2,42.49
+W,Communications,Internet,97.1,69.8,28.2,68.9,58.6,89.03
+RGTI,BamHI,純血量子計算 (Pure Quantum),90.0,81.0,21.5,68.5,59.0,20.09
+CPNG,Communications,Internet,87.7,32.5,19.3,68.4,38.3,18.22
+AVTR,"Consumer, Non-cyclical",Healthcare-Products,92.0,76.9,24.4,67.6,58.9,9.56
+GPK,Industrial,Packaging&Containers,81.0,75.1,13.6,67.3,51.7,10.85
+QBTS,BamHI,純血量子計算 (Pure Quantum),91.5,90.6,24.2,67.3,64.2,23.3
+AI,BamHI,AI 應用軟體 (AI Apps),81.1,78.4,14.0,67.1,53.1,10.34
+BLDR,Industrial,Building Materials,84.1,28.2,17.1,67.0,35.0,80.9
+NCLH,"Consumer, Cyclical",Leisure Time,95.5,46.0,28.8,66.8,49.0,20.58
+ROCK,BamHI,住宅建材 (Building Materials),88.3,31.5,21.8,66.5,39.0,41.22
+SGI,"Consumer, Cyclical",Home Furnishings,86.9,37.6,24.0,62.9,42.0,75.82
+BKNG,Communications,Internet,79.9,38.6,19.6,60.3,39.3,173.44
+QLYS,BamHI,資安 (Cybersecurity),78.2,72.6,18.8,59.5,52.2,110.64
+FND,"Consumer, Cyclical",Retail,82.8,42.5,23.6,59.2,43.0,53.03
+AYI,Industrial,Electrical Compo&Equip,83.2,60.4,24.4,58.8,50.6,315.24
+GPC,"Consumer, Cyclical",Retail,87.6,51.7,28.9,58.7,49.8,109.51
+DLTR,"Consumer, Cyclical",Retail,89.7,44.9,30.9,58.7,48.2,111.07
+CDW,Communications,Internet,90.6,44.5,31.8,58.7,48.7,126.21
+CRL,"Consumer, Non-cyclical",Healthcare-Services,89.2,66.8,30.6,58.6,56.8,184.16
+HIMS,BamHI,網路平台與新經濟 (Internet Platforms),98.3,93.2,40.0,58.4,72.9,33.94
+EXPE,Communications,Internet,81.8,42.1,24.9,56.9,43.2,243.27
+SPCE,BamHI,太空概念股 (Space),96.6,87.7,41.3,55.3,70.9,3.3
+ESAB,Industrial,Machinery-Diversified,86.1,55.3,31.0,55.1,51.7,103.96
+ALK,"Consumer, Cyclical",Airlines,94.7,82.7,39.7,55.0,67.9,50.24
+IBM,Technology,Computers,75.9,42.0,21.0,54.9,40.4,245.57
+TECH,"Consumer, Non-cyclical",Healthcare-Products,92.4,54.6,37.9,54.5,55.5,56.93
+IP,Basic Materials,Forest Products&Paper,93.1,46.8,39.2,54.0,53.0,37.47
+COF,Financial,Diversified Finan Serv,75.2,59.3,22.3,52.9,47.7,203.56
+CXT,Technology,Computers,89.5,51.2,37.2,52.3,53.2,46.03
+SNOW,Technology,Software,96.9,88.0,45.7,51.1,72.8,225.3
+POOL,"Consumer, Cyclical",Distribution/Wholesale,78.4,34.4,27.3,51.1,40.4,200.11
+CRH,Industrial,Building Materials,79.6,48.2,28.4,51.1,46.6,112.27
+BTBT,BamHI,加密貨幣(Crypto),85.8,82.3,35.2,50.5,64.2,2.02
+WFC,Financial,Banks,78.9,47.9,28.5,50.4,46.4,83.63
+AXP,Financial,Diversified Finan Serv,80.0,64.7,30.3,49.7,54.0,343.35
+A,"Consumer, Non-cyclical",Healthcare-Products,79.2,58.4,31.1,48.2,51.6,125.69
+AAL,"Consumer, Cyclical",Airlines,93.5,91.6,46.4,47.2,73.9,16.0
+MLM,Industrial,Building Materials,82.0,47.0,35.2,46.8,49.3,606.61
+CCL,"Consumer, Cyclical",Leisure Time,90.3,75.7,43.6,46.8,65.8,31.05
+BMRN,"Consumer, Non-cyclical",Biotechnology,77.3,39.8,31.3,45.9,43.9,55.08
+DV,Technology,Software,75.7,43.2,30.2,45.5,44.5,10.23
+DLO,BamHI,金融科技與支付 (Fintech & Payments),77.4,38.6,32.4,45.0,43.9,12.87
+CRSP,BamHI,醫療生技 (Biotech & Pharma),80.3,67.7,35.9,44.4,57.5,53.87
+LPX,Industrial,Building Materials,79.2,47.7,34.8,44.3,48.8,77.39
+NTRA,"Consumer, Non-cyclical",Healthcare-Products,82.5,70.1,39.5,43.1,60.3,230.14
+HAYW,Industrial,Building Materials,77.8,54.6,35.0,42.8,51.4,15.08
+UAL,"Consumer, Cyclical",Airlines,92.6,80.4,50.0,42.6,70.7,119.8
+HRL,"Consumer, Non-cyclical",Food,88.2,55.1,47.3,40.9,58.6,24.32
+LOAR,Industrial,Aerospace/Defense,83.9,68.7,43.8,40.1,61.8,68.93
+BBWI,"Consumer, Cyclical",Retail,94.0,67.5,54.2,39.8,67.5,20.71
+VST,Utilities,Electric,82.6,49.3,43.1,39.5,53.5,162.14
+HEI,Industrial,Aerospace/Defense,82.7,74.0,44.0,38.7,63.8,339.72
+RCL,"Consumer, Cyclical",Leisure Time,93.8,65.8,55.3,38.5,67.2,312.65
+AXTA,Basic Materials,Chemicals,89.7,79.7,51.6,38.1,70.5,34.15
+BROS,"Consumer, Cyclical",Retail,95.0,84.1,57.3,37.7,75.5,69.64
+VMC,Industrial,Building Materials,86.7,64.2,49.0,37.6,62.6,303.12
+HD,"Consumer, Cyclical",Retail,76.7,41.8,40.7,35.9,48.3,337.6
+BBY,"Consumer, Cyclical",Retail,93.1,74.3,58.0,35.0,71.5,74.84
+MHK,Industrial,Building Materials,83.4,60.0,48.4,35.0,60.0,113.52
+BAC,Financial,Banks,81.2,70.8,46.6,34.7,63.2,56.81
+TNL,"Consumer, Cyclical",Lodging,91.1,58.7,56.5,34.5,64.3,77.46
+TDG,Industrial,Aerospace/Defense,76.2,62.3,42.2,34.0,57.0,1310.31
+BIRK,"Consumer, Cyclical",Apparel,98.0,83.9,64.4,33.6,78.9,48.17
+HPQ,Technology,Computers,80.2,77.0,47.2,33.0,65.7,23.09
+JPM,Financial,Banks,78.3,65.0,46.2,32.1,60.2,332.32
+M,"Consumer, Cyclical",Retail,93.3,85.5,61.3,32.0,77.4,24.47
+TLN,Utilities,Electric,94.5,86.7,62.9,31.6,78.7,432.65
+SLGN,Industrial,Packaging&Containers,83.1,58.5,51.7,31.4,60.7,42.77
+AMCR,Industrial,Packaging&Containers,80.6,53.9,49.4,31.3,57.4,41.7
+CR,Industrial,Machinery-Diversified,92.3,75.2,62.1,30.2,73.4,210.94
+RPM,Basic Materials,Chemicals,79.8,64.3,49.8,30.0,61.6,109.11

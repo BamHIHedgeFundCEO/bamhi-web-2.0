@@ -23,14 +23,15 @@ from fastapi import Depends, FastAPI  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 
 from backend.auth import get_current_user  # noqa: E402
-from backend.routers import dark_pool, equity, insider, macro, models, notes, screener, sector_rotation, sector_strength, world_sectors  # noqa: E402
+from backend.routers import dark_pool, equity, insider, macro, market_watch, models, notes, screener, sector_rotation, sector_strength, world_sectors  # noqa: E402
 from backend.services.insider import bg_update, init_cache  # noqa: E402
 
 app = FastAPI(title="BamHI Quant API", version="2.0.0")
 
 
 def _run_daily_digest():
-    """APScheduler 每日排程 — 推送 Discord 摘要。"""
+    """APScheduler 每日排程 — 推送 Discord 摘要 + 市場觀察三報。"""
+    today = date.today().isoformat()
     try:
         from backend.services.insider import get_radar
         from backend.services.discord_notify import send_daily_digest
@@ -38,9 +39,15 @@ def _run_daily_digest():
         items, _, _ = get_radar(1, "buy_amount")
         top_buys = sorted(items, key=lambda x: x["buy_amount"], reverse=True)[:5]
         top_sells = sorted(items, key=lambda x: x["sell_amount"], reverse=True)[:5]
-        send_daily_digest(top_buys, top_sells, date.today().isoformat())
+        send_daily_digest(top_buys, top_sells, today)
     except Exception as e:
         print(f"[scheduler] daily digest 失敗: {e}")
+
+    try:
+        from backend.services.discord_notify import send_market_watch_report
+        send_market_watch_report(today)
+    except Exception as e:
+        print(f"[scheduler] 市場觀察三報失敗: {e}")
 
 
 # Load persisted cache on startup (Supabase → JSON fallback, no EDGAR fetch at startup)
@@ -100,3 +107,4 @@ app.include_router(equity.router)
 app.include_router(notes.router)
 app.include_router(screener.router)
 app.include_router(insider.router)
+app.include_router(market_watch.router)
