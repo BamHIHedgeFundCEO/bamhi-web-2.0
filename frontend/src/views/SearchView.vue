@@ -73,23 +73,6 @@
         </div>
       </template>
 
-      <!-- 財務報表 -->
-      <template v-else-if="tab === 'finance'">
-        <h3>近期財務報表（近四季）</h3>
-        <div v-if="p.financials.rows.length" class="fin-wrap">
-          <table class="fin">
-            <thead><tr><th>指標</th><th v-for="c in p.financials.columns" :key="c">{{ c }}</th></tr></thead>
-            <tbody>
-              <tr v-for="row in p.financials.rows" :key="row.metric">
-                <td class="metric-name">{{ row.metric }}</td>
-                <td v-for="c in p.financials.columns" :key="c" class="mono">{{ fmtFin(row.metric, row[c]) }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <p v-else class="ph">無法取得損益表資料。</p>
-      </template>
-
       <!-- 內部人交易 -->
       <template v-else-if="tab === 'insider'">
         <div class="insider-header">
@@ -172,7 +155,6 @@ const PERIODS = ['6mo', '1y', '2y', '5y', '10y', 'max']
 const TABS = [
   { key: 'chart', label: '📈 技術線圖' },
   { key: 'info', label: '🏢 基本資料' },
-  { key: 'finance', label: '📊 財務報表' },
   { key: 'insider', label: '👤 內部人交易' },
 ]
 
@@ -209,14 +191,6 @@ const insiderMarks = computed(() => {
   return { buys, sells }
 })
 
-const PCT_ROWS = new Set(['營收年增率 (YoY)', '毛利率 (Gross Margin)', '淨利率 (Net Margin)'])
-const MONEY_ROWS = new Set(['營收 (Revenue)', '營運現金流 (Operating CF)', '自由現金流 (Free CF)'])
-function fmtFin(metric, v) {
-  if (v === null || v === undefined) return 'N/A'
-  if (PCT_ROWS.has(metric)) return `${v.toFixed(2)} %`
-  if (MONEY_ROWS.has(metric)) return `${v.toLocaleString()} M`
-  return v.toFixed(2)
-}
 
 const compositeOption = computed(() => ({
   xAxis: { type: 'category', data: p.value?.chart.dates ?? [], axisLabel: { color: '#94a3b8' }, axisLine: { lineStyle: { color: '#1f2d40' } } },

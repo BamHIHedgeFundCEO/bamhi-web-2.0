@@ -50,8 +50,7 @@ def _compute_indicators(hist: pd.DataFrame) -> pd.DataFrame:
     return hist
 
 
-def _fmp_fundamentals(ticker: str, info: dict) -> pd.DataFrame:
-    income_stmt = pd.DataFrame()
+def _fmp_fundamentals(ticker: str, info: dict) -> None:
     try:
         p = requests.get(f"https://financialmodelingprep.com/stable/profile?symbol={ticker}&apikey={FMP_API_KEY}", timeout=10).json()
         if p:
@@ -69,52 +68,6 @@ def _fmp_fundamentals(ticker: str, info: dict) -> pd.DataFrame:
     except Exception as e:
         print(f"FMP 基本資料失敗: {e}")
 
-    try:
-        is_resp = requests.get(f"https://financialmodelingprep.com/stable/income-statement?symbol={ticker}&period=quarter&limit=5&apikey={FMP_API_KEY}", timeout=10).json()
-        cf_resp = requests.get(f"https://financialmodelingprep.com/stable/cash-flow-statement?symbol={ticker}&period=quarter&limit=4&apikey={FMP_API_KEY}", timeout=10).json()
-        if is_resp and cf_resp:
-            df_is = pd.DataFrame(is_resp if isinstance(is_resp, list) else [is_resp])
-            df_cf = pd.DataFrame(cf_resp if isinstance(cf_resp, list) else [cf_resp])
-            if not df_is.empty and not df_cf.empty:
-                df_is.set_index("date", inplace=True)
-                df_cf.set_index("date", inplace=True)
-                if "grossProfit" in df_is and "revenue" in df_is:
-                    df_is["grossProfitRatio"] = df_is["grossProfit"] / df_is["revenue"]
-                if "netIncome" in df_is and "revenue" in df_is:
-                    df_is["netIncomeRatio"] = df_is["netIncome"] / df_is["revenue"]
-                df_is["revenue_YoY"] = df_is["revenue"].pct_change(periods=-4) if len(df_is) >= 5 else None
-                combined = pd.concat([df_is.head(4), df_cf.head(4)], axis=1).T
-                mapping = {"revenue": "營收 (Revenue)", "revenue_YoY": "營收年增率 (YoY)", "grossProfitRatio": "毛利率 (Gross Margin)",
-                           "netIncomeRatio": "淨利率 (Net Margin)", "eps": "單季 EPS", "operatingCashFlow": "營運現金流 (Operating CF)",
-                           "freeCashFlow": "自由現金流 (Free CF)"}
-                avail = [c for c in mapping if c in combined.index]
-                income_stmt = combined.loc[avail].rename(index=mapping)
-    except Exception as e:
-        print(f"FMP 財報失敗: {e}")
-    return income_stmt
-
-
-def _financials_to_records(df: pd.DataFrame) -> list[dict]:
-    """財報 DataFrame (index=指標, columns=季度) → 前端易渲染的列結構。"""
-    if df.empty:
-        return {"columns": [], "rows": []}
-    pct_rows = {"營收年增率 (YoY)", "毛利率 (Gross Margin)", "淨利率 (Net Margin)"}
-    money_rows = {"營收 (Revenue)", "營運現金流 (Operating CF)", "自由現金流 (Free CF)"}
-    out = []
-    for metric in df.index:
-        row = {"metric": metric}
-        for col in df.columns:
-            v = df.at[metric, col]
-            if pd.isna(v) or v is None:
-                row[str(col)] = None
-            elif metric in pct_rows:
-                row[str(col)] = round(float(v) * 100, 2)
-            elif metric in money_rows:
-                row[str(col)] = round(float(v) / 1e6, 1)  # → 百萬
-            else:
-                row[str(col)] = round(float(v), 2)
-        out.append(row)
-    return {"columns": [str(c) for c in df.columns], "rows": out}
 
 
 def _translate_zh(text: str) -> str | None:
@@ -151,7 +104,7 @@ def get_profile(ticker: str, period: str = "2y", interval: str = "1d"):
 
     hist = _compute_indicators(hist)
     info = {"currentPrice": float(hist["Close"].iloc[-1])}
-    income_stmt = _fmp_fundamentals(ticker, info)
+    _fmp_fundamentals(ticker, info)
 
     if "previousClose" not in info:
         info["previousClose"] = float(hist["Close"].iloc[-2]) if len(hist) > 1 else info["currentPrice"]
@@ -200,7 +153,6 @@ def get_profile(ticker: str, period: str = "2y", interval: str = "1d"):
             "signals_up": [dates[i] for i, v in enumerate(hist["Signal_Up"]) if v],
             "signals_down": [dates[i] for i, v in enumerate(hist["Signal_Down"]) if v],
         },
-        "financials": _financials_to_records(income_stmt),
     }
     if len(_CACHE) >= _CACHE_MAX:
         oldest = min(_CACHE, key=lambda k: _CACHE[k]["ts"])
