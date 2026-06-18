@@ -6,6 +6,7 @@
 各功能 router 在模組遷移時逐一掛上 (app.include_router(...))，
 資料運算重用既有 data_engine / data_pipeline。
 """
+import gc
 import os
 import threading
 
@@ -56,14 +57,19 @@ init_cache()
 _digest_hour = int(os.getenv("DIGEST_HOUR_EST", "22"))
 _scheduler = BackgroundScheduler(timezone="US/Eastern")
 _scheduler.add_job(_run_daily_digest, CronTrigger(hour=_digest_hour, minute=0))
-# EDGAR fetch: 60 sec after startup via Timer, then every 30 min via scheduler
+# EDGAR fetch: 60 sec after startup via Timer, then every 60 min via scheduler
 def _first_fetch():
     print("[scheduler] timer fired, calling bg_update", flush=True)
     bg_update(20)
+    gc.collect()
+
+def _scheduled_fetch():
+    bg_update(20)
+    gc.collect()
 
 threading.Timer(60.0, _first_fetch).start()
 print("[scheduler] timer set (60s)", flush=True)
-_scheduler.add_job(lambda: bg_update(20), IntervalTrigger(minutes=30))
+_scheduler.add_job(_scheduled_fetch, IntervalTrigger(minutes=60))
 _scheduler.start()
 
 # ── CORS (§1.2)：開發 localhost:5173 + 生產 Vercel domain ──

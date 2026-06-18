@@ -4,6 +4,7 @@
 純 pandas / numpy；yfinance 僅用於全板塊唯一一次 bulk download，
 依 period 行程內快取，overview 與 detail 共用。
 """
+import gc
 import hashlib
 import json
 import os
@@ -14,9 +15,10 @@ import pandas as pd
 
 from backend.config.sectors import SECTOR_LEADERS, TRACKED_SECTORS
 
-# bulk download 快取：period → {ts, data}
+# bulk download 快取：period → {ts, data}，最多保留 2 個 period
 _BULK_CACHE: dict = {}
 _BULK_TTL = 3600
+_BULK_MAX = 2
 
 RRG_SHORT = 14
 RRG_LONG = 50
@@ -84,7 +86,14 @@ def _get_bulk(period: str) -> pd.DataFrame:
     import yfinance as yf
 
     raw = yf.download(_all_unique_tickers(), period=period, progress=False, auto_adjust=False)
+    # downcast float64 → float32 to halve RAM for this large MultiIndex DataFrame
+    for col in raw.select_dtypes("float64").columns:
+        raw[col] = raw[col].astype("float32")
+    if len(_BULK_CACHE) >= _BULK_MAX:
+        oldest = min(_BULK_CACHE, key=lambda k: _BULK_CACHE[k]["ts"])
+        del _BULK_CACHE[oldest]
     _BULK_CACHE[period] = {"ts": time.time(), "data": raw}
+    gc.collect()
     return raw
 
 
