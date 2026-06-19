@@ -17,6 +17,16 @@ _TTL = 3600
 _CACHE_MAX = 200
 
 
+def _sanitize(obj):
+    if isinstance(obj, float):
+        return None if not np.isfinite(obj) else obj
+    if isinstance(obj, dict):
+        return {k: _sanitize(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_sanitize(v) for v in obj]
+    return obj
+
+
 def _compute_indicators(hist: pd.DataFrame) -> pd.DataFrame:
     for ma in (5, 10, 20, 60, 120, 240):
         hist[f"MA_{ma}"] = hist["Close"].rolling(ma).mean()
@@ -156,6 +166,7 @@ def get_profile(ticker: str, period: str = "2y", interval: str = "1d"):
             "signals_down": [dates[i] for i, v in enumerate(hist["Signal_Down"]) if v],
         },
     }
+    data = _sanitize(data)
     if len(_CACHE) >= _CACHE_MAX:
         oldest = min(_CACHE, key=lambda k: _CACHE[k]["ts"])
         del _CACHE[oldest]
