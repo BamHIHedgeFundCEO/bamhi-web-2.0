@@ -31,6 +31,8 @@ def get_naaim_latest():
     try:
         from selenium import webdriver
         from selenium.webdriver.chrome.options import Options
+        from selenium.webdriver.chrome.service import Service
+        from webdriver_manager.chrome import ChromeDriverManager
         import io
         import os
         import time
@@ -62,7 +64,7 @@ def get_naaim_latest():
         }
         chrome_options.add_experimental_option("prefs", prefs)
         
-        driver = webdriver.Chrome(options=chrome_options)
+        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
         print("      🤖 [Selenium] 啟動瀏覽器載入 NAAIM 頁面...")
         driver.get(url)
         time.sleep(2)
@@ -174,8 +176,8 @@ def update():
             if 'SP500_Price' in full_df.columns:
                 full_df = full_df.drop(columns=['SP500_Price'])
 
-            full_df['Date'] = pd.to_datetime(full_df['Date']).dt.normalize()
-            sp500['Date'] = pd.to_datetime(sp500['Date']).dt.normalize()
+            full_df['Date'] = pd.to_datetime(full_df['Date']).astype('datetime64[us]')
+            sp500['Date'] = pd.to_datetime(sp500['Date']).astype('datetime64[us]')
 
             full_df = pd.merge_asof(full_df.sort_values('Date'),
                                     sp500.sort_values('Date'),

@@ -36,7 +36,7 @@ jobs:
       - name: Set up Chrome
         uses: browser-actions/setup-chrome@v1
         with:
-          chrome-version: 150
+          chrome-version: stable
 
       # 3. 安裝需要的套件（從 requirements.txt，避免手寫清單漏裝）
       - name: Install dependencies

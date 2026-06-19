@@ -18,20 +18,19 @@ def get_aaii_latest():
     
     try:
         import undetected_chromedriver as uc
+        from webdriver_manager.chrome import ChromeDriverManager
         import time
-        
+
         print("      🤖 [Selenium] 啟動瀏覽器載入 AAII 頁面並嘗試繞過防火牆...")
-        
+
         options = uc.ChromeOptions()
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
-        options.add_argument("--window-size=1,1")            # 視窗縮到最小
-        options.add_argument("--window-position=10000,10000")  # 移到螢幕之外，使用者看不到
-        
-        # ⚠️ 注意：不使用 headless=True，因為 Incapsula 能識破所有 Headless 指紋
-        # 視窗會在背景安靜出現約 30 秒後自動關閉，不影響您的操作
-        # version_main 不寫死，讓 undetected-chromedriver 自動對齊當前環境的 Chrome 版本
-        driver = uc.Chrome(options=options)
+        options.add_argument("--window-size=1,1")
+        options.add_argument("--window-position=10000,10000")
+
+        driver_path = ChromeDriverManager().install()
+        driver = uc.Chrome(driver_executable_path=driver_path, options=options)
         driver.get(url)
         
         # 動態等待，直到網頁出現表格為止 (最多 25 秒)
@@ -165,8 +164,8 @@ def update():
             if 'SP500_Price' in full_df.columns:
                 full_df = full_df.drop(columns=['SP500_Price'])
 
-            full_df['Date'] = pd.to_datetime(full_df['Date']).dt.normalize()
-            sp500['Date'] = pd.to_datetime(sp500['Date']).dt.normalize()
+            full_df['Date'] = pd.to_datetime(full_df['Date']).astype('datetime64[us]')
+            sp500['Date'] = pd.to_datetime(sp500['Date']).astype('datetime64[us]')
 
             full_df = pd.merge_asof(full_df.sort_values('Date'),
                                     sp500.sort_values('Date'),
