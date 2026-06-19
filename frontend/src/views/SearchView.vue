@@ -26,8 +26,8 @@
       <!-- 標題 + 價格 -->
       <h1 class="title">{{ p.company_name }} <span class="tkr">({{ p.ticker }})</span></h1>
       <div class="price-row" :class="up ? 'up' : 'down'">
-        <span class="price">${{ p.price.current.toFixed(2) }}</span>
-        <span class="chg">{{ p.price.change >= 0 ? '+' : '' }}{{ p.price.change.toFixed(2) }} ({{ p.price.change_pct >= 0 ? '+' : '' }}{{ p.price.change_pct.toFixed(2) }}%)</span>
+        <span class="price">${{ p.price.current != null ? p.price.current.toFixed(2) : '—' }}</span>
+        <span class="chg">{{ p.price.change >= 0 ? '+' : '' }}{{ p.price.change != null ? p.price.change.toFixed(2) : '—' }} ({{ p.price.change_pct >= 0 ? '+' : '' }}{{ p.price.change_pct != null ? p.price.change_pct.toFixed(2) : '—' }}%)</span>
       </div>
 
       <!-- 估值 -->
