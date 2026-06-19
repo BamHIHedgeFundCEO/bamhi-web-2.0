@@ -116,8 +116,14 @@ def get_profile(ticker: str, period: str = "2y", interval: str = "1d"):
     signal = "🔴 過熱警示 (賣訊)" if comp > 75 else "🟢 超跌機會 (買訊)" if comp < 25 else "⚪ 觀望持有"
 
     dates = [d.strftime("%Y-%m-%d %H:%M") if interval == "1h" else d.strftime("%Y-%m-%d") for d in hist.index]
+    def _safe(v, dg):
+        try:
+            f = float(v)
+            return None if not np.isfinite(f) else round(f, dg)
+        except Exception:
+            return None
     def col(c, dg=4):
-        return [None if pd.isna(v) else round(float(v), dg) for v in hist[c]] if c in hist else []
+        return [_safe(v, dg) for v in hist[c]] if c in hist else []
 
     cur = info["currentPrice"]
     prev = info["previousClose"]
@@ -135,8 +141,7 @@ def get_profile(ticker: str, period: str = "2y", interval: str = "1d"):
         "trend_status": trend, "signal_status": signal, "composite": round(comp, 1),
         "chart": {
             "dates": dates, "interval": interval,
-            "candle": [[None if pd.isna(o) else round(float(o), 3), None if pd.isna(cl) else round(float(cl), 3),
-                        None if pd.isna(lo) else round(float(lo), 3), None if pd.isna(hi) else round(float(hi), 3)]
+            "candle": [[_safe(o, 3), _safe(cl, 3), _safe(lo, 3), _safe(hi, 3)]
                        for o, cl, lo, hi in zip(hist["Open"], hist["Close"], hist["Low"], hist["High"])],
             "ma": {f"MA{w}": col(f"MA_{w}") for w in (5, 10, 20, 60, 120, 240)},
             "composite": col("Composite", 2),
