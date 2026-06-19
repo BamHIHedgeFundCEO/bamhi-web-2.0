@@ -104,13 +104,18 @@ def get_profile(ticker: str, period: str = "2y", interval: str = "1d"):
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     })
     stock = yf.Ticker(ticker, session=session)
-    try:
-        hist = stock.history(period=period, interval=interval)
-    except Exception as e:
-        print(f"[equity] yfinance error {ticker}: {e}")
-        hist = pd.DataFrame()
+    hist = pd.DataFrame()
+    for attempt in range(3):
+        try:
+            hist = stock.history(period=period, interval=interval)
+            if not hist.empty:
+                break
+        except Exception as e:
+            print(f"[equity] yfinance error {ticker} attempt {attempt+1}: {e}")
+        if attempt < 2:
+            time.sleep(2 ** attempt)
     if hist.empty:
-        print(f"[equity] empty history for {ticker}")
+        print(f"[equity] empty history for {ticker} after 3 attempts")
         return None
 
     hist = _compute_indicators(hist)
