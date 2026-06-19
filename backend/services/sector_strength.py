@@ -12,6 +12,7 @@ import pandas as pd
 
 _OVERVIEW_CACHE: dict = {}   # {"mtime": float, "data": dict}
 _HEATMAP_CACHE: dict = {}   # period → {"mtime": float, "data": dict}
+_PRICES_CACHE: dict = {}    # {"mtime": float, "data": pd.DataFrame}
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 DATA_DIR = os.path.join(BASE_DIR, "data")
@@ -45,10 +46,18 @@ def _load_prices() -> pd.DataFrame:
     path = os.path.join(DATA_DIR, "sector_strength.csv")
     if not os.path.exists(path):
         return pd.DataFrame()
+    try:
+        mt = os.path.getmtime(path)
+    except OSError:
+        return pd.DataFrame()
+    if _PRICES_CACHE.get("mtime") == mt:
+        return _PRICES_CACHE["data"]
     df = pd.read_csv(path)
     df["date"] = pd.to_datetime(df["date"])
     float_cols = df.select_dtypes("float64").columns
     df[float_cols] = df[float_cols].astype("float32")
+    _PRICES_CACHE["mtime"] = mt
+    _PRICES_CACHE["data"] = df
     return df
 
 
