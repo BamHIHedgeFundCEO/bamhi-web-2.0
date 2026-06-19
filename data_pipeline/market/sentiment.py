@@ -164,10 +164,13 @@ def update():
             # 🔥 修正 2：合併前先刪除舊有的 SP500_Price，避免欄位名稱衝突 (_x, _y)
             if 'SP500_Price' in full_df.columns:
                 full_df = full_df.drop(columns=['SP500_Price'])
-                
-            full_df = pd.merge_asof(full_df.sort_values('Date'), 
-                                    sp500.sort_values('Date'), 
-                                    on='Date', 
+
+            full_df['Date'] = pd.to_datetime(full_df['Date']).dt.normalize()
+            sp500['Date'] = pd.to_datetime(sp500['Date']).dt.normalize()
+
+            full_df = pd.merge_asof(full_df.sort_values('Date'),
+                                    sp500.sort_values('Date'),
+                                    on='Date',
                                     direction='backward')
     except Exception as e:
         print(f"      [Error] S&P 500 下載失敗: {e}")
