@@ -119,11 +119,12 @@ def get_profile(ticker: str, period: str = "2y", interval: str = "1d"):
         return None
 
     hist = _compute_indicators(hist)
-    info = {"currentPrice": float(hist["Close"].iloc[-1])}
+    close_valid = hist["Close"].dropna()
+    info = {"currentPrice": float(close_valid.iloc[-1]) if len(close_valid) > 0 else float("nan")}
     _fmp_fundamentals(ticker, info)
 
     if "previousClose" not in info:
-        info["previousClose"] = float(hist["Close"].iloc[-2]) if len(hist) > 1 else info["currentPrice"]
+        info["previousClose"] = float(close_valid.iloc[-2]) if len(close_valid) > 1 else info["currentPrice"]
 
     # 趨勢 / 訊號燈號
     last = hist.iloc[-1]

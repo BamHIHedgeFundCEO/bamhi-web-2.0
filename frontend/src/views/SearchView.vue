@@ -30,11 +30,6 @@
         <span class="chg">{{ p.price.change >= 0 ? '+' : '' }}{{ p.price.change != null ? p.price.change.toFixed(2) : '—' }} ({{ p.price.change_pct >= 0 ? '+' : '' }}{{ p.price.change_pct != null ? p.price.change_pct.toFixed(2) : '—' }}%)</span>
       </div>
 
-      <!-- 估值 -->
-      <div class="metrics">
-        <MetricCard label="總市值" :value="p.valuation.market_cap_b !== null ? p.valuation.market_cap_b + ' B' : 'N/A'" delta-suffix="" />
-      </div>
-
       <!-- 趨勢/訊號 -->
       <div class="info-row">
         <div class="info-chip">趨勢狀態：<b>{{ p.trend_status }}</b></div>
@@ -140,7 +135,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import { useEquityStore } from '@/stores/equity'
 import { useInsiderStore } from '@/stores/insider'
-import MetricCard from '@/components/ui/MetricCard.vue'
+
 import CandleChart from '@/components/charts/CandleChart.vue'
 import TimeSeriesChart from '@/components/charts/TimeSeriesChart.vue'
 
