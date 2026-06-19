@@ -74,5 +74,6 @@ jobs:
           git add data/*.csv data/sector_rotation/*.json
           # 如果有資料更新才 commit，沒更新就不做動作 (避免報錯)
           git commit -m "📈 Auto-update market data [skip ci]" || exit 0
+          git checkout -- .
           git pull --rebase origin main
           git push
