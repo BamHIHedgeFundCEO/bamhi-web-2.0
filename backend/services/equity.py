@@ -91,9 +91,11 @@ def get_profile(ticker: str, period: str = "2y", interval: str = "1d"):
     stock = yf.Ticker(ticker)
     try:
         hist = stock.history(period=period, interval=interval)
-    except Exception:
+    except Exception as e:
+        print(f"[equity] yfinance error {ticker}: {e}")
         hist = pd.DataFrame()
     if hist.empty:
+        print(f"[equity] empty history for {ticker}")
         return None
 
     hist = _compute_indicators(hist)
