@@ -331,7 +331,7 @@ def get_signals(period: str = "1y"):
         else:
             sig = _signal_from_df(df)
         out.append({"sector": name, "leaders": SECTOR_LEADERS.get(name, []), **sig})
-    return {"period": period, "signals": out}
+    return _sanitize({"period": period, "signals": out})
 
 
 def list_sectors() -> list[dict]:
@@ -390,9 +390,14 @@ def _f(v, digits=None):
 
 
 def _sanitize(obj):
-    """Recursively replace inf/-inf/nan with None in any nested structure."""
-    if isinstance(obj, float):
-        return None if not np.isfinite(obj) else obj
+    """Recursively coerce all numpy scalars and replace inf/-inf/nan with None."""
+    if isinstance(obj, np.bool_):
+        return bool(obj)
+    if isinstance(obj, np.integer):
+        return int(obj)
+    if isinstance(obj, (float, np.floating)):
+        fv = float(obj)
+        return None if not np.isfinite(fv) else fv
     if isinstance(obj, dict):
         return {k: _sanitize(v) for k, v in obj.items()}
     if isinstance(obj, list):
