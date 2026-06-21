@@ -12,6 +12,7 @@ import gc
 import json
 import os
 import sys
+import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
@@ -31,7 +32,9 @@ MIN_ADV = 300_000
 DAYS = 200
 GRANGER_LAG = 3
 GRANGER_ALPHA = 0.05
-BATCH = 200
+BATCH = 100          # smaller batches → less rate-limit pressure
+BATCH_SLEEP = 2      # seconds between batches
+BATCH_RETRIES = 3    # retry failed batch up to 3x with exponential backoff
 
 
 def update():
@@ -124,42 +127,58 @@ def _build_universe() -> pd.DataFrame:
     return universe.reset_index(drop=True)
 
 
+def _download_batch(batch: list) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Download one batch; returns (close_df, vol_df) or empty DataFrames on failure."""
+    raw = yf.download(batch, period=f"{DAYS}d", auto_adjust=True, threads=False, progress=False)
+    if raw.empty:
+        return pd.DataFrame(), pd.DataFrame()
+    if isinstance(raw.columns, pd.MultiIndex):
+        close_df = raw["Close"]
+        vol_df = raw["Volume"]
+        if isinstance(close_df, pd.Series):
+            close_df = close_df.to_frame(name=batch[0])
+            vol_df = vol_df.to_frame(name=batch[0])
+    else:
+        close_df = raw[["Close"]].rename(columns={"Close": batch[0]}) if "Close" in raw.columns else pd.DataFrame()
+        vol_df = raw[["Volume"]].rename(columns={"Volume": batch[0]}) if "Volume" in raw.columns else pd.DataFrame()
+    return close_df, vol_df
+
+
 def _fetch_prices(tickers: list) -> tuple:
     all_close = {}
     all_vol = {}
 
-    for i in range(0, len(tickers), BATCH):
-        batch = [t for t in tickers[i : i + BATCH] if t]
+    batches = [
+        [t for t in tickers[i : i + BATCH] if t]
+        for i in range(0, len(tickers), BATCH)
+    ]
+
+    for idx, batch in enumerate(batches):
         if not batch:
             continue
-        try:
-            raw = yf.download(
-                batch,
-                period=f"{DAYS}d",
-                auto_adjust=True,
-                threads=True,
-                progress=False,
-            )
-            if raw.empty:
-                continue
+        if idx > 0:
+            time.sleep(BATCH_SLEEP)
 
-            if isinstance(raw.columns, pd.MultiIndex):
-                close_df = raw["Close"]
-                vol_df = raw["Volume"]
-                if isinstance(close_df, pd.Series):
-                    close_df = close_df.to_frame(name=batch[0])
-                    vol_df = vol_df.to_frame(name=batch[0])
-            else:
-                close_df = raw[["Close"]].rename(columns={"Close": batch[0]}) if "Close" in raw.columns else pd.DataFrame()
-                vol_df = raw[["Volume"]].rename(columns={"Volume": batch[0]}) if "Volume" in raw.columns else pd.DataFrame()
+        close_df, vol_df = pd.DataFrame(), pd.DataFrame()
+        for attempt in range(BATCH_RETRIES):
+            try:
+                close_df, vol_df = _download_batch(batch)
+                if not close_df.empty:
+                    break
+            except Exception as e:
+                wait = 5 * (2 ** attempt)
+                print(f"      [warn] batch {idx} attempt {attempt+1} failed: {e}; retry in {wait}s")
+                time.sleep(wait)
 
-            for t in close_df.columns:
-                if t in batch:
-                    all_close[t] = close_df[t].ffill()
-                    if t in vol_df.columns:
-                        all_vol[t] = vol_df[t].ffill()
-        except Exception as e:
-            print(f"      [warn] batch {i}-{i+BATCH} failed: {e}")
+        if close_df.empty:
+            print(f"      [warn] batch {idx} gave up after {BATCH_RETRIES} attempts")
+            continue
+
+        for t in close_df.columns:
+            if t in batch:
+                all_close[t] = close_df[t].ffill()
+                if t in vol_df.columns:
+                    all_vol[t] = vol_df[t].ffill()
 
     if not all_close:
         return pd.DataFrame(), pd.DataFrame()
