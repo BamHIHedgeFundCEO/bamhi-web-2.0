@@ -205,12 +205,17 @@ def scan_vcp(tickers: list[str], raw_data: pd.DataFrame) -> list[dict]:
         if len(spy_close) >= 60:
             spy_3m = spy_close.pct_change(60).iloc[-1] * 100
 
-    close_last, vol_last = df_c.iloc[-1], df_v.iloc[-1]
-    ma50, ma150, ma200 = df_c.rolling(50).mean().iloc[-1], df_c.rolling(150).mean().iloc[-1], df_c.rolling(200).mean().iloc[-1]
-    high_52w = df_c.iloc[-252:].max()
+    # ffill so last row is last valid trading day (today may be NaN if market not closed)
+    df_c_f = df_c.ffill()
+    df_v_f = df_v.ffill()
+    df_h_f = df_h.ffill()
+    df_l_f = df_l.ffill()
+    close_last, vol_last = df_c_f.iloc[-1], df_v_f.iloc[-1]
+    ma50, ma150, ma200 = df_c_f.rolling(50).mean().iloc[-1], df_c_f.rolling(150).mean().iloc[-1], df_c_f.rolling(200).mean().iloc[-1]
+    high_52w = df_c_f.iloc[-252:].max()
     trend_pass = (close_last > ma150) & (close_last > ma200) & (ma50 > ma150) & (close_last >= high_52w * 0.75)
 
-    tr = df_h - df_l
+    tr = df_h_f - df_l_f
     safe_close = close_last.replace(0, 1)
     atr_now = tr.iloc[-5:].mean() / safe_close * 100
     atr_base = tr.iloc[-20:].mean() / safe_close * 100
@@ -220,8 +225,8 @@ def scan_vcp(tickers: list[str], raw_data: pd.DataFrame) -> list[dict]:
     # 近 60 交易日切 3 段(各 20 日)，比較每段「高低區間 ÷ 均價」，逐段變小 = 波動收斂，
     # 比單一 5d/20d 比值更貼近 VCP 的「連續收縮」結構。
     def _win_range(sl):
-        base = df_c.iloc[sl].mean().replace(0, np.nan)
-        return (df_h.iloc[sl].max() - df_l.iloc[sl].min()) / base * 100
+        base = df_c_f.iloc[sl].mean().replace(0, np.nan)
+        return (df_h_f.iloc[sl].max() - df_l_f.iloc[sl].min()) / base * 100
 
     r_old, r_mid, r_new = _win_range(slice(-60, -40)), _win_range(slice(-40, -20)), _win_range(slice(-20, None))
     shrink1, shrink2 = r_mid < r_old, r_new < r_mid
@@ -230,18 +235,18 @@ def scan_vcp(tickers: list[str], raw_data: pd.DataFrame) -> list[dict]:
     tightness = (1 - r_new / r_old.replace(0, np.nan)).clip(0, 1).fillna(0)  # 收得多緊 0~1
     contraction_ok = converging & (r_new < 12)                        # 連續收斂 + 最新段夠緊
 
-    vol_ma20 = df_v.rolling(20).mean().iloc[-1]
+    vol_ma20 = df_v_f.rolling(20).mean().iloc[-1]
     vol_dry = vol_last < vol_ma20 * 0.6
-    ret_50 = df_c.iloc[-50:].pct_change()
-    up_vol = (df_v.iloc[-50:] * (ret_50 > 0)).sum()
-    down_vol = (df_v.iloc[-50:] * (ret_50 < 0)).sum()
+    ret_50 = df_c_f.iloc[-50:].pct_change()
+    up_vol = (df_v_f.iloc[-50:] * (ret_50 > 0)).sum()
+    down_vol = (df_v_f.iloc[-50:] * (ret_50 < 0)).sum()
     ud_ratio = pd.Series(np.where(down_vol > 0, up_vol / down_vol, 0.0), index=valid)
 
-    ma20 = df_c.rolling(20).mean().iloc[-1]
+    ma20 = df_c_f.rolling(20).mean().iloc[-1]
     dist_ma20 = np.where(ma20 > 0, (close_last / ma20 - 1) * 100, 0)
-    m1, m10 = df_c.pct_change(1).iloc[-1] * 100, df_c.pct_change(10).iloc[-1] * 100
-    m20, m60 = df_c.pct_change(20).iloc[-1] * 100, df_c.pct_change(60).iloc[-1] * 100
-    rs_3m = df_c.pct_change(60).iloc[-1] * 100 - spy_3m
+    m1, m10 = df_c_f.pct_change(1).iloc[-1] * 100, df_c_f.pct_change(10).iloc[-1] * 100
+    m20, m60 = df_c_f.pct_change(20).iloc[-1] * 100, df_c_f.pct_change(60).iloc[-1] * 100
+    rs_3m = df_c_f.pct_change(60).iloc[-1] * 100 - spy_3m
     dist_high = (close_last / high_52w - 1) * 100
 
     res = pd.DataFrame({
@@ -418,7 +423,9 @@ def get_detail(sector: str, period: str):
         return {"sector": sector, "found": False}
 
     dates = [d.strftime("%Y-%m-%d") for d in df.index]
-    last = df.iloc[-1]
+    # Use last row with valid Sector_Close; today's bar may be NaN if market not closed
+    valid_df = df.dropna(subset=["Sector_Close"])
+    last = valid_df.iloc[-1] if not valid_df.empty else df.iloc[-1]
     prev_close = _f(df["Sector_Close"].iloc[-2]) if len(df) > 1 else _f(last["Sector_Close"])
     prev_close = prev_close or 0.0
     cur_close = _f(last["Sector_Close"]) or 0.0
