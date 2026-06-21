@@ -7,9 +7,12 @@
 資料運算重用既有 data_engine / data_pipeline。
 """
 import gc
+import json
+import math
 import os
 import threading
 
+import numpy as np
 from dotenv import load_dotenv
 
 # 先載入 backend/.env，再 import 會讀取環境變數的模組 (auth.py 在 import 時讀 secret)
@@ -23,12 +26,36 @@ from apscheduler.triggers.interval import IntervalTrigger
 from fastapi import Depends, FastAPI  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from fastapi.middleware.gzip import GZipMiddleware  # noqa: E402
+from fastapi.responses import JSONResponse  # noqa: E402
+
+
+def _deep_sanitize(obj):
+    """Recursively convert numpy scalars and replace non-finite floats with None."""
+    if isinstance(obj, np.bool_):
+        return bool(obj)
+    if isinstance(obj, np.integer):
+        return int(obj)
+    if isinstance(obj, (float, np.floating)):
+        f = float(obj)
+        return None if not math.isfinite(f) else f
+    if isinstance(obj, np.ndarray):
+        return _deep_sanitize(obj.tolist())
+    if isinstance(obj, dict):
+        return {k: _deep_sanitize(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_deep_sanitize(v) for v in obj]
+    return obj
+
+
+class SafeJSONResponse(JSONResponse):
+    def render(self, content) -> bytes:
+        return json.dumps(_deep_sanitize(content), ensure_ascii=False).encode("utf-8")
 
 from backend.auth import get_current_user  # noqa: E402
 from backend.routers import dark_pool, equity, insider, macro, market_watch, models, notes, screener, sector_rotation, sector_strength, world_sectors  # noqa: E402
 from backend.services.insider import bg_update, init_cache  # noqa: E402
 
-app = FastAPI(title="BamHI Quant API", version="2.0.0")
+app = FastAPI(title="BamHI Quant API", version="2.0.0", default_response_class=SafeJSONResponse)
 
 
 def _run_daily_digest():
