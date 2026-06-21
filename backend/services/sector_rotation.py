@@ -352,16 +352,19 @@ def get_overview(period: str):
     heatmap, rrg, trail, close_series = [], [], [], {}
     for name, df in per_sector.items():
         short = name.split(" ")[0]
-        if "Momentum_Diff" in df and pd.notna(df.iloc[-1]["Momentum_Diff"]):
-            heatmap.append({"sector": name, "short": short, "momentum_diff": round(float(df.iloc[-1]["Momentum_Diff"]), 2), "score": round(float(df.iloc[-1]["Momentum_Diff"]), 2)})
-        v = df.dropna(subset=["RS_Ratio", "RS_Momentum"])
+        md = _f(df.iloc[-1].get("Momentum_Diff"), 2)
+        if md is not None:
+            heatmap.append({"sector": name, "short": short, "momentum_diff": md, "score": md})
+        v = df.replace([np.inf, -np.inf], np.nan).dropna(subset=["RS_Ratio", "RS_Momentum"])
         if not v.empty:
             last = v.iloc[-1]
-            q = rrg_quadrant(float(last["RS_Ratio"]), float(last["RS_Momentum"]))
-            rrg.append({"sector": name, "short": short, "rs_ratio": round(float(last["RS_Ratio"]), 2), "rs_momentum": round(float(last["RS_Momentum"]), 2), **q})
-            tail = v.iloc[-20:]
-            trail.append({"sector": name, "short": short, "color": q["color"],
-                          "points": [[round(float(r), 3), round(float(m), 3)] for r, m in zip(tail["RS_Ratio"], tail["RS_Momentum"])]})
+            rr, rm = _f(last["RS_Ratio"]), _f(last["RS_Momentum"])
+            if rr is not None and rm is not None:
+                q = rrg_quadrant(rr, rm)
+                rrg.append({"sector": name, "short": short, "rs_ratio": _f(rr, 2), "rs_momentum": _f(rm, 2), **q})
+                tail = v.iloc[-20:]
+                trail.append({"sector": name, "short": short, "color": q["color"],
+                              "points": [[_f(r, 3), _f(m, 3)] for r, m in zip(tail["RS_Ratio"], tail["RS_Momentum"])]})
         if "Sector_Close" in df:
             close_series[short] = df["Sector_Close"]
 
@@ -369,7 +372,7 @@ def get_overview(period: str):
     if len(close_series) >= 2:
         corr = pd.DataFrame(close_series).pct_change().dropna().corr()
         correlation = {"labels": corr.columns.tolist(),
-                       "matrix": [[round(float(corr.iloc[i, j]), 3) for j in range(len(corr))] for i in range(len(corr))]}
+                       "matrix": [[_f(corr.iloc[i, j], 3) for j in range(len(corr))] for i in range(len(corr))]}
 
     return {"period": period, "heatmap": heatmap, "rrg": rrg, "rrg_trail": trail, "correlation": correlation}
 
