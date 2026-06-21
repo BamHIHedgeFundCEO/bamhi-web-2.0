@@ -374,8 +374,21 @@ def get_overview(period: str):
     return {"period": period, "heatmap": heatmap, "rrg": rrg, "rrg_trail": trail, "correlation": correlation}
 
 
+def _f(v, digits=None):
+    """Safe float: returns None for NaN/inf/-inf."""
+    if v is None:
+        return None
+    try:
+        fv = float(v)
+    except (TypeError, ValueError):
+        return None
+    if not np.isfinite(fv):
+        return None
+    return round(fv, digits) if digits is not None else fv
+
+
 def _series(s: pd.Series, digits=4):
-    return [None if pd.isna(v) else round(float(v), digits) for v in s]
+    return [_f(v, digits) for v in s]
 
 
 def get_detail(sector: str, period: str):
@@ -388,15 +401,19 @@ def get_detail(sector: str, period: str):
 
     dates = [d.strftime("%Y-%m-%d") for d in df.index]
     last = df.iloc[-1]
-    prev_close = float(df["Sector_Close"].iloc[-2]) if len(df) > 1 else float(last["Sector_Close"])
-    daily_pct = (float(last["Sector_Close"]) - prev_close) / prev_close * 100 if prev_close else 0.0
+    prev_close = _f(df["Sector_Close"].iloc[-2]) if len(df) > 1 else _f(last["Sector_Close"])
+    prev_close = prev_close or 0.0
+    cur_close = _f(last["Sector_Close"]) or 0.0
+    daily_pct = (cur_close - prev_close) / prev_close * 100 if prev_close else 0.0
 
-    crowd = float(last["Crowdedness"]) * 100 if pd.notna(last["Crowdedness"]) else 0.0
-    crowd90 = float(last["Crowdedness_90p"]) * 100 if pd.notna(last["Crowdedness_90p"]) else 0.0
+    crowd = (_f(last["Crowdedness"]) or 0.0) * 100
+    crowd90 = (_f(last["Crowdedness_90p"]) or 0.0) * 100
     overheated = crowd >= crowd90 and crowd90 > 0
-    close_v, ma20_v, ma60_v = float(last["Sector_Close"]), float(last["MA20"]), float(last["MA60"])
-    rs_slope_pct = float(last["RS_Slope"]) * 100 if pd.notna(last["RS_Slope"]) else 0.0
-    m10 = float(last["M10"]) if pd.notna(last["M10"]) else 0.0
+    close_v = _f(last["Sector_Close"]) or 0.0
+    ma20_v = _f(last["MA20"]) or 0.0
+    ma60_v = _f(last["MA60"]) or 0.0
+    rs_slope_pct = (_f(last["RS_Slope"]) or 0.0) * 100
+    m10 = _f(last["M10"]) or 0.0
 
     if overheated:
         status = {"level": "error", "text": f"🚨【擁擠度防護罩觸發】資金佔大盤均量比 ({crowd:.2f}%) 突破過去一年 90% 高位 ({crowd90:.2f}%)，散戶情緒擁擠，嚴格執行減碼紀律。"}
@@ -409,8 +426,8 @@ def get_detail(sector: str, period: str):
     else:
         status = {"level": "warning", "text": "🟡【動能衰減／整理區間】月線之上但短線動能減弱或 RS 下滑，可能橫盤消化。"}
 
-    rs_r = float(last["RS_Ratio"]) if pd.notna(last["RS_Ratio"]) else None
-    rs_m = float(last["RS_Momentum"]) if pd.notna(last["RS_Momentum"]) else None
+    rs_r = _f(last["RS_Ratio"])
+    rs_m = _f(last["RS_Momentum"])
     quad = rrg_quadrant(rs_r, rs_m) if rs_r is not None and rs_m is not None else None
 
     ud = df["UD_DV_Ratio"]
@@ -418,18 +435,17 @@ def get_detail(sector: str, period: str):
         "sector": sector, "found": True, "period": period,
         "leaders": SECTOR_LEADERS.get(sector, []), "tickers": TRACKED_SECTORS[sector],
         "metrics": {
-            "daily_pct": round(daily_pct, 2), "m5": round(float(last["M5"]), 2) if pd.notna(last["M5"]) else None,
-            "m10": round(m10, 2), "m20": round(float(last["M20"]), 2) if pd.notna(last["M20"]) else None,
-            "momentum_diff": round(float(last["Momentum_Diff"]), 2) if pd.notna(last["Momentum_Diff"]) else None,
-            "rs_slope_pct": round(rs_slope_pct, 2), "crowd": round(crowd, 2), "crowd_90p": round(crowd90, 2),
-            "overheated": overheated, "rs_ratio": round(rs_r, 2) if rs_r else None, "rs_momentum": round(rs_m, 2) if rs_m else None,
+            "daily_pct": _f(daily_pct, 2), "m5": _f(last["M5"], 2),
+            "m10": _f(m10, 2), "m20": _f(last["M20"], 2),
+            "momentum_diff": _f(last["Momentum_Diff"], 2),
+            "rs_slope_pct": _f(rs_slope_pct, 2), "crowd": _f(crowd, 2), "crowd_90p": _f(crowd90, 2),
+            "overheated": overheated, "rs_ratio": _f(rs_r, 2), "rs_momentum": _f(rs_m, 2),
             "quadrant": quad, "status": status,
         },
         "chart": {
             "dates": dates,
             # ECharts candlestick 順序: [open, close, low, high]
-            "candle": [[None if pd.isna(o) else round(float(o), 3), None if pd.isna(c) else round(float(c), 3),
-                        None if pd.isna(lo) else round(float(lo), 3), None if pd.isna(hi) else round(float(hi), 3)]
+            "candle": [[_f(o, 3), _f(c, 3), _f(lo, 3), _f(hi, 3)]
                        for o, c, lo, hi in zip(df["Sector_Open"], df["Sector_Close"], df["Sector_Low"], df["Sector_High"])],
             "ma10": _series(df["MA10"]), "ma20": _series(df["MA20"]), "ma60": _series(df["MA60"]),
             "ma120": _series(df["MA120"]), "ma200": _series(df["MA200"]),
