@@ -183,8 +183,8 @@ def _fetch_prices(tickers: list) -> tuple:
     if not all_close:
         return pd.DataFrame(), pd.DataFrame()
 
-    close = pd.DataFrame(all_close)
-    volume = pd.DataFrame(all_vol)
+    close = pd.DataFrame(all_close).ffill()
+    volume = pd.DataFrame(all_vol).ffill()
 
     # Drop today's incomplete bar if market hasn't closed yet
     today = pd.Timestamp.now(tz="America/New_York").normalize().tz_localize(None)
@@ -215,7 +215,7 @@ def _rs_rating(close: pd.DataFrame) -> pd.DataFrame:
         "60R":   r60,
         "120R":  r120,
         "Rank":  rank,
-        "Price": close.iloc[-1],
+        "Price": close.ffill().iloc[-1],
     })
     df.index.name = "ticker"
     return df
