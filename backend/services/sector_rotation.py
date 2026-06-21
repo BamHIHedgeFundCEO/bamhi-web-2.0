@@ -426,8 +426,7 @@ def get_detail(sector: str, period: str):
     # Use last row with valid Sector_Close; today's bar may be NaN if market not closed
     valid_df = df.dropna(subset=["Sector_Close"])
     last = valid_df.iloc[-1] if not valid_df.empty else df.iloc[-1]
-    prev_close = _f(df["Sector_Close"].iloc[-2]) if len(df) > 1 else _f(last["Sector_Close"])
-    prev_close = prev_close or 0.0
+    prev_close = (_f(valid_df.iloc[-2]["Sector_Close"]) or 0.0) if len(valid_df) > 1 else 0.0
     cur_close = _f(last["Sector_Close"]) or 0.0
     daily_pct = (cur_close - prev_close) / prev_close * 100 if prev_close else 0.0
 
