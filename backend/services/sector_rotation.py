@@ -374,11 +374,10 @@ def get_overview(period: str):
         correlation = {"labels": corr.columns.tolist(),
                        "matrix": [[_f(corr.iloc[i, j], 3) for j in range(len(corr))] for i in range(len(corr))]}
 
-    return {"period": period, "heatmap": heatmap, "rrg": rrg, "rrg_trail": trail, "correlation": correlation}
+    return _sanitize({"period": period, "heatmap": heatmap, "rrg": rrg, "rrg_trail": trail, "correlation": correlation})
 
 
 def _f(v, digits=None):
-    """Safe float: returns None for NaN/inf/-inf."""
     if v is None:
         return None
     try:
@@ -388,6 +387,17 @@ def _f(v, digits=None):
     if not np.isfinite(fv):
         return None
     return round(fv, digits) if digits is not None else fv
+
+
+def _sanitize(obj):
+    """Recursively replace inf/-inf/nan with None in any nested structure."""
+    if isinstance(obj, float):
+        return None if not np.isfinite(obj) else obj
+    if isinstance(obj, dict):
+        return {k: _sanitize(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_sanitize(v) for v in obj]
+    return obj
 
 
 def _series(s: pd.Series, digits=4):
@@ -434,7 +444,7 @@ def get_detail(sector: str, period: str):
     quad = rrg_quadrant(rs_r, rs_m) if rs_r is not None and rs_m is not None else None
 
     ud = df["UD_DV_Ratio"]
-    return {
+    result = {
         "sector": sector, "found": True, "period": period,
         "leaders": SECTOR_LEADERS.get(sector, []), "tickers": TRACKED_SECTORS[sector],
         "metrics": {
@@ -459,3 +469,4 @@ def get_detail(sector: str, period: str):
         },
         "vcp": scan_vcp(TRACKED_SECTORS[sector], raw),
     }
+    return _sanitize(result)
