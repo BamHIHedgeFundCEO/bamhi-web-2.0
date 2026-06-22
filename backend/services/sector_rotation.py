@@ -86,6 +86,11 @@ def _get_bulk(period: str) -> pd.DataFrame:
     import yfinance as yf
 
     raw = yf.download(_all_unique_tickers(), period=period, progress=False, auto_adjust=False)
+    # Drop phantom rows: yfinance occasionally appends a future/incomplete row where
+    # nearly all Close prices are NaN. Drop any trailing rows where <5% of tickers have data.
+    if "Close" in raw.columns.get_level_values(0):
+        valid_ratio = raw["Close"].notna().mean(axis=1)
+        raw = raw[valid_ratio >= 0.05]
     # downcast float64 → float32 to halve RAM for this large MultiIndex DataFrame
     for col in raw.select_dtypes("float64").columns:
         raw[col] = raw[col].astype("float32")
@@ -244,7 +249,15 @@ def scan_vcp(tickers: list[str], raw_data: pd.DataFrame) -> list[dict]:
 
     ma20 = df_c_f.rolling(20).mean().iloc[-1]
     dist_ma20 = np.where(ma20 > 0, (close_last / ma20 - 1) * 100, 0)
-    m1, m10 = df_c_f.pct_change(1).iloc[-1] * 100, df_c_f.pct_change(10).iloc[-1] * 100
+    # Use raw (non-ffilled) pct_change so we get the true last-valid-day change
+    # rather than 0.0 when yfinance appends a phantom NaN row that gets ffill'd
+    def _last_valid_pct(df_raw, n):
+        return df_raw.apply(
+            lambda col: col.dropna().pct_change(n).iloc[-1] * 100
+            if len(col.dropna()) > n else 0.0
+        )
+    m1  = _last_valid_pct(df_c, 1)
+    m10 = _last_valid_pct(df_c, 10)
     m20, m60 = df_c_f.pct_change(20).iloc[-1] * 100, df_c_f.pct_change(60).iloc[-1] * 100
     rs_3m = df_c_f.pct_change(60).iloc[-1] * 100 - spy_3m
     dist_high = (close_last / high_52w - 1) * 100
@@ -299,7 +312,8 @@ def rrg_quadrant(rs_ratio: float, rs_momentum: float) -> dict:
 
 def _signal_from_df(df: pd.DataFrame) -> dict:
     """從板塊 df 推導首頁訊號 (對應 components/sector_signals.get_signal_for_sector)。"""
-    last = df.iloc[-1]
+    valid = df.dropna(subset=["Sector_Close", "MA20"])
+    last = valid.iloc[-1] if not valid.empty else df.iloc[-1]
     close_v = float(last.get("Sector_Close", 0))
     ma20_v = float(last.get("MA20", 0)) if pd.notna(last.get("MA20")) else 0
     ma60_v = float(last.get("MA60", 0)) if pd.notna(last.get("MA60")) else 0
