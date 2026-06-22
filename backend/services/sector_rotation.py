@@ -357,9 +357,11 @@ def get_overview(period: str):
     heatmap, rrg, trail, close_series = [], [], [], {}
     for name, df in per_sector.items():
         short = name.split(" ")[0]
-        md = _f(df.iloc[-1].get("Momentum_Diff"), 2)
-        if md is not None:
-            heatmap.append({"sector": name, "short": short, "momentum_diff": md, "score": md})
+        valid_md = df.dropna(subset=["Momentum_Diff"])
+        if not valid_md.empty:
+            md = _f(valid_md.iloc[-1]["Momentum_Diff"], 2)
+            if md is not None:
+                heatmap.append({"sector": name, "short": short, "momentum_diff": md, "score": md})
         v = df.replace([np.inf, -np.inf], np.nan).dropna(subset=["RS_Ratio", "RS_Momentum"])
         if not v.empty:
             last = v.iloc[-1]
