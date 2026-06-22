@@ -51,7 +51,9 @@ const treeData = computed(() => {
       _meta: it,
     })
   }
-  return Object.values(groups)
+  const result = Object.values(groups)
+  // Single group → flatten so ECharts shows leaf nodes directly (not group shell)
+  return result.length === 1 ? result[0].children : result
 })
 
 const option = computed(() => ({
