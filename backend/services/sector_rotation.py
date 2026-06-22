@@ -311,31 +311,58 @@ def rrg_quadrant(rs_ratio: float, rs_momentum: float) -> dict:
 
 
 def _signal_from_df(df: pd.DataFrame) -> dict:
-    """從板塊 df 推導首頁訊號 (對應 components/sector_signals.get_signal_for_sector)。"""
-    valid = df.dropna(subset=["Sector_Close", "MA20"])
-    last = valid.iloc[-1] if not valid.empty else df.iloc[-1]
-    close_v = float(last.get("Sector_Close", 0))
-    ma20_v = float(last.get("MA20", 0)) if pd.notna(last.get("MA20")) else 0
-    ma60_v = float(last.get("MA60", 0)) if pd.notna(last.get("MA60")) else 0
-    rs_slope = float(last.get("RS_Slope", 0)) if pd.notna(last.get("RS_Slope")) else 0
-    m10 = float(last.get("M10", 0)) if pd.notna(last.get("M10")) else 0
-    crowd = float(last.get("Crowdedness", 0)) * 100 if pd.notna(last.get("Crowdedness")) else 0
-    crowd90 = float(last.get("Crowdedness_90p", 0)) * 100 if pd.notna(last.get("Crowdedness_90p")) else 999
+    """從板塊 df 推導首頁訊號，以 RRG 四象限為主色，MA 排列判斷趨勢結構。"""
+    valid_rrg = df.dropna(subset=["RS_Ratio", "RS_Momentum"])
+    valid_ma = df.dropna(subset=["Sector_Close", "MA20", "MA60"])
+    last_rrg = valid_rrg.iloc[-1] if not valid_rrg.empty else None
+    last_ma = valid_ma.iloc[-1] if not valid_ma.empty else None
 
-    if crowd >= crowd90 and crowd90 > 0:
-        return {"emoji": "🚨", "status": "過熱警報", "color": "red",
-                "detail": f"擁擠度 {crowd:.1f}% 突破 90 分位 {crowd90:.1f}%，籌碼極度擁擠，注意大戶派發風險！"}
-    if close_v < ma20_v:
-        return {"emoji": "🔴", "status": "空頭弱勢", "color": "orange",
-                "detail": f"指數跌破月線（收盤 {close_v:.2f} < MA20 {ma20_v:.2f}），建議觀望。"}
-    if close_v > ma20_v and ma20_v > ma60_v and rs_slope > 0 and m10 > 0:
-        return {"emoji": "🟢", "status": "強勢多頭", "color": "green",
-                "detail": "Close > MA20 > MA60，RS 向上發散，主升段，可尋找 VCP 突破點。"}
-    if close_v > ma20_v and rs_slope > 0:
+    # MA 排列判斷
+    if last_ma is not None:
+        close_v = float(last_ma["Sector_Close"])
+        ma20_v = float(last_ma["MA20"])
+        ma60_v = float(last_ma["MA60"])
+        above_ma20 = close_v > ma20_v
+        bullish_ma = above_ma20 and ma20_v > ma60_v  # 多頭排列
+        bearish_ma = close_v < ma20_v                 # 空頭排列
+    else:
+        above_ma20 = bullish_ma = bearish_ma = False
+
+    # RRG 象限
+    if last_rrg is not None:
+        rs_ratio = float(last_rrg["RS_Ratio"])
+        rs_mom = float(last_rrg["RS_Momentum"])
+    else:
+        rs_ratio = rs_mom = 100.0
+
+    leading    = rs_ratio > 100 and rs_mom > 100
+    weakening  = rs_ratio > 100 and rs_mom <= 100
+    improving  = rs_ratio <= 100 and rs_mom > 100
+    # lagging = rs_ratio <= 100 and rs_mom <= 100
+
+    if leading and bullish_ma:
+        return {"emoji": "🟢", "status": "多頭排列", "color": "green",
+                "detail": "Close > MA20 > MA60，RS 位於領先象限並持續加速，主升段核心板塊。"}
+    if leading and not bearish_ma:
+        return {"emoji": "🟢", "status": "多頭排列", "color": "green",
+                "detail": "RS 強勢領先，指數站穩月線，趨勢向上，可尋找 VCP 突破點。"}
+    if improving and bullish_ma:
         return {"emoji": "🔵", "status": "初步轉強", "color": "blue",
-                "detail": "指數剛站上月線且 RS 翻轉向上，有落底回升跡象，可關注 VCP 候選股。"}
-    return {"emoji": "🟡", "status": "整理蓄力", "color": "yellow",
-            "detail": "月線之上但動能衰減或 RS 下滑，板塊可能橫盤消化或面臨賣壓。"}
+                "detail": "RS 由落後轉改善，MA 多頭排列初形成，潛在輪動候選，可小量關注。"}
+    if improving:
+        return {"emoji": "🔵", "status": "初步轉強", "color": "blue",
+                "detail": "RS 動能由弱轉強，指數回升中，有落底跡象，可關注 VCP 候選股。"}
+    if weakening and bullish_ma:
+        return {"emoji": "🟡", "status": "盤整蓄力", "color": "yellow",
+                "detail": "RS 位於轉弱象限，動能減速中，MA 仍多頭排列，注意高點風險，觀察量縮收斂。"}
+    if weakening:
+        return {"emoji": "🟡", "status": "盤整蓄力", "color": "yellow",
+                "detail": "RS 動能減弱，指數橫盤整理，觀望為主，等待量能縮小後的突破訊號。"}
+    if bearish_ma:
+        return {"emoji": "🔴", "status": "空頭排列", "color": "red",
+                "detail": f"指數跌破月線（{close_v:.2f} < MA20 {ma20_v:.2f}），RS 落後象限，建議觀望。"}
+    return {"emoji": "🔴", "status": "空頭排列", "color": "red",
+            "detail": "RS 持續落後且動能惡化，弱勢板塊，建議迴避，等待 RS 翻轉訊號再評估。"}
 
 
 def get_signals(period: str = "1y"):

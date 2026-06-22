@@ -35,7 +35,7 @@
     <section class="signals">
       <div class="signals-head">
         <h2>⚡ 板塊即時訊號推播</h2>
-        <p>基於板塊指數 MA 排列 + 擁擠度防護罩，快速瀏覽所有板塊進出場狀態</p>
+        <p>基於 RRG 象限 + MA 排列結構，快速瀏覽所有板塊趨勢狀態</p>
       </div>
 
       <div v-if="store.signalsLoading" class="ph">正在快速掃描所有板塊訊號（首次需 bulk 下載，稍候）…</div>
