@@ -237,15 +237,15 @@ def _pullback_buy(ticker: str, close: pd.DataFrame, spy: pd.Series | None) -> bo
     c = close[ticker].dropna()
     if len(c) < 55:
         return False
-    if _rsi14(c) >= 60:
+    rsi = _rsi14(c)
+    if rsi >= 60 or rsi <= 30:
         return False
     spy_aligned = spy.reindex(c.index).ffill()
     rel = c / spy_aligned.replace(0, np.nan)
     ma50 = rel.rolling(50).mean()
     if pd.isna(ma50.iloc[-1]) or rel.iloc[-1] <= ma50.iloc[-1]:
         return False
-    slope = float(ma50.iloc[-1]) - float(ma50.iloc[-6])
-    return slope > 0
+    return True
 
 
 def _kings(df_rank: pd.DataFrame, close: pd.DataFrame, spy) -> pd.DataFrame:
