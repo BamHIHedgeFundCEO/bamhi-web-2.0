@@ -3,5 +3,6 @@
   "framework": "vite",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "ignoreCommand": "git log -1 --pretty=%B | grep -q '\\[skip ci\\]' && exit 0 || exit 1",
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }
