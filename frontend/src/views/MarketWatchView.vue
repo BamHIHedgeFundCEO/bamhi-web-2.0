@@ -36,7 +36,8 @@
       <template v-else-if="stars">
         <p v-if="stars.error" class="err">⚠️ {{ stars.error }}</p>
         <p class="meta">更新：{{ stars.updated_at || '—' }}　共 {{ stars.total }} 檔</p>
-        <p class="hint">🚀 門檻：20R&gt;60R&gt;120R（多頭排列）+ 加速度≥30 + 20R≥75</p>
+        <p class="hint">🚀 入選門檻：20R&gt;60R&gt;120R（多頭排列）+ 加速度≥30 + 20R≥75</p>
+        <p class="hint">✓ 追動能：RSI 50–75 + 加速度&gt;40　｜　✓ 等回調：RSI 30–60 + 加速度&gt;40</p>
         <DataTable v-if="stars.items?.length" :columns="starsCols" :rows="stars.items" row-key="ticker" />
         <p v-else class="ph">目前無符合門檻的標的。</p>
       </template>
@@ -156,6 +157,9 @@ const starsCols = [
   { key: '120R', label: '120R', align: 'right', format: (v) => v?.toFixed(1) ?? '—' },
   { key: 'Accel', label: '加速度', align: 'right', format: (v) => v != null ? `+${v.toFixed(1)}` : '—', color: () => 'var(--color-bull)' },
   { key: 'Rank', label: 'RS Rank', align: 'right', format: (v) => v?.toFixed(1) ?? '—' },
+  { key: 'RSI14', label: 'RSI14', align: 'right', format: (v) => v?.toFixed(1) ?? '—', color: rsiColor },
+  { key: 'Entry_Momentum', label: '追動能', align: 'center', format: (v) => v ? '✓' : '—', color: (v) => v ? 'var(--color-bull)' : '' },
+  { key: 'Entry_Pullback', label: '等回調', align: 'center', format: (v) => v ? '✓' : '—', color: (v) => v ? 'var(--color-accent-cyan)' : '' },
   { key: 'Price', label: '價格', align: 'right', format: (v) => v != null ? `$${v.toFixed(2)}` : '—' },
 ]
 

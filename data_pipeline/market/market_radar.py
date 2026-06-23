@@ -78,7 +78,7 @@ def _run():
     kings.to_csv(DATA_DIR / "mr_kings.csv", index=False)
     print(f"      Kings: {len(kings)}")
 
-    stars = _rising_stars(df_rank)
+    stars = _rising_stars(df_rank, close)
     stars.to_csv(DATA_DIR / "mr_rising_stars.csv", index=False)
     print(f"      Rising Stars: {len(stars)}")
 
@@ -266,7 +266,7 @@ def _kings(df_rank: pd.DataFrame, close: pd.DataFrame, spy) -> pd.DataFrame:
     return top3[[c for c in cols if c in top3.columns]].round({"Rank": 1, "20R": 1, "60R": 1, "120R": 1, "Price": 2})
 
 
-def _rising_stars(df_rank: pd.DataFrame) -> pd.DataFrame:
+def _rising_stars(df_rank: pd.DataFrame, close: pd.DataFrame) -> pd.DataFrame:
     df = df_rank.reset_index()
     mask = (
         (df["20R"] > df["60R"]) &
@@ -276,7 +276,15 @@ def _rising_stars(df_rank: pd.DataFrame) -> pd.DataFrame:
     )
     stars = df[mask].copy()
     stars["Accel"] = (stars["20R"] - stars["120R"]).round(1)
-    cols = ["ticker", "sector", "sub_industry", "20R", "60R", "120R", "Accel", "Rank", "Price"]
+
+    def _rsi_safe(t):
+        return _rsi14(close[t].dropna()) if t in close.columns else 50.0
+
+    stars["RSI14"] = stars["ticker"].apply(_rsi_safe).round(1)
+    stars["Entry_Momentum"] = (stars["RSI14"] > 50) & (stars["RSI14"] < 75) & (stars["Accel"] > 40)
+    stars["Entry_Pullback"] = (stars["RSI14"] > 30) & (stars["RSI14"] < 60) & (stars["Accel"] > 40)
+
+    cols = ["ticker", "sector", "sub_industry", "20R", "60R", "120R", "Accel", "Rank", "RSI14", "Entry_Momentum", "Entry_Pullback", "Price"]
     return (
         stars[[c for c in cols if c in stars.columns]]
         .sort_values("Accel", ascending=False)

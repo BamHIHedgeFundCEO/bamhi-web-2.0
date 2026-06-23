@@ -58,6 +58,9 @@ def get_rising_stars() -> dict:
         return hit
     try:
         df = pd.read_csv(path)
+        for col in ("Entry_Momentum", "Entry_Pullback"):
+            if col in df.columns:
+                df[col] = df[col].astype(bool)
         float_cols = df.select_dtypes("float64").columns
         df[float_cols] = df[float_cols].astype("float32")
         items = df.where(pd.notnull(df), None).to_dict(orient="records")
