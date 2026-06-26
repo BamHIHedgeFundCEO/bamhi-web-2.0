@@ -1,283 +1,283 @@
 ticker,sector,sub_industry,Rank,20R,60R,120R,RSI14,Pullback_Buy,Price
-DD,Basic Materials,Chemicals,99.4,100.0,99.6,99.0,88.7,False,137.82
-MRVL,Technology,Semiconductors,98.9,99.0,99.2,98.7,55.5,True,276.7
-SNDK,Technology,Computers,98.9,95.2,99.7,100.0,55.8,True,1914.46
-DELL,Technology,Computers,98.8,99.4,98.4,98.9,68.6,False,434.06
-SEZL,BamHI,金融科技與支付 (Fintech & Payments),98.5,99.5,98.7,97.7,72.3,False,159.27
-ALAB,Technology,Semiconductors,98.4,97.8,100.0,97.1,62.0,False,399.92
-NBIS,BamHI,算力租借平台 (AI Compute Infra),98.4,97.5,98.6,98.6,57.9,True,259.66
-WDC,Technology,Computers,98.3,96.6,97.9,99.4,58.9,True,643.83
-MU,Technology,Semiconductors,98.0,92.4,99.4,99.3,56.8,True,1048.51
-KEEL,BamHI,算力租借平台 (AI Compute Infra),98.0,94.3,99.8,98.0,60.7,False,6.12
-ICHR,BamHI,半導體設備 (Semiconductor Equipment),97.9,96.7,96.6,99.9,59.7,True,89.38
-APPS,BamHI,AI 應用軟體 (AI Apps),97.9,99.9,99.9,94.9,70.0,False,10.14
-COHU,BamHI,半導體設備 (Semiconductor Equipment),97.9,98.3,97.3,98.3,60.5,False,63.66
-STX,BamHI,存儲記憶體 (Storage),97.8,93.0,98.8,99.2,59.7,True,993.25
-UCTT,BamHI,半導體設備 (Semiconductor Equipment),97.5,97.0,95.5,99.7,58.2,True,108.42
-QMCO,BamHI,純血量子計算 (Pure Quantum),97.4,99.7,99.1,94.6,56.5,True,13.42
-OSCR,BamHI,醫療保險 (Managed Care),97.3,99.1,98.9,94.8,67.1,False,29.16
-SIMO,BamHI,存儲記憶體 (Storage),96.5,85.4,99.3,99.3,64.3,False,321.66
-ARM,BamHI,半導體/GPU 設計 (Semiconductors & GPU),96.2,87.0,98.3,98.8,52.7,True,359.08
-CRDO,BamHI,光通訊 (Optical Communication),96.2,96.1,98.9,93.5,59.6,True,268.99
-STRL,BamHI,資料中心基建(Data_Center_Infra),95.2,85.0,97.0,98.5,54.0,True,867.23
-BE,BamHI,微電網與獨立能源島(Microgrids & Energy Islands),94.6,77.7,98.1,99.5,61.1,False,326.19
-SNX,Industrial,Electronics,94.1,93.6,94.9,93.6,66.0,False,283.22
-CRS,Basic Materials,Iron/Steel,93.7,98.4,91.8,93.2,77.3,False,580.95
-CIFR,BamHI,算力租借平台 (AI Compute Infra),93.3,89.3,95.9,92.8,56.2,True,26.22
-BBCP,BamHI,水泥砂石 (Aggregates & Cement),93.1,99.6,93.1,90.0,75.4,False,11.16
-RVMD,"Consumer, Non-cyclical",Biotechnology,93.1,83.4,95.3,95.8,66.4,False,169.77
-NWL,"Consumer, Cyclical",Housewares,92.6,99.8,93.3,88.4,77.0,False,5.51
-ATEN,BamHI,資安 (Cybersecurity),92.4,91.1,91.5,94.1,71.4,False,34.18
-ASX,BamHI,封測 (OSAT),92.4,73.4,96.1,98.1,59.7,True,41.34
-FLEX,Industrial,Electronics,92.3,70.7,97.9,97.5,57.1,True,150.72
-VIRT,Financial,Diversified Finan Serv,92.2,95.7,89.3,93.4,71.5,False,62.35
-HUM,"Consumer, Non-cyclical",Healthcare-Services,92.0,94.8,97.4,85.2,68.7,False,361.64
-UMAC,BamHI,無人機 (Drones),91.5,88.3,93.5,91.0,43.4,True,19.52
-ARQQ,BamHI,純血量子計算 (Pure Quantum),91.2,99.8,98.0,80.1,73.7,False,28.64
-PANW,Communications,Internet,91.2,86.0,96.1,88.9,62.8,False,285.26
-CNC,"Consumer, Non-cyclical",Healthcare-Services,91.0,84.2,96.5,89.0,58.0,True,62.97
-RAL,Industrial,Electronics,90.7,92.0,95.0,85.7,76.3,False,72.2
-WSC,"Consumer, Non-cyclical",Commercial Services,90.6,87.6,93.8,89.0,63.0,False,28.85
-ETSY,Communications,Internet,90.6,96.1,93.2,85.3,75.1,False,78.02
-ATI,Industrial,Aerospace/Defense,89.8,92.5,86.8,91.6,65.3,False,197.59
-VIK,"Consumer, Cyclical",Leisure Time,89.2,92.8,90.6,86.2,74.3,False,103.05
-GLW,Communications,Telecommunications,89.2,70.5,90.8,97.0,57.9,True,205.83
-PENN,"Consumer, Cyclical",Entertainment,88.5,94.3,89.8,84.3,56.9,True,20.38
-CAT,Industrial,Machinery-Constr&Mining,88.5,83.0,87.8,92.0,62.6,False,994.45
-DVA,"Consumer, Non-cyclical",Healthcare-Services,87.8,81.3,85.1,93.7,71.3,False,213.04
-ILMN,"Consumer, Non-cyclical",Biotechnology,87.7,95.4,90.1,81.5,67.2,False,175.09
-PK,Financial,REITS,87.6,94.4,86.9,84.8,67.6,False,14.34
-IBKR,Financial,Diversified Finan Serv,87.4,87.3,88.4,86.5,59.6,True,92.79
-RARE,"Consumer, Non-cyclical",Biotechnology,87.3,97.9,90.5,78.8,70.6,False,29.11
-BRKR,"Consumer, Non-cyclical",Healthcare-Products,87.2,97.5,94.3,74.9,62.1,False,58.44
-DY,BamHI,電網工程設備 (Grid Infrastructure),87.1,90.6,86.9,85.5,58.5,True,483.48
-OGN,"Consumer, Non-cyclical",Pharmaceuticals,86.9,51.2,97.8,93.9,72.7,False,13.48
-AGX,BamHI,資料中心基建(Data_Center_Infra),86.8,82.5,78.8,97.0,58.0,True,732.24
-TKR,Industrial,Metal Fabricate/Hardware,86.8,78.7,87.1,90.6,62.0,False,137.99
-TREX,Industrial,Building Materials,86.8,95.7,85.0,84.2,65.7,False,48.88
-GNRC,Industrial,Electrical Compo&Equip,86.6,64.6,88.8,95.3,57.0,True,284.14
-ESI,Basic Materials,Chemicals,86.5,75.5,85.2,93.2,58.7,True,46.12
-FIX,Industrial,Engineering&Construction,86.4,65.9,87.7,95.5,54.6,True,1954.47
-URI,"Consumer, Non-cyclical",Commercial Services,86.3,87.8,89.7,82.1,61.3,False,1083.72
-NTLA,BamHI,醫療生技 (Biotech & Pharma),86.1,96.8,75.0,91.8,59.8,True,15.5
-CARR,Industrial,Building Materials,85.7,89.3,84.7,84.9,65.6,False,74.06
-CORT,"Consumer, Non-cyclical",Pharmaceuticals,85.1,99.2,97.5,65.7,74.1,False,81.56
-CVS,"Consumer, Non-cyclical",Pharmaceuticals,85.1,87.7,89.1,79.9,68.0,False,101.87
-DAL,"Consumer, Cyclical",Airlines,85.1,89.4,86.7,81.2,72.0,False,90.65
-ECG,Industrial,Engineering&Construction,84.9,70.3,84.0,93.0,56.2,True,158.99
-WSM,"Consumer, Cyclical",Retail,84.5,94.0,83.7,80.4,72.6,False,235.66
-JHX,Industrial,Building Materials,84.3,95.2,87.8,75.2,64.8,False,25.82
-CROX,"Consumer, Cyclical",Apparel,84.2,68.6,91.2,85.1,56.1,True,121.4
-DDOG,Technology,Software,84.2,47.0,96.2,90.7,52.2,True,222.65
-TSM,BamHI,半導體/GPU 設計 (Semiconductors & GPU),83.9,76.3,83.9,87.8,54.7,True,440.83
-BEAM,BamHI,醫療生技 (Biotech & Pharma),83.5,89.0,91.3,73.1,58.4,True,33.9
-LUV,"Consumer, Cyclical",Airlines,83.5,95.9,84.6,76.2,74.5,False,50.94
-OUST,BamHI,激光 (Laser),83.1,32.5,97.7,93.8,51.0,True,40.71
-SN,"Consumer, Cyclical",Home Furnishings,83.0,95.5,84.9,75.0,66.0,False,140.19
-CSCO,Communications,Telecommunications,82.9,53.8,90.7,89.6,55.1,True,119.73
-FCEL,BamHI,微電網與獨立能源島(Microgrids & Energy Islands),82.6,16.8,99.8,98.4,54.9,True,21.56
-MGM,"Consumer, Cyclical",Lodging,82.6,96.4,79.2,79.2,61.0,False,47.09
-OSS,BamHI,AI 伺服器與硬體 (AI Computing Hardware),82.4,25.0,97.2,96.4,46.8,True,16.11
-UAL,"Consumer, Cyclical",Airlines,81.9,97.0,89.4,66.9,72.3,False,130.54
-STT,Financial,Banks,81.4,74.3,85.5,81.0,61.1,False,168.87
-ROKU,Communications,Internet,81.3,74.3,92.0,74.0,58.7,True,135.93
-ARMK,"Consumer, Cyclical",Food Service,81.2,63.3,84.2,87.3,61.8,False,53.93
-GVA,BamHI,水泥砂石 (Aggregates & Cement),81.2,88.9,78.4,80.1,69.0,False,151.88
-BEN,Financial,Diversified Finan Serv,81.2,59.8,88.5,84.5,55.0,True,32.47
-HST,Financial,REITS,81.1,74.1,81.1,84.7,60.9,False,24.58
-MS,Financial,Banks,81.1,81.5,86.1,75.8,60.2,False,219.86
-C,Financial,Banks,80.9,88.4,82.9,75.1,68.3,False,143.59
-MSM,"Consumer, Cyclical",Retail,80.8,76.2,79.6,84.4,59.8,True,116.55
-KMX,"Consumer, Cyclical",Retail,80.8,97.6,73.6,79.6,59.7,True,50.79
-RS,Basic Materials,Iron/Steel,80.8,72.3,81.9,83.9,55.4,True,396.86
-VRNS,BamHI,資安 (Cybersecurity),80.8,95.0,94.7,59.8,71.4,False,37.29
-TEX,BamHI,資料中心基建(Data_Center_Infra),80.7,93.9,74.2,80.7,66.0,False,70.1
-IRM,Financial,REITS,80.7,59.0,82.4,89.9,58.0,True,130.59
-NUE,Basic Materials,Iron/Steel,80.7,49.0,89.6,87.6,46.3,True,240.52
-PRMB,"Consumer, Non-cyclical",Beverages,80.6,59.8,83.3,88.3,58.1,True,24.45
-HOG,"Consumer, Cyclical",Leisure Time,80.5,85.7,81.6,76.9,56.2,True,25.55
-R,Industrial,Transportation,80.1,69.8,81.8,83.6,52.0,True,261.01
-TENB,BamHI,資安 (Cybersecurity),80.0,78.4,93.8,67.1,60.3,False,27.92
-LSTR,Industrial,Transportation,80.0,61.1,82.0,87.4,51.8,True,207.68
-H,"Consumer, Cyclical",Lodging,79.9,84.0,85.6,72.2,62.8,False,197.32
-WST,"Consumer, Non-cyclical",Healthcare-Products,79.9,77.3,86.5,74.5,67.5,False,340.41
-GL,Financial,Insurance,79.8,87.1,79.5,76.4,78.7,False,175.64
-Q,Basic Materials,Chemicals,79.6,36.1,87.2,93.7,52.8,True,158.73
-SWK,Industrial,Hand/Machine Tools,79.6,90.4,80.6,73.1,67.3,False,89.66
-KNX,Industrial,Transportation,79.5,59.3,83.1,86.1,50.3,True,74.52
-CMI,"Consumer, Cyclical",Auto Manufacturers,79.5,66.1,82.2,83.5,54.5,True,694.87
-TFSL,Financial,Savings&Loans,79.4,79.0,77.3,81.7,70.8,False,17.04
-SEI,BamHI,微電網與獨立能源島(Microgrids & Energy Islands),79.4,53.3,80.5,91.3,51.8,True,75.98
-LFUS,Industrial,Electrical Compo&Equip,79.3,38.9,86.0,92.8,51.2,True,463.69
-VIAV,BamHI,光通訊 (Optical Communication),79.1,23.6,87.6,98.4,49.4,True,49.41
-NTRA,"Consumer, Non-cyclical",Healthcare-Products,79.0,98.8,87.4,60.8,72.7,False,259.97
-GWW,"Consumer, Cyclical",Distribution/Wholesale,78.9,77.0,77.1,81.6,63.9,False,1342.57
-DGXX,BamHI,電力公用事業 (Electric Utilities),78.8,3.0,99.0,96.5,42.1,False,5.86
-ATOM,BamHI,半導體材料 (Semiconductor Materials),78.4,1.1,96.6,98.8,42.4,False,7.41
-NOK,BamHI,光通訊 (Optical Communication),78.3,11.8,94.3,95.7,47.8,True,13.81
-TWLO,Technology,Software,78.2,46.0,92.1,80.3,45.5,True,188.34
-IRDM,Communications,Telecommunications,78.0,12.7,91.1,97.4,43.6,False,42.28
-VVV,"Consumer, Non-cyclical",Commercial Services,78.0,92.0,66.4,82.5,69.9,False,39.61
-MNST,"Consumer, Non-cyclical",Beverages,77.7,78.9,81.0,73.6,71.2,False,94.7
-MTZ,Industrial,Engineering&Construction,76.9,51.6,73.8,92.7,56.1,True,393.14
-GE,Industrial,Aerospace/Defense,76.9,91.8,78.9,67.5,73.3,False,365.88
-RRX,Industrial,Machinery-Diversified,76.3,67.3,67.8,89.2,54.0,True,218.75
-PFGC,"Consumer, Non-cyclical",Food,76.3,88.7,78.0,68.3,71.2,False,106.43
-VRT,Industrial,Machinery-Constr&Mining,76.1,39.9,76.0,94.2,49.4,False,316.43
-AUR,"Consumer, Cyclical",Auto Parts&Equipment,76.0,18.0,91.0,90.0,46.0,False,6.23
-CR,Industrial,Machinery-Diversified,75.6,93.4,79.7,62.7,73.3,False,213.87
-BWA,"Consumer, Cyclical",Auto Parts&Equipment,75.5,49.3,75.9,88.1,46.6,True,68.19
-HWM,Industrial,Aerospace/Defense,75.3,72.0,70.4,82.0,59.4,True,276.06
-SW,Industrial,Packaging&Containers,75.3,93.9,67.7,73.6,65.5,False,46.56
-CGNX,Industrial,Machinery-Diversified,75.3,26.7,82.5,92.3,50.3,True,63.64
-CVLT,BamHI,AI 應用軟體 (AI Apps),75.3,95.8,94.2,46.0,68.7,False,130.76
-MOD,BamHI,散熱與液冷 (Cooling),75.1,27.6,78.7,95.1,49.6,True,276.7
-TOL,"Consumer, Cyclical",Home Builders,75.0,92.2,72.0,69.3,67.3,False,161.03
-GEV,Industrial,Machinery-Constr&Mining,74.2,44.5,73.2,90.1,56.0,True,1057.65
-YETI,"Consumer, Cyclical",Leisure Time,73.7,77.5,86.2,59.3,60.0,False,49.64
-KNF,BamHI,水泥砂石 (Aggregates & Cement),73.7,96.2,58.0,78.1,67.2,False,90.8
-WCC,"Consumer, Cyclical",Distribution/Wholesale,73.5,29.8,83.0,85.7,49.7,True,351.97
-HIMS,BamHI,網路平台與新經濟 (Internet Platforms),73.2,99.3,93.7,39.8,61.3,False,32.7
-SPIR,BamHI,太空概念股 (Space),73.2,2.9,85.3,96.3,45.4,False,17.13
-NXPI,BamHI,半導體/GPU 設計 (Semiconductors & GPU),73.2,17.0,91.6,82.8,47.5,True,294.06
-DHI,"Consumer, Cyclical",Home Builders,73.0,89.8,73.9,63.8,68.8,False,166.51
-SNOW,Technology,Software,73.0,98.0,89.7,43.8,54.6,True,225.95
-AEVA,BamHI,激光 (Laser),72.9,2.6,92.2,88.8,42.2,False,20.04
-REYN,"Consumer, Non-cyclical",Household Products/Wares,72.8,93.5,74.1,61.1,81.8,False,25.73
-RL,"Consumer, Cyclical",Apparel,72.6,79.6,76.4,65.2,65.0,False,414.25
-USAR,BamHI,稀土與戰略金屬 (Rare Earths),72.2,4.8,85.7,92.5,43.4,False,21.42
-BK,BamHI,金融 (Financials),71.8,57.1,75.4,75.6,57.7,True,143.63
-SMG,"Consumer, Cyclical",Housewares,71.5,91.9,60.3,72.6,69.9,False,68.54
-THG,Financial,Insurance,71.1,78.0,74.5,64.3,75.3,False,210.4
-NGL,BamHI,天然氣供應鏈 (Natural Gas & LNG),71.0,16.6,79.4,89.8,46.0,False,15.69
-VSAT,BamHI,太空概念股 (Space),70.7,4.1,82.3,92.4,42.9,False,62.23
-SHLS,BamHI,太陽能 (Solar),70.6,29.3,91.7,70.2,49.9,True,10.2
-PFG,Financial,Insurance,70.6,60.6,73.0,73.2,51.7,True,106.7
-PHM,"Consumer, Cyclical",Home Builders,70.5,90.9,66.5,64.4,71.0,False,135.71
-TE,BamHI,太陽能 (Solar),70.2,9.4,89.9,80.9,48.6,True,8.53
-MAR,"Consumer, Cyclical",Lodging,69.7,60.3,70.1,73.9,50.9,True,383.56
-NOVT,BamHI,科技儀器 (Scientific Instruments),69.4,26.6,82.8,77.5,47.5,True,152.0
-GPUS,BamHI,加密貨幣(Crypto),69.3,86.9,88.8,41.1,47.4,True,0.19
-LPG,BamHI,天然氣供應鏈 (Natural Gas & LNG),69.1,17.8,71.7,92.2,44.8,False,39.92
-RDW,BamHI,太空概念股 (Space),69.1,0.2,86.0,86.6,38.4,False,11.38
-SJM,"Consumer, Non-cyclical",Food,69.1,82.1,66.3,65.3,58.4,True,111.63
-SIRI,Communications,Media,69.1,28.9,72.7,85.6,53.7,True,27.9
-CZR,"Consumer, Cyclical",Entertainment,68.8,67.5,60.6,77.6,64.7,False,29.6
-IONQ,BamHI,純血量子計算 (Pure Quantum),68.6,12.2,96.3,69.2,44.8,False,53.6
-RMBS,BamHI,存儲記憶體 (Storage),68.2,6.7,85.6,81.4,41.7,False,124.52
-SLGN,Industrial,Packaging&Containers,68.0,93.7,65.4,57.8,78.0,False,44.67
-BIRK,"Consumer, Cyclical",Apparel,67.6,65.4,81.3,54.9,54.4,True,45.09
-CRML,BamHI,稀土與戰略金屬 (Rare Earths),67.5,7.4,81.9,83.1,42.1,False,9.35
-WSO,"Consumer, Cyclical",Distribution/Wholesale,67.1,69.6,63.1,69.8,56.6,False,400.98
-ATKR,BamHI,住宅建材 (Building Materials),66.9,21.6,81.7,74.8,48.2,True,77.89
-KDP,"Consumer, Non-cyclical",Beverages,66.7,73.9,68.3,61.6,61.1,False,31.4
-LYV,"Consumer, Cyclical",Entertainment,66.4,62.3,64.8,70.0,56.9,True,171.47
-ENPH,Energy,Energy-Alternate Sources,66.3,2.7,76.4,88.0,43.6,True,47.82
-D,Utilities,Electric,65.9,66.4,60.9,70.8,64.7,False,69.26
-USFD,"Consumer, Non-cyclical",Food,65.5,92.5,40.4,77.2,70.2,False,95.35
-PKG,Industrial,Packaging&Containers,65.4,83.3,56.9,65.1,66.5,False,237.85
-ETN,Industrial,Electrical Compo&Equip,64.9,50.7,58.7,78.3,49.9,False,404.59
-AXTI,BamHI,半導體材料 (Semiconductor Materials),64.8,0.4,62.2,99.8,38.9,False,70.14
-TLN,Utilities,Electric,64.0,67.6,74.7,51.6,57.0,True,405.89
-BHP,BamHI,銅 (Copper),63.8,27.3,63.0,82.9,40.1,False,80.72
-NVO,BamHI,醫療生技 (Biotech & Pharma),63.7,76.6,84.2,36.7,65.6,False,47.41
-MO,"Consumer, Non-cyclical",Agriculture,63.3,53.5,52.2,79.3,58.3,True,72.07
-CLH,Industrial,Environmental Control,62.9,67.2,46.4,77.3,59.6,True,298.78
-EIX,Utilities,Electric,62.8,66.9,45.6,77.8,62.3,False,74.22
-TRGP,Energy,Pipelines,62.0,43.9,46.1,87.0,53.2,True,266.32
-BWLP,BamHI,天然氣供應鏈 (Natural Gas & LNG),61.9,15.5,58.5,88.6,39.9,False,18.37
-MLI,Industrial,Metal Fabricate/Hardware,61.5,35.8,72.2,63.7,47.4,False,133.17
-SNA,Industrial,Hand/Machine Tools,59.9,71.8,52.1,61.8,60.2,False,392.14
-MMM,Industrial,Miscellaneous Manufactur,59.8,77.5,63.5,47.4,71.3,False,165.91
-GNTX,"Consumer, Cyclical",Auto Parts&Equipment,59.8,68.7,62.6,52.5,53.9,True,25.04
-BTBT,BamHI,加密貨幣(Crypto),59.7,38.1,89.2,41.1,50.6,True,1.93
-TECK,BamHI,銅 (Copper),59.1,17.0,67.0,72.2,38.1,False,57.7
-DTM,Energy,Pipelines,59.0,44.6,50.6,74.7,63.9,False,147.09
-CL,"Consumer, Non-cyclical",Cosmetics/Personal Care,58.9,58.5,51.5,66.6,59.5,True,91.88
-KMB,"Consumer, Non-cyclical",Household Products/Wares,58.4,83.1,51.3,53.1,65.8,False,106.73
-PH,Industrial,Miscellaneous Manufactur,58.2,85.2,48.9,54.1,66.0,False,961.09
-KVUE,"Consumer, Non-cyclical",Cosmetics/Personal Care,58.2,77.0,49.2,57.7,66.3,False,18.8
-CNCK,BamHI,加密貨幣(Crypto),58.1,83.2,80.4,23.2,63.9,False,2.18
-FCX,Basic Materials,Mining,56.9,34.8,52.6,72.3,42.1,False,61.84
-DINO,Energy,Oil&Gas,56.9,34.0,38.4,86.9,42.6,False,65.76
-WMB,Energy,Pipelines,56.8,49.3,38.3,79.0,62.5,False,75.87
-MPC,Energy,Oil&Gas,56.1,46.1,28.4,88.7,45.2,False,246.51
-LIF,BamHI,AI 應用軟體 (AI Apps),55.9,96.0,77.8,14.1,60.1,False,49.42
-FLNC,BamHI,太陽能 (Solar),55.7,25.3,86.3,40.4,44.0,True,19.75
-WMS,Industrial,Metal Fabricate/Hardware,55.7,78.2,56.6,43.6,60.1,False,149.05
-IP,Basic Materials,Forest Products&Paper,55.3,94.8,51.2,39.6,68.1,False,38.3
-HBM,BamHI,銅 (Copper),55.2,14.9,65.6,65.0,38.1,False,22.99
-KLAR,BamHI,金融科技與支付 (Fintech & Payments),55.1,78.8,90.3,8.1,60.5,False,18.39
-SSRM,BamHI,黃金礦 (Gold Miners),55.1,23.1,46.6,79.7,45.9,False,28.35
-ADM,"Consumer, Non-cyclical",Agriculture,55.1,35.0,39.7,80.5,39.9,False,75.08
-VLO,Energy,Oil&Gas,55.0,50.9,24.1,88.1,45.5,False,242.43
-CHD,"Consumer, Non-cyclical",Household Products/Wares,54.4,57.9,39.6,67.5,56.6,True,98.67
-CMC,BamHI,鋼鐵金屬 (Steel & Metals),54.2,37.1,71.8,45.1,43.6,False,71.28
-PG,"Consumer, Non-cyclical",Cosmetics/Personal Care,54.1,74.0,46.7,51.5,60.5,False,152.04
-GOLD,BamHI,黃金礦 (Gold Miners),54.0,33.6,41.9,76.4,46.5,False,41.32
-LECO,Industrial,Hand/Machine Tools,54.0,54.7,49.4,58.2,54.0,True,268.91
-BCC,BamHI,住宅建材 (Building Materials),53.9,89.9,39.8,50.0,65.1,False,77.66
-ZBRA,Technology,Office/Business Equip,53.7,41.7,71.3,42.0,55.7,True,247.78
-F,"Consumer, Cyclical",Auto Manufacturers,53.5,19.9,72.4,51.4,44.2,True,13.84
-UPST,BamHI,金融科技與支付 (Fintech & Payments),52.4,74.7,80.8,12.9,55.0,True,32.65
-PM,"Consumer, Non-cyclical",Agriculture,52.3,43.0,50.7,58.6,50.2,True,178.78
-SCCO,Basic Materials,Mining,52.1,20.1,47.4,72.7,41.7,False,171.84
-PDYN,BamHI,無人機 (Drones),51.5,12.8,37.3,85.0,42.3,False,5.98
-NI,Utilities,Gas,50.5,47.3,39.2,63.4,55.4,True,47.63
-FSLR,Energy,Energy-Alternate Sources,50.4,24.3,79.9,34.1,45.0,True,248.36
-TDY,Industrial,Miscellaneous Manufactur,50.2,39.5,36.9,68.9,46.1,False,612.17
-LASR,BamHI,激光 (Laser),49.6,6.0,29.6,91.4,41.7,False,63.81
-HHH,Financial,Real Estate,49.5,83.4,55.8,26.2,68.1,False,69.89
-CCJ,BamHI,鈾礦 (Uranium),49.4,43.5,35.6,66.2,48.2,False,106.64
-PCAR,"Consumer, Cyclical",Auto Manufacturers,49.3,68.3,39.1,50.1,50.8,False,117.03
-MDU,Utilities,Gas,48.7,40.7,43.2,58.2,56.4,False,21.66
-NX,BamHI,住宅建材 (Building Materials),47.9,39.3,35.1,64.9,53.1,False,17.77
-TAC,BamHI,電力公用事業 (Electric Utilities),46.6,37.9,43.8,53.9,55.5,True,13.69
-MP,Basic Materials,Mining,46.3,12.3,50.2,59.4,42.9,False,56.51
-SGI,"Consumer, Cyclical",Home Furnishings,46.1,83.5,49.8,23.6,61.0,False,76.52
-FTI,Energy,Oil&Gas Services,45.2,19.7,17.2,86.0,37.0,False,64.29
-DNN,BamHI,鈾礦 (Uranium),42.9,30.2,20.3,72.0,44.7,False,3.17
-WM,Industrial,Environmental Control,42.7,66.5,30.2,43.2,57.0,True,223.26
-AMBA,BamHI,機器人供應鏈 (Robotics Supply Chain),42.1,1.6,74.5,30.0,41.4,False,62.99
-SGML,BamHI,鋰礦 (Lithium),41.9,9.2,67.4,32.7,36.2,False,12.48
-RSG,Industrial,Environmental Control,41.1,63.2,29.7,41.4,58.3,True,213.58
-AWK,Utilities,Water,39.9,68.8,23.7,41.7,59.4,True,129.64
-DIS,Communications,Media,39.3,40.6,50.8,27.1,47.9,False,101.12
-BKR,Energy,Oil&Gas Services,38.8,12.6,16.2,74.6,31.1,False,56.38
-NNE,BamHI,核電與核能技術 (Nuclear Power),38.7,7.3,59.9,33.2,44.9,False,23.15
-NOV,Energy,Oil&Gas Services,38.6,16.1,20.9,67.6,34.6,False,18.35
-JLL,Financial,Real Estate,38.0,65.3,34.9,27.3,50.2,False,299.78
-NWSA,Communications,Media,37.2,35.2,38.8,36.7,42.3,False,25.23
-WTRG,Utilities,Water,36.7,56.1,22.2,41.5,54.2,False,37.78
-SQM,BamHI,鋰礦 (Lithium),36.5,28.4,19.9,57.2,39.8,False,75.58
-RCAT,BamHI,無人機 (Drones),36.4,33.0,3.6,70.8,39.0,False,9.34
-OMC,Communications,Advertising,35.9,48.7,31.9,33.4,47.9,False,73.66
-ATO,Utilities,Gas,35.4,38.5,22.7,46.6,50.8,False,172.59
-NXE,BamHI,鈾礦 (Uranium),34.6,22.9,18.2,56.9,41.9,False,10.07
-CBRE,Financial,Real Estate,34.2,63.7,33.4,20.2,51.5,False,133.94
-UAMY,BamHI,稀土與戰略金屬 (Rare Earths),33.8,3.6,4.4,78.3,37.4,False,6.57
-HAS,"Consumer, Cyclical",Toys/Games/Hobbies,33.5,32.8,22.8,44.6,39.9,False,83.28
-CENX,BamHI,鋼鐵金屬 (Steel & Metals),30.6,1.6,16.3,59.5,28.5,False,44.5
-AMRC,BamHI,電網工程設備 (Grid Infrastructure),29.8,5.4,37.4,34.3,43.6,False,27.68
-BX,Financial,Private Equity,29.5,33.2,42.4,14.8,40.2,False,112.99
-FNV,BamHI,黃金礦 (Gold Miners),28.4,23.0,16.7,42.8,40.1,False,209.76
-TEL,BamHI,電網工程設備 (Grid Infrastructure),28.1,32.0,28.7,25.5,40.7,False,198.55
-BMI,BamHI,科技儀器 (Scientific Instruments),28.0,70.2,19.1,15.8,56.3,True,133.58
-KKR,Financial,Private Equity,27.1,35.3,37.9,12.2,39.1,False,91.51
-ITRI,BamHI,科技儀器 (Scientific Instruments),26.9,37.0,23.6,25.2,48.5,False,81.61
-OKLO,BamHI,核電與核能技術 (Nuclear Power),26.5,6.3,47.3,15.9,40.5,False,54.06
-LAC,BamHI,鋰礦 (Lithium),25.6,6.5,32.1,28.6,33.7,False,3.94
-SMTK,BamHI,半導體材料 (Semiconductor Materials),25.2,13.5,56.2,0.1,45.4,False,0.25
-NIO,BamHI,電動車 (Electric Vehicles),24.5,26.9,19.6,28.3,34.5,False,4.9
-DLB,"Consumer, Cyclical",Home Furnishings,20.4,26.6,18.4,19.3,41.1,False,52.64
-MAT,"Consumer, Cyclical",Toys/Games/Hobbies,19.8,24.5,26.2,11.0,38.9,False,13.88
-SMR,BamHI,核電與核能技術 (Nuclear Power),18.9,11.5,29.5,12.0,44.9,False,10.21
-CG,Financial,Private Equity,15.2,19.5,17.6,10.7,32.4,False,41.06
-NNDM,BamHI,機器人 (Robotics),15.0,4.4,8.4,26.9,39.3,False,1.37
-BMBL,BamHI,網路平台與新經濟 (Internet Platforms),13.4,14.2,10.9,15.6,36.9,False,2.72
-HII,Industrial,Shipbuilding,12.9,16.0,3.4,20.8,32.8,False,279.62
-BYDDY,BamHI,電動車 (Electric Vehicles),11.0,9.1,6.2,16.6,19.3,False,9.61
-LI,BamHI,電動車 (Electric Vehicles),7.1,5.7,2.5,12.4,25.5,False,12.39
-SYM,BamHI,機器人 (Robotics),7.0,3.7,6.4,9.2,34.7,False,39.43
-TTD,Communications,Advertising,6.1,7.5,9.6,2.0,34.0,False,17.7
-SERV,BamHI,機器人 (Robotics),4.3,2.0,3.5,6.3,32.0,False,6.12
+SNDK,Technology,Computers,99.9,99.5,100.0,100.0,66.4,False,2335.0
+MU,Technology,Semiconductors,99.5,98.5,99.8,99.7,64.5,False,1213.56
+DD,Basic Materials,Chemicals,99.3,100.0,99.3,99.0,88.7,False,137.8
+MRVL,Technology,Semiconductors,99.2,99.3,99.5,98.9,56.5,True,281.26
+WDC,Technology,Computers,98.6,97.5,98.4,99.4,62.2,False,675.39
+DELL,Technology,Computers,98.5,99.1,97.9,98.8,60.3,False,409.45
+ICHR,BamHI,半導體設備 (Semiconductor Equipment),98.4,98.0,97.2,99.9,63.8,False,95.03
+UCTT,BamHI,半導體設備 (Semiconductor Equipment),98.4,98.7,96.9,99.8,65.1,False,120.66
+SEZL,BamHI,金融科技與支付 (Fintech & Payments),98.2,99.2,98.4,97.5,74.0,False,163.74
+NBIS,BamHI,算力租借平台 (AI Compute Infra),98.1,95.8,98.7,98.6,56.7,True,256.63
+STX,BamHI,存儲記憶體 (Storage),97.8,92.5,98.8,99.3,62.6,False,1025.36
+ACMR,BamHI,半導體設備 (Semiconductor Equipment),97.7,94.4,98.8,98.2,65.7,False,106.86
+ALAB,Technology,Semiconductors,97.7,95.2,99.9,96.6,61.6,False,398.0
+APPS,BamHI,AI 應用軟體 (AI Apps),97.6,99.8,99.8,94.5,70.1,False,10.16
+QMCO,BamHI,純血量子計算 (Pure Quantum),97.1,99.4,98.9,94.2,53.5,True,12.93
+CORT,"Consumer, Non-cyclical",Pharmaceuticals,97.1,97.5,97.0,96.9,77.9,False,84.75
+SIMO,BamHI,存儲記憶體 (Storage),97.0,88.4,99.2,99.1,65.2,False,325.26
+OSCR,BamHI,醫療保險 (Managed Care),96.6,98.4,98.2,94.1,64.0,False,28.67
+ARM,BamHI,半導體/GPU 設計 (Semiconductors & GPU),96.6,89.7,98.0,98.7,50.7,True,347.71
+STRL,BamHI,資料中心基建(Data_Center_Infra),95.7,87.0,97.5,98.4,55.4,True,881.92
+CRDO,BamHI,光通訊 (Optical Communication),95.7,94.7,99.0,92.9,59.3,True,268.03
+GLW,Communications,Telecommunications,95.4,93.9,93.8,97.8,64.3,False,228.01
+FLEX,Industrial,Electronics,95.0,82.5,98.3,98.0,63.8,False,161.28
+RVMD,"Consumer, Non-cyclical",Biotechnology,94.6,91.0,95.2,95.8,71.5,False,178.17
+NWL,"Consumer, Cyclical",Housewares,93.8,99.8,94.2,90.4,80.6,False,5.89
+CRS,Basic Materials,Iron/Steel,93.8,98.4,91.8,93.5,80.4,False,599.24
+BBCP,BamHI,水泥砂石 (Aggregates & Cement),93.5,99.3,92.9,91.2,78.1,False,11.52
+KEEL,BamHI,算力租借平台 (AI Compute Infra),93.2,72.4,99.4,97.3,56.1,True,5.87
+HUM,"Consumer, Non-cyclical",Healthcare-Services,92.8,95.5,97.3,87.0,74.0,False,376.0
+BE,BamHI,微電網與獨立能源島(Microgrids & Energy Islands),92.5,67.7,98.1,99.2,56.0,True,309.18
+ATEN,BamHI,資安 (Cybersecurity),92.4,93.5,90.1,94.1,73.6,False,34.74
+PANW,Communications,Internet,92.3,92.7,94.9,89.6,66.1,False,293.09
+ASX,BamHI,封測 (OSAT),92.0,73.4,95.8,97.6,60.6,False,41.85
+SNX,Industrial,Electronics,91.7,86.4,93.3,92.8,59.8,True,277.63
+CAT,Industrial,Machinery-Constr&Mining,91.6,90.7,91.2,92.6,69.4,False,1057.01
+COHR,Industrial,Electronics,90.7,73.4,94.4,95.7,55.1,True,407.25
+WSC,"Consumer, Non-cyclical",Commercial Services,90.6,88.2,93.6,88.8,63.9,False,29.07
+VIRT,Financial,Diversified Finan Serv,90.5,95.7,86.0,92.5,65.8,False,61.05
+AGX,BamHI,資料中心基建(Data_Center_Infra),90.5,85.1,87.0,96.8,60.7,False,753.07
+CNC,"Consumer, Non-cyclical",Healthcare-Services,90.3,81.4,96.0,89.2,62.2,False,64.77
+ATI,Industrial,Aerospace/Defense,90.0,92.0,87.3,91.6,66.7,False,199.5
+FIX,Industrial,Engineering&Construction,89.8,76.4,91.0,95.2,58.2,True,2017.57
+ESI,Basic Materials,Chemicals,89.4,84.5,87.6,93.7,62.3,False,47.72
+ETSY,Communications,Internet,89.4,95.0,92.2,83.8,73.8,False,77.7
+TKR,Industrial,Metal Fabricate/Hardware,89.4,87.5,88.5,91.3,68.7,False,144.01
+RIOT,BamHI,算力租借平台 (AI Compute Infra),89.1,59.0,97.6,95.5,59.0,True,27.76
+SEI,BamHI,微電網與獨立能源島(Microgrids & Energy Islands),88.8,84.2,88.4,91.4,56.1,True,79.43
+NTLA,BamHI,醫療生技 (Biotech & Pharma),88.7,93.6,83.0,92.0,62.4,False,16.03
+ARQQ,BamHI,純血量子計算 (Pure Quantum),88.6,99.9,97.4,74.2,69.5,False,27.32
+URI,"Consumer, Non-cyclical",Commercial Services,88.3,90.0,91.5,84.3,68.6,False,1139.51
+BRKR,"Consumer, Non-cyclical",Healthcare-Products,88.2,96.9,93.7,78.3,65.9,False,60.89
+GNRC,Industrial,Electrical Compo&Equip,88.2,67.6,91.3,95.3,60.6,False,295.16
+Q,Basic Materials,Chemicals,87.6,68.2,90.4,94.6,57.7,True,167.49
+ECG,Industrial,Engineering&Construction,87.5,76.2,87.1,93.7,59.5,True,163.56
+DVA,"Consumer, Non-cyclical",Healthcare-Services,87.0,79.8,84.5,93.1,71.6,False,213.36
+PK,Financial,REITS,87.0,94.2,85.1,85.2,70.3,False,14.57
+TREX,Industrial,Building Materials,86.9,94.3,85.2,85.0,67.8,False,49.98
+CARR,Industrial,Building Materials,86.9,92.4,84.7,86.2,68.9,False,76.0
+IBKR,Financial,Diversified Finan Serv,86.5,88.4,86.5,85.7,57.8,True,92.16
+VIK,"Consumer, Cyclical",Leisure Time,86.3,83.8,88.1,85.8,73.9,False,102.9
+OGN,"Consumer, Non-cyclical",Pharmaceuticals,86.2,49.2,97.8,93.2,71.8,False,13.47
+ILMN,"Consumer, Non-cyclical",Biotechnology,86.1,93.0,87.2,81.6,68.8,False,177.65
+PENN,"Consumer, Cyclical",Entertainment,86.0,82.2,88.6,85.3,62.1,False,21.09
+TEX,BamHI,資料中心基建(Data_Center_Infra),85.9,97.4,82.2,83.9,72.0,False,74.58
+MRNA,"Consumer, Non-cyclical",Biotechnology,85.8,97.0,71.6,94.4,62.6,False,59.75
+CVS,"Consumer, Non-cyclical",Pharmaceuticals,85.3,88.1,88.3,80.9,72.7,False,104.66
+SN,"Consumer, Cyclical",Home Furnishings,84.6,95.2,86.9,77.2,68.0,False,142.85
+DAL,"Consumer, Cyclical",Airlines,84.3,86.6,86.8,80.7,73.6,False,92.11
+CMI,"Consumer, Cyclical",Auto Manufacturers,84.2,78.4,85.8,85.5,61.2,False,727.59
+WSM,"Consumer, Cyclical",Retail,84.0,92.9,82.1,81.5,74.6,False,240.06
+LUV,"Consumer, Cyclical",Airlines,84.0,93.9,86.4,76.7,76.5,False,52.09
+KMX,"Consumer, Cyclical",Retail,83.9,96.6,78.6,82.8,63.8,False,52.9
+VRNS,BamHI,資安 (Cybersecurity),83.3,97.6,94.3,65.1,74.2,False,38.56
+GVA,BamHI,水泥砂石 (Aggregates & Cement),83.3,90.9,80.7,82.0,73.4,False,156.65
+GTES,Industrial,Machinery-Diversified,83.2,87.0,83.2,81.4,65.2,False,29.02
+DDOG,Technology,Software,83.1,45.2,95.2,90.1,50.9,True,220.94
+MSM,"Consumer, Cyclical",Retail,83.1,83.4,79.9,86.2,65.0,False,119.37
+JHX,Industrial,Building Materials,82.8,89.0,87.8,74.7,65.6,False,26.02
+OUST,BamHI,激光 (Laser),82.7,30.2,97.9,93.8,52.6,True,41.82
+RRX,Industrial,Machinery-Diversified,82.6,81.7,75.5,90.0,59.0,True,227.18
+UAL,"Consumer, Cyclical",Airlines,82.5,93.8,90.9,68.6,74.7,False,134.61
+SWK,Industrial,Hand/Machine Tools,82.4,91.8,83.6,76.5,70.4,False,92.31
+OSS,BamHI,AI 伺服器與硬體 (AI Computing Hardware),82.3,25.4,97.1,96.0,47.4,True,16.2
+MOD,BamHI,散熱與液冷 (Cooling),82.2,52.0,84.6,94.9,52.5,True,283.67
+LFUS,Industrial,Electrical Compo&Equip,82.2,48.2,88.0,93.4,55.7,True,477.22
+VRT,Industrial,Machinery-Constr&Mining,82.1,54.1,84.0,94.3,52.1,True,325.57
+TWLO,Technology,Software,82.1,67.0,90.8,81.0,47.5,True,190.88
+VIAV,BamHI,光通訊 (Optical Communication),82.0,31.1,91.1,98.3,51.2,True,50.44
+R,Industrial,Transportation,81.7,74.9,82.6,84.1,58.1,True,267.92
+GEV,Industrial,Machinery-Constr&Mining,81.6,67.9,79.2,90.8,58.7,True,1085.47
+KNX,Industrial,Transportation,81.4,64.3,84.2,87.1,56.2,True,77.07
+FCEL,BamHI,微電網與獨立能源島(Microgrids & Energy Islands),81.3,11.6,99.3,98.1,50.2,True,19.65
+UMAC,BamHI,無人機 (Drones),81.2,46.1,92.9,87.1,42.2,False,18.81
+MTZ,Industrial,Engineering&Construction,81.2,64.1,78.1,92.7,59.6,True,403.57
+NUE,Basic Materials,Iron/Steel,81.0,50.7,89.1,88.2,53.6,True,248.89
+CR,Industrial,Machinery-Diversified,81.0,96.6,84.1,70.2,78.9,False,223.59
+IRM,Financial,REITS,81.0,63.0,81.0,89.9,58.8,True,131.06
+RS,Basic Materials,Iron/Steel,81.0,73.9,81.2,84.3,60.4,False,405.78
+WST,"Consumer, Non-cyclical",Healthcare-Products,80.8,82.8,85.4,75.4,70.8,False,346.56
+TFSL,Financial,Savings&Loans,80.7,85.7,76.9,81.9,75.7,False,17.51
+C,Financial,Banks,80.5,90.2,81.3,74.8,70.2,False,144.98
+STT,Financial,Banks,80.4,74.2,83.5,80.5,61.9,False,169.51
+GWW,"Consumer, Cyclical",Distribution/Wholesale,80.4,81.8,77.6,82.5,69.0,False,1374.78
+CSCO,Communications,Telecommunications,80.4,44.2,90.0,88.9,53.6,True,118.97
+TECH,"Consumer, Non-cyclical",Healthcare-Products,80.2,99.6,81.8,68.9,77.7,False,70.7
+LSTR,Industrial,Transportation,80.0,65.2,80.0,87.5,54.5,True,210.12
+BPOP,Financial,Banks,80.0,84.8,76.0,81.7,75.7,False,167.19
+MGM,"Consumer, Cyclical",Lodging,80.0,86.5,78.8,78.1,61.4,False,47.2
+HST,Financial,REITS,80.0,71.4,79.5,84.9,64.9,False,24.98
+BEN,Financial,Diversified Finan Serv,79.8,59.1,86.4,83.4,56.1,True,32.65
+ARMK,"Consumer, Cyclical",Food Service,79.4,57.3,82.3,87.7,66.4,False,54.78
+TSM,BamHI,半導體/GPU 設計 (Semiconductors & GPU),79.4,59.3,83.1,85.7,52.7,True,434.99
+NOK,BamHI,光通訊 (Optical Communication),79.4,19.6,93.5,95.1,49.0,True,13.98
+TENB,BamHI,資安 (Cybersecurity),79.3,86.0,91.7,63.6,57.0,True,27.44
+PRMB,"Consumer, Non-cyclical",Beverages,79.2,55.7,81.7,88.5,61.4,False,24.98
+ANET,Communications,Telecommunications,79.2,73.8,85.6,75.4,53.7,True,165.45
+GL,Financial,Insurance,78.9,88.8,76.7,76.1,79.4,False,176.4
+DGXX,BamHI,電力公用事業 (Electric Utilities),78.8,3.4,99.1,96.1,41.4,False,5.79
+BEAM,BamHI,醫療生技 (Biotech & Pharma),78.8,71.6,89.8,71.3,58.4,True,33.93
+GE,Industrial,Aerospace/Defense,78.5,91.4,81.4,69.1,75.1,False,371.36
+ATOM,BamHI,半導體材料 (Semiconductor Materials),78.3,1.7,96.1,98.8,41.8,False,7.31
+CROX,"Consumer, Cyclical",Apparel,78.3,48.3,87.8,83.7,51.4,True,118.88
+H,"Consumer, Cyclical",Lodging,78.1,75.3,85.0,72.5,62.2,False,197.01
+AUR,"Consumer, Cyclical",Auto Parts&Equipment,77.5,23.9,91.6,90.2,46.2,False,6.24
+FFIV,Communications,Internet,77.4,44.5,83.3,88.0,52.8,True,386.01
+VVV,"Consumer, Non-cyclical",Commercial Services,77.4,89.6,66.2,82.4,70.3,False,39.72
+LOAR,Industrial,Aerospace/Defense,76.8,96.2,84.4,59.4,74.9,False,77.37
+MNST,"Consumer, Non-cyclical",Beverages,76.8,74.6,80.2,74.4,73.6,False,95.83
+CVLT,BamHI,AI 應用軟體 (AI Apps),76.5,96.4,93.9,49.1,71.6,False,133.94
+SW,Industrial,Packaging&Containers,76.1,91.9,71.3,73.0,66.2,False,46.84
+HOG,"Consumer, Cyclical",Leisure Time,75.9,71.1,78.2,76.0,55.4,True,25.46
+DY,BamHI,電網工程設備 (Grid Infrastructure),75.8,27.8,89.2,86.5,61.3,False,493.61
+KNF,BamHI,水泥砂石 (Aggregates & Cement),75.8,93.1,62.8,80.0,69.5,False,92.9
+WCC,"Consumer, Cyclical",Distribution/Wholesale,75.7,36.9,84.1,86.6,52.3,True,357.53
+NOVT,BamHI,科技儀器 (Scientific Instruments),75.5,43.9,85.5,81.2,55.7,True,160.43
+BWA,"Consumer, Cyclical",Auto Parts&Equipment,75.2,41.0,78.9,88.6,49.6,True,69.47
+NXPI,BamHI,半導體/GPU 設計 (Semiconductors & GPU),74.5,22.6,91.5,83.5,49.4,True,298.64
+NGL,BamHI,天然氣供應鏈 (Natural Gas & LNG),74.4,31.9,80.1,89.9,49.2,False,16.01
+REYN,"Consumer, Non-cyclical",Household Products/Wares,74.3,93.7,74.4,64.5,83.9,False,26.31
+TOL,"Consumer, Cyclical",Home Builders,74.2,90.4,72.1,68.3,68.0,False,162.08
+PFGC,"Consumer, Non-cyclical",Food,73.5,83.4,74.9,67.3,72.6,False,107.27
+HIMS,BamHI,網路平台與新經濟 (Internet Platforms),73.4,98.3,93.4,40.9,61.3,False,32.71
+AEVA,BamHI,激光 (Laser),73.0,2.2,93.3,88.1,42.6,False,20.15
+RCL,"Consumer, Cyclical",Leisure Time,72.8,92.5,71.7,64.1,65.4,False,322.65
+USAR,BamHI,稀土與戰略金屬 (Rare Earths),72.6,6.8,86.7,91.5,41.6,False,20.66
+DHI,"Consumer, Cyclical",Home Builders,72.5,87.2,74.4,63.4,69.1,False,166.95
+SNOW,Technology,Software,72.3,98.2,87.7,44.0,55.2,True,227.06
+ETN,Industrial,Electrical Compo&Equip,72.0,60.2,69.8,80.1,55.2,True,419.87
+ATKR,BamHI,住宅建材 (Building Materials),71.7,37.3,83.4,77.1,52.5,True,79.96
+CZR,"Consumer, Cyclical",Entertainment,71.5,69.7,65.0,78.8,73.9,False,30.41
+AXTI,BamHI,半導體材料 (Semiconductor Materials),71.2,0.8,77.9,99.6,38.5,False,69.06
+SPIR,BamHI,太空概念股 (Space),70.9,1.2,81.6,95.0,42.1,False,15.99
+RMBS,BamHI,存儲記憶體 (Storage),70.8,11.9,89.9,81.1,41.3,False,123.69
+WSO,"Consumer, Cyclical",Distribution/Wholesale,70.6,76.6,64.7,73.5,61.2,False,412.19
+BK,BamHI,金融 (Financials),70.4,57.8,73.0,74.1,57.7,True,143.63
+VSAT,BamHI,太空概念股 (Space),70.4,2.5,82.9,91.8,40.4,False,60.0
+GPUS,BamHI,加密貨幣(Crypto),70.3,93.3,81.3,47.7,47.4,True,0.19
+RL,"Consumer, Cyclical",Apparel,70.2,78.6,73.3,63.0,62.3,False,410.11
+EE,BamHI,天然氣供應鏈 (Natural Gas & LNG),70.2,77.5,56.0,80.8,68.6,False,37.4
+TLN,Utilities,Electric,70.2,80.7,79.4,55.7,59.7,True,416.8
+SMG,"Consumer, Cyclical",Housewares,70.0,87.6,61.7,69.6,71.1,False,69.33
+KDP,"Consumer, Non-cyclical",Beverages,69.8,76.3,70.3,66.0,69.2,False,32.52
+PHM,"Consumer, Cyclical",Home Builders,69.4,88.9,66.0,63.1,71.1,False,135.81
+SLGN,Industrial,Packaging&Containers,69.2,94.0,66.8,59.1,79.6,False,45.33
+TRGP,Energy,Pipelines,68.4,62.3,51.8,87.9,59.1,True,273.45
+SJM,"Consumer, Non-cyclical",Food,68.0,79.3,65.5,65.0,59.8,True,112.5
+PKG,Industrial,Packaging&Containers,67.9,84.3,61.1,66.4,68.9,False,241.09
+RDW,BamHI,太空概念股 (Space),67.7,0.2,84.6,84.7,37.0,False,10.8
+SIRI,Communications,Media,67.7,28.0,70.6,84.6,51.6,True,27.76
+TE,BamHI,太陽能 (Solar),67.7,7.0,88.8,76.8,48.4,True,8.5
+ALSN,"Consumer, Cyclical",Auto Parts&Equipment,67.6,79.5,51.9,77.4,59.8,True,124.52
+LYV,"Consumer, Cyclical",Entertainment,67.6,67.1,63.1,72.4,61.9,False,175.11
+CRML,BamHI,稀土與戰略金屬 (Rare Earths),67.5,8.7,83.9,80.6,41.5,False,9.26
+UNM,Financial,Insurance,67.4,72.3,69.7,62.7,56.3,True,88.92
+THG,Financial,Insurance,66.6,77.9,67.4,60.3,69.0,False,207.56
+ENPH,Energy,Energy-Alternate Sources,66.6,2.0,78.6,86.8,42.9,False,47.21
+USFD,"Consumer, Non-cyclical",Food,66.1,91.1,42.4,77.3,71.8,False,96.22
+PH,Industrial,Miscellaneous Manufactur,65.4,90.1,59.9,58.5,71.1,False,989.91
+TRP,BamHI,天然氣供應鏈 (Natural Gas & LNG),65.1,58.3,55.7,77.8,62.7,False,70.19
+DTM,Energy,Pipelines,64.8,62.8,54.3,76.3,69.0,False,149.75
+BIRK,"Consumer, Cyclical",Apparel,64.6,63.6,77.8,51.9,52.9,True,44.52
+MO,"Consumer, Non-cyclical",Agriculture,64.4,58.9,52.0,79.6,61.9,False,73.21
+ARGX,BamHI,醫療生技 (Biotech & Pharma),64.2,76.9,74.2,47.9,57.1,True,888.65
+SNA,Industrial,Hand/Machine Tools,64.2,75.5,56.9,65.8,65.4,False,400.95
+VLO,Energy,Oil&Gas,63.9,70.8,35.0,89.4,55.8,True,255.06
+MLI,Industrial,Metal Fabricate/Hardware,63.9,43.7,72.4,65.5,49.8,True,134.39
+WMB,Energy,Pipelines,63.7,66.6,46.3,79.6,67.4,False,77.53
+D,Utilities,Electric,63.6,65.0,57.1,69.4,65.7,False,69.51
+BHP,BamHI,銅 (Copper),63.5,25.9,62.9,82.9,41.0,False,81.16
+SHLS,BamHI,太陽能 (Solar),63.2,10.0,90.7,62.4,47.4,True,9.86
+DINO,Energy,Oil&Gas,63.1,45.1,47.4,87.8,49.1,True,67.78
+CLH,Industrial,Environmental Control,62.8,70.3,44.5,77.2,60.2,False,299.39
+MAR,"Consumer, Cyclical",Lodging,62.5,40.6,64.5,71.5,47.2,True,378.91
+IONQ,BamHI,純血量子計算 (Pure Quantum),62.5,6.6,95.0,57.9,41.3,False,50.56
+MPC,Energy,Oil&Gas,62.3,57.2,38.0,89.1,51.5,True,253.56
+LASR,BamHI,激光 (Laser),61.8,6.1,60.7,90.8,40.0,False,62.44
+WMS,Industrial,Metal Fabricate/Hardware,61.8,82.7,63.4,49.7,64.6,False,155.26
+FCX,Basic Materials,Mining,61.7,41.9,59.8,73.5,44.2,False,62.8
+TECK,BamHI,銅 (Copper),61.3,21.6,69.4,72.9,41.5,False,59.0
+KMB,"Consumer, Non-cyclical",Household Products/Wares,60.5,79.6,57.4,54.1,67.9,False,108.1
+EIX,Utilities,Electric,60.4,64.4,41.2,77.5,64.1,False,74.75
+MMM,Industrial,Miscellaneous Manufactur,60.1,76.7,63.7,48.3,73.7,False,167.97
+LECO,Industrial,Hand/Machine Tools,59.0,64.0,55.5,59.9,58.0,True,273.72
+BTBT,BamHI,加密貨幣(Crypto),58.9,31.2,89.2,42.4,50.6,True,1.93
+KVUE,"Consumer, Non-cyclical",Cosmetics/Personal Care,58.9,73.5,53.0,57.4,68.0,False,18.96
+HBM,BamHI,銅 (Copper),58.7,18.3,70.8,66.7,40.2,False,23.53
+IP,Basic Materials,Forest Products&Paper,58.2,94.3,56.8,41.5,70.2,False,39.02
+TDY,Industrial,Miscellaneous Manufactur,58.2,55.8,45.4,72.1,53.1,False,627.19
+ADM,"Consumer, Non-cyclical",Agriculture,57.5,34.3,45.4,81.3,45.4,False,76.54
+SSRM,BamHI,黃金礦 (Gold Miners),57.3,33.2,48.3,78.4,46.4,False,28.46
+SEDG,BamHI,太陽能 (Solar),57.3,2.9,49.5,92.3,42.6,False,51.88
+PCAR,"Consumer, Cyclical",Auto Manufacturers,57.3,77.2,48.2,56.3,58.6,True,121.68
+GOLD,BamHI,黃金礦 (Gold Miners),56.7,39.5,50.0,72.0,47.1,False,41.45
+SCCO,Basic Materials,Mining,56.6,26.9,53.4,74.6,43.9,False,174.73
+KLAR,BamHI,金融科技與支付 (Fintech & Payments),56.2,83.0,89.6,9.5,64.2,False,19.13
+BCC,BamHI,住宅建材 (Building Materials),56.2,88.3,44.0,52.3,68.3,False,79.76
+FTI,Energy,Oil&Gas Services,56.0,44.3,29.7,88.0,45.9,False,67.03
+F,"Consumer, Cyclical",Auto Manufacturers,55.7,18.9,75.3,54.5,47.6,True,14.11
+CMC,BamHI,鋼鐵金屬 (Steel & Metals),55.7,35.8,71.1,50.2,51.6,True,74.09
+LIF,BamHI,AI 應用軟體 (AI Apps),55.1,91.6,75.8,16.1,58.5,True,48.94
+UPST,BamHI,金融科技與支付 (Fintech & Payments),53.7,74.0,81.9,15.3,56.0,True,32.97
+PDYN,BamHI,無人機 (Drones),53.6,6.9,47.9,82.7,41.1,False,5.83
+MP,Basic Materials,Mining,52.5,15.0,69.1,54.6,41.6,False,55.62
+CL,"Consumer, Non-cyclical",Cosmetics/Personal Care,52.3,45.7,44.1,63.8,56.3,True,91.06
+CHD,"Consumer, Non-cyclical",Household Products/Wares,51.9,47.5,40.4,65.5,55.0,True,98.15
+PM,"Consumer, Non-cyclical",Agriculture,51.9,43.0,49.1,59.0,52.3,True,178.93
+ZBRA,Technology,Office/Business Equip,50.8,34.8,69.4,40.3,52.9,True,243.39
+SGI,"Consumer, Cyclical",Home Furnishings,50.7,85.5,57.3,26.7,64.5,False,78.59
+FSLR,Energy,Energy-Alternate Sources,50.7,22.3,80.6,35.0,45.1,True,248.64
+TAC,BamHI,電力公用事業 (Electric Utilities),50.1,46.4,48.4,53.8,57.3,True,13.81
+ROCK,BamHI,住宅建材 (Building Materials),50.1,85.3,54.4,28.2,65.1,False,44.19
+NI,Utilities,Gas,49.9,49.3,37.7,62.3,56.7,True,47.81
+NOV,Energy,Oil&Gas Services,49.5,30.0,36.5,72.2,41.5,False,18.94
+MDU,Utilities,Gas,49.3,45.5,42.8,57.7,57.1,False,21.7
+HHH,Financial,Real Estate,48.3,80.1,54.9,25.7,68.3,False,69.96
+ELF,"Consumer, Non-cyclical",Cosmetics/Personal Care,46.9,87.9,50.0,23.3,61.0,False,65.09
+AMBA,BamHI,機器人供應鏈 (Robotics Supply Chain),43.6,2.8,78.1,29.6,42.9,False,64.11
+CCJ,BamHI,鈾礦 (Uranium),43.1,34.8,31.8,58.6,44.6,False,103.58
+BKR,Energy,Oil&Gas Services,43.1,21.0,22.1,75.1,33.5,False,56.94
+WM,Industrial,Environmental Control,40.6,63.3,27.0,42.8,56.7,True,223.08
+UAMY,BamHI,稀土與戰略金屬 (Rare Earths),39.5,4.3,14.3,82.3,40.2,False,6.86
+RSG,Industrial,Environmental Control,39.4,62.9,25.8,41.4,58.1,True,213.5
+AWK,Utilities,Water,38.9,66.7,22.8,41.1,60.1,False,130.0
+JLL,Financial,Real Estate,38.7,65.8,34.8,29.1,53.8,False,303.76
+DNN,BamHI,鈾礦 (Uranium),37.2,21.7,21.0,61.2,41.4,False,3.07
+AMRC,BamHI,電網工程設備 (Grid Infrastructure),37.0,6.6,54.8,34.5,43.9,False,27.76
+ATO,Utilities,Gas,36.0,41.6,23.0,46.3,54.0,False,173.67
+HAS,"Consumer, Cyclical",Toys/Games/Hobbies,36.0,37.6,24.6,46.7,46.3,False,84.88
+WTRG,Utilities,Water,35.8,55.2,21.2,40.7,55.5,True,37.93
+BMI,BamHI,科技儀器 (Scientific Instruments),34.7,86.1,24.2,19.5,64.3,False,140.9
+WBD,Communications,Media,34.1,44.1,30.0,33.2,52.0,False,26.98
+CBRE,Financial,Real Estate,33.8,60.5,32.5,21.8,52.7,False,134.58
+NWSA,Communications,Media,33.1,28.8,32.2,36.1,40.6,False,25.03
+OMC,Communications,Advertising,32.7,43.1,28.6,31.7,47.2,False,73.43
+CENX,BamHI,鋼鐵金屬 (Steel & Metals),31.7,2.5,13.4,64.6,31.8,False,45.96
+SQM,BamHI,鋰礦 (Lithium),30.7,16.6,18.7,49.8,36.2,False,73.11
+TEL,BamHI,電網工程設備 (Grid Infrastructure),30.5,33.4,32.7,26.9,42.2,False,200.07
+ITRI,BamHI,科技儀器 (Scientific Instruments),30.4,37.5,29.3,27.9,52.7,False,82.95
+NNE,BamHI,核電與核能技術 (Nuclear Power),29.9,5.2,48.6,23.6,40.1,False,20.65
+BKKT,BamHI,加密貨幣(Crypto),29.8,2.1,56.2,17.1,39.7,False,7.83
+FNV,BamHI,黃金礦 (Gold Miners),29.5,29.6,17.2,41.8,40.3,False,210.0
+BX,Financial,Private Equity,28.4,35.9,37.4,15.6,42.1,False,114.18
+NXE,BamHI,鈾礦 (Uranium),28.3,16.3,16.1,46.4,38.2,False,9.65
+SGML,BamHI,鋰礦 (Lithium),27.9,9.2,34.3,30.8,34.9,False,12.15
+OKLO,BamHI,核電與核能技術 (Nuclear Power),27.7,4.9,54.5,12.3,37.4,False,51.01
+RCAT,BamHI,無人機 (Drones),27.5,12.6,5.4,57.1,37.3,False,8.91
+KKR,Financial,Private Equity,27.5,38.3,35.9,13.8,42.5,False,92.65
+LAC,BamHI,鋰礦 (Lithium),25.1,5.7,33.5,26.3,32.4,False,3.85
+PLAB,BamHI,半導體材料 (Semiconductor Materials),23.8,1.1,15.7,43.2,43.0,False,32.85
+DLB,"Consumer, Cyclical",Home Furnishings,21.2,29.5,18.0,20.4,40.2,False,52.45
+BMBL,BamHI,網路平台與新經濟 (Internet Platforms),20.7,26.8,18.2,20.1,46.9,False,2.94
+MAT,"Consumer, Cyclical",Toys/Games/Hobbies,20.7,26.2,27.4,11.2,37.8,False,13.81
+NIO,BamHI,電動車 (Electric Vehicles),20.0,10.9,12.9,31.6,31.3,False,4.73
+KEP,BamHI,核電與核能技術 (Nuclear Power),19.5,29.0,18.9,15.4,43.5,False,12.46
+NNDM,BamHI,機器人 (Robotics),18.7,10.8,12.4,29.0,41.1,False,1.39
+CG,Financial,Private Equity,17.4,24.3,18.5,12.9,36.9,False,41.9
+HII,Industrial,Shipbuilding,13.6,18.0,4.5,20.5,32.5,False,279.09
+BYDDY,BamHI,電動車 (Electric Vehicles),11.7,13.4,3.9,18.6,21.2,False,9.67
+SYM,BamHI,機器人 (Robotics),10.6,5.4,13.2,10.5,39.2,False,40.77
+LI,BamHI,電動車 (Electric Vehicles),6.3,4.8,1.9,11.4,22.8,False,11.83
+TTD,Communications,Advertising,4.9,7.1,6.8,2.0,32.3,False,17.33
+SERV,BamHI,機器人 (Robotics),4.4,1.8,5.0,5.0,30.4,False,5.9
