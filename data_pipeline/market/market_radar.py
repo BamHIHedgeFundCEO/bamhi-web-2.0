@@ -186,10 +186,13 @@ def _fetch_prices(tickers: list) -> tuple:
     close = pd.DataFrame(all_close).ffill()
     volume = pd.DataFrame(all_vol).ffill()
 
-    # Drop today's incomplete bar if market hasn't closed yet
-    today = pd.Timestamp.now(tz="America/New_York").normalize().tz_localize(None)
-    close = close[close.index < today]
-    volume = volume[volume.index < today]
+    # Drop today's bar only if market is still open (before 16:00 ET)
+    now_et = pd.Timestamp.now(tz="America/New_York")
+    cutoff = now_et.normalize().tz_localize(None)
+    if now_et.hour >= 16:
+        cutoff += pd.Timedelta(days=1)
+    close = close[close.index < cutoff]
+    volume = volume[volume.index < cutoff]
 
     return close, volume
 
