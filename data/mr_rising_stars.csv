@@ -1,98 +1,105 @@
 ticker,sector,sub_industry,20R,60R,120R,Accel,Rank,RSI14,Entry_Momentum,Entry_Pullback,Price
-BRBR,"Consumer, Non-cyclical",Pharmaceuticals,98.9,3.1,1.1,97.8,21.4,62.2,True,False,11.39
-BNC,BamHI,資料中心基建(Data_Center_Infra),96.1,43.9,2.6,93.5,37.8,60.7,True,False,3.05
-CAI,"Consumer, Non-cyclical",Healthcare-Products,94.9,52.3,11.0,84.0,44.3,58.8,True,True,18.7
-LIF,BamHI,AI 應用軟體 (AI Apps),91.6,75.8,16.1,75.6,55.1,58.5,True,True,48.94
-HOOD,Communications,Internet,95.4,86.1,20.4,75.0,61.7,52.4,True,True,93.47
-DUOL,Technology,Software,84.0,75.3,10.3,73.7,51.0,51.3,True,True,119.94
-AXON,Industrial,Miscellaneous Manufactur,88.0,44.9,17.3,70.7,42.5,52.7,True,True,444.73
-RGEN,"Consumer, Non-cyclical",Healthcare-Products,97.8,77.5,27.2,70.6,61.4,70.2,True,False,145.23
-RYAN,Financial,Insurance,81.1,49.4,11.6,69.5,40.6,59.7,True,True,35.95
-DASH,Communications,Internet,86.1,65.6,17.2,68.9,50.3,60.8,True,False,176.91
-AVTR,"Consumer, Non-cyclical",Healthcare-Products,94.1,79.1,26.0,68.1,60.9,65.8,True,False,10.08
-QLYS,BamHI,資安 (Cybersecurity),93.0,78.4,25.2,67.7,60.0,66.4,True,False,116.19
-COO,"Consumer, Non-cyclical",Healthcare-Products,90.7,34.2,23.7,67.0,41.3,67.4,True,False,70.64
-BMI,BamHI,科技儀器 (Scientific Instruments),86.1,24.2,19.5,66.6,34.7,64.3,True,False,140.9
-WING,"Consumer, Cyclical",Retail,77.8,45.2,11.3,66.5,38.2,58.2,True,True,165.42
-IQV,"Consumer, Non-cyclical",Healthcare-Services,86.6,55.0,20.6,65.9,47.5,59.8,True,True,186.43
-BLDR,Industrial,Building Materials,89.5,55.9,23.9,65.6,49.8,66.1,True,False,88.72
-W,Communications,Internet,97.7,80.4,32.5,65.2,64.7,70.9,True,False,93.52
-ELF,"Consumer, Non-cyclical",Cosmetics/Personal Care,87.9,50.0,23.3,64.5,46.9,61.0,True,False,65.09
-MEDP,"Consumer, Non-cyclical",Healthcare-Services,94.8,56.5,31.5,63.3,54.2,75.2,False,False,519.96
-ABT,"Consumer, Non-cyclical",Healthcare-Products,78.0,19.6,15.1,62.9,29.4,61.3,True,False,93.24
-DHR,"Consumer, Non-cyclical",Healthcare-Products,84.9,40.9,22.2,62.7,42.2,66.4,True,False,193.21
-DLTR,"Consumer, Cyclical",Retail,95.9,54.1,35.9,60.0,55.2,62.5,True,False,118.21
-SGI,"Consumer, Cyclical",Home Furnishings,85.5,57.3,26.7,58.8,50.7,64.5,True,False,78.59
-DG,"Consumer, Cyclical",Retail,86.8,31.1,28.0,58.8,41.0,58.9,True,True,117.56
-TEM,"Consumer, Non-cyclical",Healthcare-Products,90.8,76.7,32.0,58.8,61.6,59.3,True,True,54.87
-FBIN,Industrial,Building Materials,92.0,73.4,33.4,58.7,61.1,67.8,True,False,46.34
-CPB,"Consumer, Non-cyclical",Food,78.8,35.6,20.7,58.1,38.3,58.6,True,True,22.35
-TMO,"Consumer, Non-cyclical",Healthcare-Products,83.1,41.6,25.3,57.8,43.4,63.9,True,False,505.75
-HIMS,BamHI,網路平台與新經濟 (Internet Platforms),98.3,93.4,40.9,57.4,73.4,61.3,True,False,32.71
-GPC,"Consumer, Cyclical",Retail,90.6,49.2,33.3,57.3,51.1,69.3,True,False,112.99
-ROCK,BamHI,住宅建材 (Building Materials),85.3,54.4,28.2,57.1,50.1,65.1,True,False,44.19
-NCLH,"Consumer, Cyclical",Leisure Time,90.2,64.4,33.5,56.7,57.2,65.0,True,False,20.98
-SLM,Financial,Diversified Finan Serv,87.4,66.4,30.8,56.6,56.3,68.1,True,False,24.61
-RH,"Consumer, Cyclical",Retail,84.4,67.8,27.8,56.6,55.1,60.2,True,False,159.92
-FND,"Consumer, Cyclical",Retail,91.7,63.3,35.4,56.4,57.8,65.4,True,False,58.32
-POOL,"Consumer, Cyclical",Distribution/Wholesale,86.3,38.9,30.4,55.9,45.0,64.0,True,False,207.38
-EXPE,Communications,Internet,83.2,52.5,27.5,55.7,48.7,60.2,True,False,250.95
-AYI,Industrial,Electrical Compo&Equip,94.6,78.3,39.6,55.0,66.1,70.7,True,False,359.39
-COF,Financial,Diversified Finan Serv,77.6,60.6,22.8,54.8,48.9,66.5,True,False,204.9
-HHH,Financial,Real Estate,80.1,54.9,25.7,54.4,48.3,68.3,True,False,69.96
-SNOW,Technology,Software,98.2,87.7,44.0,54.2,72.3,55.2,True,True,227.06
-WFC,Financial,Banks,84.3,52.2,30.6,53.8,50.0,63.3,True,False,84.74
-RLI,Financial,Insurance,82.5,31.3,28.9,53.6,40.6,64.9,True,False,55.13
-AJG,Financial,Insurance,75.7,33.0,22.3,53.3,37.3,56.5,True,True,217.86
-IP,Basic Materials,Forest Products&Paper,94.3,56.8,41.5,52.8,58.2,70.2,True,False,39.02
-CXT,Technology,Computers,96.0,68.8,43.3,52.7,64.0,69.5,True,False,48.03
-A,"Consumer, Non-cyclical",Healthcare-Products,91.3,68.0,39.7,51.6,61.3,63.1,True,False,135.51
-QGEN,"Consumer, Non-cyclical",Healthcare-Products,75.7,29.4,24.4,51.3,36.7,62.8,True,False,38.94
-OMF,Financial,Diversified Finan Serv,81.9,62.0,30.7,51.2,53.5,68.7,True,False,59.89
-CDW,Communications,Internet,85.8,48.5,34.8,51.0,50.5,51.8,True,True,128.02
-CRL,"Consumer, Non-cyclical",Healthcare-Services,98.1,79.5,48.7,49.4,70.9,72.4,True,False,212.71
-AXP,Financial,Diversified Finan Serv,80.2,60.5,32.4,47.8,53.2,68.8,True,False,342.46
-CVLT,BamHI,AI 應用軟體 (AI Apps),96.4,93.9,49.1,47.3,76.5,71.6,True,False,133.94
-TTWO,Technology,Software,79.3,71.0,32.6,46.7,57.3,62.4,True,False,238.72
-CART,Communications,Internet,90.3,73.9,44.6,45.7,65.5,66.1,True,False,46.8
-GPUS,BamHI,加密貨幣(Crypto),93.3,81.3,47.7,45.5,70.3,47.4,False,True,0.19
-FRMI,Financial,REITS,99.0,92.3,54.2,44.9,78.4,63.2,True,False,8.8
-SHC,"Consumer, Non-cyclical",Healthcare-Services,81.3,76.3,37.0,44.3,61.6,65.8,True,False,17.1
-VKTX,"Consumer, Non-cyclical",Biotechnology,91.2,70.9,47.0,44.2,65.4,70.4,True,False,36.99
-BMRN,"Consumer, Non-cyclical",Biotechnology,79.9,39.9,36.3,43.6,46.5,59.0,True,True,57.35
-SYF,Financial,Diversified Finan Serv,78.2,65.3,34.7,43.5,55.7,66.8,True,False,78.52
-HAYW,Industrial,Building Materials,88.7,70.7,46.2,42.5,64.5,70.9,True,False,16.18
-WAT,"Consumer, Non-cyclical",Healthcare-Products,81.5,75.9,39.2,42.3,62.3,63.1,True,False,376.89
-ALK,"Consumer, Cyclical",Airlines,90.5,90.3,48.4,42.1,73.6,70.6,True,False,53.29
-AXS,Financial,Insurance,80.0,39.2,37.9,42.1,46.8,61.3,True,False,104.69
-BROS,"Consumer, Cyclical",Retail,93.4,83.7,51.8,41.6,72.9,63.4,True,False,66.6
-TKO,"Consumer, Cyclical",Entertainment,78.9,40.1,38.1,40.8,47.0,55.8,True,True,203.8
-BAC,Financial,Banks,89.3,71.2,49.2,40.1,66.1,75.3,False,False,58.19
-HBAN,Financial,Banks,86.7,66.7,47.2,39.6,62.9,70.3,False,False,17.9
-AXTA,Basic Materials,Chemicals,89.4,77.3,49.9,39.5,68.8,67.5,False,False,34.73
-MLM,Industrial,Building Materials,80.4,50.3,41.3,39.1,52.7,64.5,False,False,628.94
-JPM,Financial,Banks,85.6,64.3,46.6,39.0,61.4,67.7,False,False,335.12
-PGR,Financial,Insurance,79.8,44.7,40.8,39.0,50.2,65.2,False,False,215.54
-NTRA,"Consumer, Non-cyclical",Healthcare-Products,97.9,84.3,59.6,38.3,77.1,73.0,False,False,260.74
-HRL,"Consumer, Non-cyclical",Food,96.1,58.8,58.0,38.1,65.9,77.7,False,False,26.02
-BXP,Financial,REITS,76.6,75.8,38.6,38.0,61.1,61.7,False,False,65.67
-HD,"Consumer, Cyclical",Retail,79.4,45.7,41.7,37.7,50.8,64.9,False,False,345.0
-LOAR,Industrial,Aerospace/Defense,96.2,84.4,59.4,36.8,76.8,74.9,False,False,77.37
-ABBV,"Consumer, Non-cyclical",Pharmaceuticals,87.1,59.6,50.8,36.3,61.6,71.6,False,False,243.14
-CCK,Industrial,Packaging&Containers,85.9,55.5,50.1,35.8,59.4,75.5,False,False,110.01
-LPX,Industrial,Building Materials,77.5,61.8,42.0,35.4,57.0,63.9,False,False,81.6
-SLGN,Industrial,Packaging&Containers,94.0,66.8,59.1,34.9,69.2,79.6,False,False,45.33
-HEI,Industrial,Aerospace/Defense,82.6,76.4,48.1,34.5,66.3,63.2,False,False,342.45
-VMC,Industrial,Building Materials,88.0,62.5,54.7,33.3,64.5,66.8,False,False,312.97
-MHK,Industrial,Building Materials,88.5,74.7,55.3,33.2,69.7,66.5,False,False,121.0
-WMS,Industrial,Metal Fabricate/Hardware,82.7,63.4,49.7,33.0,61.8,64.6,False,False,155.26
-AMCR,Industrial,Packaging&Containers,80.9,58.4,48.1,32.8,58.8,67.2,False,False,42.86
-VRNS,BamHI,資安 (Cybersecurity),97.6,94.3,65.1,32.5,83.3,74.2,False,False,38.56
-BBWI,"Consumer, Cyclical",Retail,87.8,63.4,55.6,32.2,65.1,65.3,False,False,21.82
-ALLY,Financial,Diversified Finan Serv,76.0,70.3,44.3,31.7,61.0,65.3,False,False,46.32
-PH,Industrial,Miscellaneous Manufactur,90.1,59.9,58.5,31.6,65.4,71.1,False,False,989.91
-ASH,Basic Materials,Chemicals,87.5,71.9,56.0,31.5,68.6,59.3,False,False,64.43
-TNL,"Consumer, Cyclical",Lodging,85.0,58.2,53.9,31.1,61.8,66.1,False,False,76.24
-BYD,"Consumer, Cyclical",Lodging,76.8,52.6,45.9,30.9,54.8,61.0,False,False,88.81
-TECH,"Consumer, Non-cyclical",Healthcare-Products,99.6,81.8,68.9,30.7,80.2,77.7,False,False,70.7
-INCY,"Consumer, Non-cyclical",Biotechnology,82.1,64.7,52.0,30.1,63.1,61.4,False,False,107.53
+BRBR,"Consumer, Non-cyclical",Pharmaceuticals,98.9,3.7,0.9,98.0,21.6,63.3,True,False,11.55
+BNC,BamHI,資料中心基建(Data_Center_Infra),94.7,41.3,1.3,93.4,36.0,60.5,True,False,3.04
+RYAN,Financial,Insurance,96.9,64.1,16.0,80.9,51.4,68.5,True,False,38.88
+KLAR,BamHI,金融科技與支付 (Fintech & Payments),92.3,92.1,11.5,80.8,59.9,69.2,True,False,20.29
+PODD,"Consumer, Non-cyclical",Healthcare-Products,82.5,5.2,4.1,78.4,20.2,55.6,True,True,158.25
+BFAM,"Consumer, Non-cyclical",Commercial Services,89.1,13.1,11.4,77.7,27.6,59.5,True,True,70.14
+LIF,BamHI,AI 應用軟體 (AI Apps),98.2,81.3,20.7,77.5,60.5,66.4,True,False,53.08
+FLUT,"Consumer, Cyclical",Entertainment,78.0,37.4,1.6,76.5,31.2,52.8,True,True,104.19
+DUOL,Technology,Software,84.6,75.6,10.3,74.3,51.3,53.0,True,True,121.49
+CAI,"Consumer, Non-cyclical",Healthcare-Products,82.6,39.9,10.2,72.4,36.6,57.2,True,True,18.5
+W,Communications,Internet,98.5,78.0,26.2,72.3,61.4,71.6,True,False,94.47
+DASH,Communications,Internet,93.2,74.3,21.4,71.8,56.9,64.7,True,False,183.09
+CCC,Technology,Software,79.4,11.0,7.7,71.7,23.4,59.7,True,True,5.01
+ELF,"Consumer, Non-cyclical",Cosmetics/Personal Care,93.9,56.2,24.1,69.8,50.9,64.6,True,False,67.43
+BLDR,Industrial,Building Materials,91.8,51.0,22.8,69.0,47.9,66.5,True,False,89.14
+BMI,BamHI,科技儀器 (Scientific Instruments),87.3,20.6,18.3,69.0,33.0,64.3,True,False,140.88
+HOOD,Communications,Internet,92.0,89.2,23.6,68.5,63.5,57.2,True,True,98.69
+RGEN,"Consumer, Non-cyclical",Healthcare-Products,95.3,77.2,27.0,68.4,60.7,71.4,True,False,147.01
+COO,"Consumer, Non-cyclical",Healthcare-Products,92.4,31.3,25.0,67.4,41.0,68.2,True,False,71.02
+BRO,Financial,Insurance,87.4,30.4,21.3,66.1,38.1,66.0,True,False,64.22
+QLYS,BamHI,資安 (Cybersecurity),97.2,88.0,32.6,64.6,67.7,73.7,True,False,123.27
+MEDP,"Consumer, Non-cyclical",Healthcare-Services,94.0,54.1,30.3,63.7,52.6,76.6,False,False,527.07
+FBIN,Industrial,Building Materials,92.9,68.9,29.2,63.7,57.8,66.1,True,False,45.96
+ABT,"Consumer, Non-cyclical",Healthcare-Products,78.4,19.9,15.4,62.9,29.8,63.3,True,False,94.12
+MKC,"Consumer, Non-cyclical",Food,78.1,37.1,15.3,62.8,36.6,64.2,True,False,51.05
+FOUR,"Consumer, Non-cyclical",Commercial Services,77.4,52.7,14.8,62.5,42.5,63.9,True,False,47.65
+CPNG,Communications,Internet,76.7,21.0,14.4,62.3,29.5,52.8,True,True,17.58
+ARQQ,BamHI,純血量子計算 (Pure Quantum),99.8,95.5,38.5,61.3,73.5,60.9,True,False,24.26
+ROCK,BamHI,住宅建材 (Building Materials),86.8,55.5,25.6,61.2,49.8,65.1,True,False,44.2
+SLM,Financial,Diversified Finan Serv,93.6,70.3,32.5,61.1,59.8,72.2,True,False,25.45
+NCLH,"Consumer, Cyclical",Leisure Time,91.9,60.6,31.4,60.5,55.2,66.4,True,False,21.24
+GPC,"Consumer, Cyclical",Retail,94.3,55.7,34.5,59.9,54.9,72.6,True,False,116.02
+EXPE,Communications,Internet,90.9,61.5,31.6,59.3,55.4,65.7,True,False,262.8
+AYI,Industrial,Electrical Compo&Equip,95.7,80.9,36.4,59.3,66.1,71.4,True,False,362.48
+TOST,"Consumer, Non-cyclical",Commercial Services,76.5,37.3,17.8,58.7,37.3,61.0,True,False,27.08
+AJG,Financial,Insurance,85.1,43.1,26.5,58.6,44.8,63.6,True,False,226.01
+FND,"Consumer, Cyclical",Retail,91.6,67.1,33.2,58.4,58.4,67.3,True,False,59.61
+AVTR,"Consumer, Non-cyclical",Healthcare-Products,85.8,82.4,27.6,58.2,61.2,68.1,True,False,10.28
+POOL,"Consumer, Cyclical",Distribution/Wholesale,89.8,44.6,31.7,58.0,48.5,66.8,True,False,211.61
+HIMS,BamHI,網路平台與新經濟 (Internet Platforms),99.1,93.5,41.3,57.8,73.7,64.2,True,False,33.94
+RLI,Financial,Insurance,93.0,44.7,35.5,57.5,50.7,72.4,True,False,57.56
+COF,Financial,Diversified Finan Serv,78.4,58.2,21.1,57.3,47.4,65.0,True,False,204.0
+CPB,"Consumer, Non-cyclical",Food,79.1,40.8,22.3,56.8,41.1,61.4,True,False,22.73
+HHH,Financial,Real Estate,86.2,62.3,29.8,56.5,54.1,74.3,True,False,72.37
+OMF,Financial,Diversified Finan Serv,84.7,63.4,28.7,56.0,53.8,70.5,True,False,60.44
+DHR,"Consumer, Non-cyclical",Healthcare-Products,77.1,39.9,23.1,54.0,40.6,68.9,True,False,196.19
+IP,Basic Materials,Forest Products&Paper,92.1,54.8,38.3,53.8,55.7,68.4,True,False,38.76
+CBRE,Financial,Real Estate,77.3,35.5,23.7,53.6,39.1,57.6,True,True,137.4
+SGI,"Consumer, Cyclical",Home Furnishings,79.0,45.4,25.6,53.4,44.2,62.6,True,False,77.94
+CXT,Technology,Computers,96.6,71.1,43.4,53.2,65.1,70.7,True,False,48.64
+WFC,Financial,Banks,79.5,45.8,26.8,52.7,44.9,59.1,True,True,83.86
+DG,"Consumer, Cyclical",Retail,77.6,34.7,25.4,52.2,39.6,61.4,True,False,119.51
+TEM,"Consumer, Non-cyclical",Healthcare-Products,79.8,76.7,28.0,51.7,57.9,61.2,True,False,56.14
+CDW,Communications,Internet,90.2,55.5,40.8,49.4,56.6,57.5,True,True,133.3
+JLL,Financial,Real Estate,81.5,40.0,32.2,49.2,45.2,62.2,True,False,315.06
+SYF,Financial,Diversified Finan Serv,81.0,64.6,32.1,48.9,54.9,67.1,True,False,78.66
+NRG,Utilities,Electric,77.2,38.0,28.3,48.9,41.9,65.2,True,False,149.36
+ESAB,Industrial,Machinery-Diversified,75.6,41.7,27.1,48.5,42.6,56.7,True,True,100.61
+FRMI,Financial,REITS,99.5,93.3,51.0,48.5,77.7,67.2,True,False,9.49
+DLO,BamHI,金融科技與支付 (Fintech & Payments),77.5,31.7,29.4,48.0,40.0,56.6,True,True,12.69
+HAYW,Industrial,Building Materials,93.4,75.4,45.8,47.7,67.2,73.2,True,False,16.49
+TTWO,Technology,Software,79.9,71.7,33.6,46.4,58.1,62.2,True,False,238.53
+CRL,"Consumer, Non-cyclical",Healthcare-Services,94.9,77.3,49.1,45.8,69.6,73.6,True,False,215.75
+ALK,"Consumer, Cyclical",Airlines,91.2,90.2,45.6,45.6,72.6,71.6,True,False,53.86
+DV,Technology,Software,85.2,61.5,39.7,45.5,57.5,58.6,True,True,10.82
+BMRN,"Consumer, Non-cyclical",Biotechnology,85.0,42.3,39.6,45.4,49.8,64.4,True,False,59.0
+ORI,Financial,Insurance,81.2,41.8,35.9,45.3,47.4,68.7,True,False,41.23
+BAC,Financial,Banks,89.9,69.8,45.9,44.0,64.3,72.0,True,False,57.88
+DLTR,"Consumer, Cyclical",Retail,80.2,59.8,36.4,43.9,54.5,67.6,True,False,123.87
+SHC,"Consumer, Non-cyclical",Healthcare-Services,81.7,72.6,37.8,43.9,60.5,68.2,True,False,17.38
+VKTX,"Consumer, Non-cyclical",Biotechnology,94.4,66.1,50.6,43.8,65.6,72.6,True,False,38.04
+AXTA,Basic Materials,Chemicals,89.5,77.1,45.7,43.8,67.0,65.4,True,False,34.5
+CART,Communications,Internet,94.8,78.7,51.4,43.5,71.0,67.8,True,False,47.46
+MTG,Financial,Insurance,78.9,47.6,35.6,43.2,49.0,71.6,True,False,27.84
+PGR,Financial,Insurance,90.7,60.0,47.9,42.8,61.3,71.9,True,False,224.34
+BXP,Financial,REITS,83.0,81.2,40.4,42.6,65.2,66.8,True,False,67.4
+AXS,Financial,Insurance,88.2,48.4,46.2,42.0,55.5,68.7,True,False,108.72
+CRBG,Financial,Insurance,76.6,72.1,35.0,41.6,58.2,57.4,True,True,28.61
+SYK,"Consumer, Non-cyclical",Healthcare-Products,75.4,34.8,34.8,40.6,42.9,64.9,True,False,332.71
+WRB,Financial,Insurance,84.8,51.5,44.8,40.1,55.5,66.6,True,False,71.27
+JPM,Financial,Banks,82.2,58.4,42.2,40.0,56.7,60.3,False,False,329.05
+SHW,Basic Materials,Chemicals,87.0,49.5,47.4,39.6,56.2,68.3,False,False,344.07
+HBAN,Financial,Banks,83.5,62.9,44.6,38.9,59.7,67.7,False,False,17.79
+CVLT,BamHI,AI 應用軟體 (AI Apps),97.8,95.3,58.9,38.8,81.3,76.2,False,False,140.04
+CCK,Industrial,Packaging&Containers,88.0,55.3,50.0,38.1,59.7,76.3,False,False,110.62
+WMS,Industrial,Metal Fabricate/Hardware,82.0,59.2,44.1,37.9,57.7,63.7,False,False,154.5
+LOAR,Industrial,Aerospace/Defense,96.1,87.3,58.8,37.4,77.6,76.9,False,False,79.14
+SLGN,Industrial,Packaging&Containers,97.0,70.4,59.8,37.2,71.5,81.5,False,False,46.23
+HD,"Consumer, Cyclical",Retail,79.7,47.8,42.5,37.1,52.1,66.7,False,False,348.86
+VMC,Industrial,Building Materials,86.6,62.4,49.7,36.8,62.2,65.3,False,False,311.35
+ALLY,Financial,Diversified Finan Serv,81.3,72.2,45.5,35.8,63.4,68.7,False,False,47.17
+TNL,"Consumer, Cyclical",Lodging,90.5,60.9,54.8,35.7,64.4,70.0,False,False,78.04
+NTRA,"Consumer, Non-cyclical",Healthcare-Products,97.0,82.3,61.6,35.5,77.0,73.4,False,False,261.91
+INCY,"Consumer, Non-cyclical",Biotechnology,92.8,71.8,58.0,34.8,70.5,68.7,False,False,113.75
+BROS,"Consumer, Cyclical",Retail,98.0,89.1,63.2,34.7,80.5,71.3,False,False,71.85
+LPX,Industrial,Building Materials,76.0,61.1,41.4,34.6,56.2,65.1,False,False,82.38
+ASH,Basic Materials,Chemicals,85.9,64.2,51.7,34.2,63.5,57.6,False,False,63.94
+AAL,"Consumer, Cyclical",Airlines,96.7,93.8,62.8,33.9,82.0,77.9,False,False,17.87
+ABBV,"Consumer, Non-cyclical",Pharmaceuticals,91.6,67.4,58.1,33.4,68.5,76.6,False,False,253.35
+AMCR,Industrial,Packaging&Containers,80.3,54.6,47.1,33.3,56.7,67.8,False,False,43.03
+HALO,"Consumer, Non-cyclical",Biotechnology,80.8,64.3,49.2,31.6,61.6,67.1,False,False,74.96
+TECH,"Consumer, Non-cyclical",Healthcare-Products,99.4,85.9,68.8,30.7,81.8,77.9,False,False,71.0
+CR,Industrial,Machinery-Diversified,95.8,79.9,65.5,30.4,77.3,71.3,False,False,219.06
+BAX,"Consumer, Non-cyclical",Healthcare-Products,89.7,82.7,59.5,30.2,74.8,69.9,False,False,22.04
