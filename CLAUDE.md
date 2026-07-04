@@ -29,14 +29,12 @@ bamhi-web-2.0/
 │   └── config/sectors.py  # 代理 import 根目錄 sector_config.py
 ├── frontend/         # Vue 3 + Vite + Pinia + ECharts，部署 Vercel
 │   └── src/          # views/ stores/ components/ router/ api/client.js lib/
-├── data_engine/      # 資料讀取層（含 Streamlit 遺留，後端不直接 import）
-├── data_pipeline/    # 資料更新管線（update_data.py 呼叫）
+├── data_pipeline/    # 資料更新管線（update_data.py 呼叫；含 sanity_check.py 資料檢核）
 ├── data/             # 每日 pipeline 產出 CSV（機器人自動 commit）
+├── legacy/           # 舊版 Streamlit 全部遺留（app.py、views/、data_engine/ 等），禁止 import，見 legacy/README.md
 ├── sector_config.py  # 板塊設定唯一來源（backend + pipeline 共用）
-└── update_data.py    # 手動/排程資料更新
+└── update_data.py    # 手動/排程資料更新（結尾自動跑 sanity check）
 ```
-
-**根目錄的 `app.py` / `views/` / `api.py` / `config.py` / `components/` 是舊版 Streamlit 遺留**，僅供對照，新功能不要動它們、不要 import。
 
 ## 開發環境
 
@@ -70,7 +68,7 @@ bamhi-web-2.0/
 ## 常見地雷
 
 - `AUTH_DISABLED=true` 只能放本地 `backend/.env`，生產 Render 絕對不設
-- `data_engine/` 有 Streamlit 依賴（`@st.cache_data`），後端服務**不直接 import**；邏輯重寫進 `backend/services/`（純 pandas/numpy）
+- 後端邏輯一律寫進 `backend/services/`（純 pandas/numpy）；`legacy/`（含舊 data_engine）任何東西都**禁止 import**
 - `sector_config.py` 是唯一來源，改動同時影響 `backend/` 與 `data_pipeline/`；`backend/config/sectors.py` 用 `sys.path` 插根目錄是刻意設計不是 bug
 - 前端 HTTP 唯一出口是 `frontend/src/api/client.js`，元件與 store 禁止硬編碼後端 URL
 - `data/*.csv`、`*.xlsx` 不要整檔讀進對話 — 用 pandas 看 shape/head（見 `docs/agents/DIAGNOSIS.md`）
