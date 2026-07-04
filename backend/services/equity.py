@@ -7,7 +7,6 @@ import time
 
 import numpy as np
 import pandas as pd
-import requests
 
 _CACHE: dict = {}
 _TTL = 3600
@@ -68,12 +67,9 @@ def get_profile(ticker: str, period: str = "2y", interval: str = "1d"):
 
     import yfinance as yf
 
-    session = requests.Session()
-    session.headers.update({
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    })
-    stock = yf.Ticker(ticker, session=session)
+    # 不要自帶 session：yfinance 1.2+ 內部用 curl_cffi 並拒收 requests.Session，
+    # 讓它自行處理（預設 impersonate chrome，反封鎖比手動 User-Agent 更佳）。
+    stock = yf.Ticker(ticker)
     hist = pd.DataFrame()
     for attempt in range(3):
         try:
