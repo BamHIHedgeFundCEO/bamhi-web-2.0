@@ -9,6 +9,7 @@ venv/
 env/
 
 # 環境變數（敏感）— 注意：既有已追蹤的 .env 不受影響，需自行 git rm --cached
+**/.env
 .env.local
 *.local
 

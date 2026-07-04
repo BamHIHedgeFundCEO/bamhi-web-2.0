@@ -15,9 +15,10 @@ import plotly.graph_objects as go
 import pandas as pd
 import requests
 import streamlit as st
+import os
 from datetime import datetime, timedelta
-# 🔑 你的專屬 FMP API 金鑰
-FMP_API_KEY = "29epqrFbGsBfasHJHyU7fnFT8CcUdeaF"
+# 🔑 FMP API 金鑰改由環境變數提供（backend/.env 的 FMP_API_KEY）
+FMP_API_KEY = os.getenv("FMP_API_KEY", "")
 
 @st.cache_data(ttl=3600, show_spinner=False)
 def fetch_stock_profile(ticker: str, period: str = "2y", interval: str = "1d"):
