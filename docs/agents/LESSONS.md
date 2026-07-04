@@ -20,6 +20,12 @@
 - 修法：先設 `$env:PYTHONUTF8="1"; $env:PYTHONIOENCODING="utf-8"` 再跑
 - 影響檔案：（全域）已寫入 CLAUDE.md 開發環境區
 
+## 2026-07-04 FMP key 曾硬編碼進 git（已修，key 待輪替）
+- 情境：secrets 總盤點
+- 雷：`data_engine/equity.py` 硬編碼 FMP key，進了 HEAD + 4 個歷史 commit；先前 commit `1bf6f63` 只清了 backend 那份，漏了這份
+- 修法：任何 key 一律 `os.getenv()`；「清 key」要全 repo grep 該值，不能只修被回報的那個檔；歷史殘留靠輪替解決，filter-repo 為選配
+- 影響檔案：`legacy/data_engine/equity.py`（已修為 env var）
+
 ## 2026-07-04 settings.local.json 允許清單含明文 API key
 - 情境：盤點 `.claude/settings.local.json`
 - 雷：permission 字串裡殘留 FRED_API_KEY 明文（歷史指令被存成允許規則）
