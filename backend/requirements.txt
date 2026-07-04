@@ -7,7 +7,6 @@ pandas
 numpy
 yfinance          # ETF 成分股即時鑽取 (on-demand)
 requests
-deep_translator   # 個股公司簡介中譯
 httpx             # discord webhook HTTP client
 apscheduler==3.10.4  # 每日摘要排程
 edgartools        # SEC Form 4 解析 (wrap SEC EDGAR XML)

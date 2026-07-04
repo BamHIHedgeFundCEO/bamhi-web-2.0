@@ -54,7 +54,6 @@ bamhi-web-2.0/
 | `SUPABASE_JWT_SECRET` | 僅舊版 HS256 專案需要 |
 | `FRONTEND_ORIGIN` | 生產前端 URL，加入 CORS 白名單 |
 | `POLYGON_API_KEY` | 資料源 |
-| `FMP_API_KEY` | Financial Modeling Prep，insider 功能必填 |
 | `DISCORD_WEBHOOK_URL` | Discord 通知（insider 大單警報 + 每日摘要） |
 | `INSIDER_MEGA_THRESHOLD` | 超大單警報門檻（美元，預設 5000000） |
 | `DIGEST_HOUR_EST` | 每日摘要推送時間（美東，預設 22） |

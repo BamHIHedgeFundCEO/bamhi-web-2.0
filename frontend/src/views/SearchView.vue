@@ -24,7 +24,7 @@
 
     <template v-else-if="p">
       <!-- 標題 + 價格 -->
-      <h1 class="title">{{ p.company_name }} <span class="tkr">({{ p.ticker }})</span></h1>
+      <h1 class="title">{{ p.ticker }}</h1>
       <div class="price-row" :class="up ? 'up' : 'down'">
         <span class="price">${{ p.price.current != null ? p.price.current.toFixed(2) : '—' }}</span>
         <span class="chg">{{ p.price.change >= 0 ? '+' : '' }}{{ p.price.change != null ? p.price.change.toFixed(2) : '—' }} ({{ p.price.change_pct >= 0 ? '+' : '' }}{{ p.price.change_pct != null ? p.price.change_pct.toFixed(2) : '—' }}%)</span>
@@ -46,23 +46,6 @@
         <CandleChart :dates="p.chart.dates" :candle="p.chart.candle" :mas="p.chart.ma" :log="false" :height="440" />
         <h3>量化綜合分數 (Composite)</h3>
         <TimeSeriesChart :option="compositeOption" :height="220" />
-      </template>
-
-      <!-- 基本資料 -->
-      <template v-else-if="tab === 'info'">
-        <div class="info-grid">
-          <div class="info-card">
-            <p class="lbl">所屬板塊 (Sector)</p><p class="val">{{ p.sector }}</p>
-            <p class="lbl">所屬產業 (Industry)</p><p class="val">{{ p.industry }}</p>
-            <p class="lbl">全職員工數</p><p class="val">{{ typeof p.employees === 'number' ? p.employees.toLocaleString() : p.employees }}</p>
-            <p v-if="p.website && p.website !== 'N/A'" class="lbl">官網</p>
-            <p v-if="p.website && p.website !== 'N/A'" class="val"><a :href="p.website" target="_blank">{{ p.website }}</a></p>
-          </div>
-          <div class="summary">
-            {{ p.summary_zh || p.summary }}
-            <p class="src">💡 簡介來源 FMP{{ p.summary_zh ? '｜翻譯 Google Translate' : '（翻譯暫時無法使用，顯示原文）' }}</p>
-          </div>
-        </div>
       </template>
 
       <!-- 內部人交易 -->
@@ -146,7 +129,6 @@ const insiderStore = useInsiderStore()
 const PERIODS = ['6mo', '1y', '2y', '5y', '10y', 'max']
 const TABS = [
   { key: 'chart', label: '📈 技術線圖' },
-  { key: 'info', label: '🏢 基本資料' },
   { key: 'insider', label: '👤 內部人交易' },
 ]
 
@@ -265,13 +247,6 @@ onMounted(reload)
 .tab-btn { background: var(--color-bg-surface); border: 1px solid var(--color-border); color: var(--color-text-secondary); padding: 8px 16px; border-radius: var(--radius-md); font-size: 13px; cursor: pointer; }
 .tab-btn.active { background: var(--color-accent); border-color: var(--color-accent); color: #fff; }
 h3 { font-size: 14px; margin: 22px 0 10px; color: var(--color-text-secondary); }
-.info-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
-.info-card { background: var(--color-bg-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 16px; }
-.info-card .lbl { color: var(--color-text-muted); font-size: 12px; margin: 12px 0 2px; }
-.info-card .lbl:first-child { margin-top: 0; }
-.info-card .val { color: var(--color-text-primary); font-size: 14px; font-weight: 600; margin: 0; }
-.summary { background: var(--color-bg-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 16px; color: var(--color-text-secondary); font-size: 13px; line-height: 1.7; }
-.summary .src { color: var(--color-text-muted); font-size: 11px; margin: 12px 0 0; }
 .fin-wrap { overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-md); }
 .fin { width: 100%; border-collapse: collapse; font-size: 13px; }
 .fin th { background: var(--color-bg-raised); color: var(--color-text-secondary); padding: 10px 14px; text-align: right; font-size: 11px; border-bottom: 1px solid var(--color-border); }
@@ -280,7 +255,6 @@ h3 { font-size: 14px; margin: 22px 0 10px; color: var(--color-text-secondary); }
 .fin .metric-name { text-align: left; color: var(--color-text-secondary); }
 .ph { color: var(--color-text-muted); padding: 30px 0; }
 .alert { background: rgba(245, 158, 11, 0.1); border: 1px solid var(--color-warning); color: var(--color-warning); padding: 14px 18px; border-radius: var(--radius-md); }
-@media (max-width: 800px) { .info-grid { grid-template-columns: 1fr; } }
 /* insider tab */
 .insider-header { display: flex; align-items: center; gap: 12px; margin: 22px 0 10px; }
 .insider-header h3 { font-size: 14px; color: var(--color-text-secondary); margin: 0; }

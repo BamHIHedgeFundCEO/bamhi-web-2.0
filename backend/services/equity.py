@@ -1,16 +1,13 @@
 """個股深度檔案引擎 (移植自 data_engine/equity.py)。
 
-yfinance (K線 + 技術指標) + FMP (美股基本面/財報) / FinMind (台股財報)。
-純 pandas/numpy，不依賴 streamlit。FMP 金鑰改讀環境變數。
+yfinance (K線 + 技術指標)。純 pandas/numpy，不依賴 streamlit。
+公司基本面 (FMP) 功能已於 2026-07-04 移除。
 """
-import os
 import time
 
 import numpy as np
 import pandas as pd
 import requests
-
-FMP_API_KEY = os.getenv("FMP_API_KEY", "")
 
 _CACHE: dict = {}
 _TTL = 3600
@@ -60,33 +57,6 @@ def _compute_indicators(hist: pd.DataFrame) -> pd.DataFrame:
     return hist
 
 
-def _fmp_fundamentals(ticker: str, info: dict) -> None:
-    try:
-        p = requests.get(f"https://financialmodelingprep.com/stable/profile?symbol={ticker}&apikey={FMP_API_KEY}", timeout=10).json()
-        if p:
-            p = p[0] if isinstance(p, list) else p
-            info.update({"shortName": p.get("companyName", ticker), "sector": p.get("sector", "N/A"),
-                         "industry": p.get("industry", "N/A"), "longBusinessSummary": p.get("description", "暫無公司業務介紹。"),
-                         "website": p.get("website", "N/A"), "fullTimeEmployees": p.get("fullTimeEmployees", "N/A"),
-                         "marketCap": p.get("mktCap", 0)})
-    except Exception as e:
-        print(f"FMP 基本資料失敗: {e}")
-
-
-
-def _translate_zh(text: str) -> str | None:
-    """將英文公司簡介翻為繁體中文（對應 Streamlit deep_translator）。失敗回 None。"""
-    if not text or text == "暫無公司業務介紹。":
-        return None
-    try:
-        from deep_translator import GoogleTranslator
-
-        return GoogleTranslator(source="auto", target="zh-TW").translate(text[:4900])
-    except Exception as e:
-        print(f"翻譯失敗，退回原文: {e}")
-        return None
-
-
 def get_profile(ticker: str, period: str = "2y", interval: str = "1d"):
     ticker = ticker.upper()
     if interval == "1h" and period in ("5y", "10y", "max"):
@@ -121,10 +91,7 @@ def get_profile(ticker: str, period: str = "2y", interval: str = "1d"):
     hist = _compute_indicators(hist)
     close_valid = hist["Close"].dropna()
     info = {"currentPrice": float(close_valid.iloc[-1]) if len(close_valid) > 0 else float("nan")}
-    _fmp_fundamentals(ticker, info)
-
-    if "previousClose" not in info:
-        info["previousClose"] = float(close_valid.iloc[-2]) if len(close_valid) > 1 else info["currentPrice"]
+    info["previousClose"] = float(close_valid.iloc[-2]) if len(close_valid) > 1 else info["currentPrice"]
 
     # 趨勢 / 訊號燈號
     last = hist.iloc[-1]
@@ -150,17 +117,11 @@ def get_profile(ticker: str, period: str = "2y", interval: str = "1d"):
 
     cur = info["currentPrice"]
     prev = info["previousClose"]
-    mc = info.get("marketCap") or 0
 
     data = {
-        "ticker": ticker, "company_name": info.get("shortName", ticker),
-        "sector": info.get("sector", "N/A"), "industry": info.get("industry", "N/A"),
-        "employees": info.get("fullTimeEmployees", "N/A"), "website": info.get("website", "N/A"),
-        "summary": info.get("longBusinessSummary", "暫無公司業務介紹。"),
-        "summary_zh": _translate_zh(info.get("longBusinessSummary", "")),
+        "ticker": ticker,
         "price": {"current": round(cur, 2), "prev_close": round(prev, 2),
                   "change": round(cur - prev, 2), "change_pct": round((cur - prev) / prev * 100, 2) if prev else 0},
-        "valuation": {"market_cap_b": round(mc / 1e9, 2) if mc else None},
         "trend_status": trend, "signal_status": signal, "composite": round(comp, 1),
         "chart": {
             "dates": dates, "interval": interval,
