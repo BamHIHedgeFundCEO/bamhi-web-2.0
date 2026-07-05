@@ -31,3 +31,9 @@
 - 雷：permission 字串裡殘留 FRED_API_KEY 明文（歷史指令被存成允許規則）
 - 修法：含 secret 的指令改用 `$env:FRED_API_KEY` 引用、不要讓含明文 key 的指令進允許清單；已存在的請使用者手動清理並考慮輪替 key
 - 影響檔案：`.claude/settings.local.json`
+
+## 2026-07-05 yfinance MultiIndex 欄位：本機煙霧測試過、CI 全滅
+- 情境：dual_pool 階段 1 首次 GitHub Actions 實跑，1166 檔全部 side='error'，workflow 卻顯示 success
+- 雷：三連環——(1) yfinance 1.2 單檔 download 回 MultiIndex 欄位，`hist["Close"]` 變 DataFrame；(2) 本機舊 pandas 對 `float(單元素Series)` 只警告、CI 新 pandas 直接 TypeError，被 except 吞成靜默 error；(3) 修復後舊 cache 仍存著 MultiIndex 欄位，增量 concat 再炸一次
+- 修法：外部資料源的欄位形狀在「邊界處正規化」（下載點+cache 讀取點+消費端三處攤平）；煙霧測試要走「冷 cache + 真實下載」路徑，暖 cache 會遮蔽下載格式問題；批次 job 的驗收不能只看 exit code，要看產出計數（left/right/discard 全 0 = 紅旗）
+- 影響檔案：`data_pipeline/dual_pool/run_stage1.py`、`l1_features.py`
