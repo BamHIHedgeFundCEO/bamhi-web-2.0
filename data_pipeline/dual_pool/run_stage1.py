@@ -120,6 +120,11 @@ def _fetch_ohlcv(ticker: str, full: bool = True) -> Optional[pd.DataFrame]:
                 threads=False,
             )
             if df is not None and not df.empty:
+                # yfinance 1.2+ 單檔下載回 MultiIndex 欄位 ('Close','AAPL')，
+                # 使 hist["Close"] 變 DataFrame，下游 float(Series) 在新版 pandas
+                # 直接 TypeError。攤平成單層欄位，讓 hist["Close"] 為 Series。
+                if isinstance(df.columns, pd.MultiIndex):
+                    df.columns = df.columns.get_level_values(0)
                 return df
         except Exception as e:
             print(f"[stage1] yfinance {ticker} attempt {attempt}: {e}")

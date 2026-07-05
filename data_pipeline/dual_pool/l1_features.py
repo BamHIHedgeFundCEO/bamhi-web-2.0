@@ -71,6 +71,12 @@ def compute_features(hist: pd.DataFrame) -> Optional[dict]:
     if hist is None or hist.empty:
         return None
 
+    # 防線：yfinance 1.2+ 單檔下載/舊 cache 可能帶 MultiIndex 欄位
+    # （('Close','AAPL')），攤平確保 hist["Close"] 為 Series 而非 DataFrame。
+    if isinstance(hist.columns, pd.MultiIndex):
+        hist = hist.copy()
+        hist.columns = hist.columns.get_level_values(0)
+
     close = hist["Close"].dropna()
     if len(close) < _MIN_HIST_DAYS:
         return None
