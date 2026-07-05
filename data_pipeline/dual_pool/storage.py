@@ -181,3 +181,85 @@ def _fallback_snapshot(snapshot_date: date, records: list[dict]):
     df = pd.DataFrame(records)
     df.to_csv(path, index=False)
     print(f"[storage] universe_snapshot fallback → {path} ({len(records)} rows)")
+
+
+# ── events 落庫（L2 催化劑抽取輸出）────────────────────────────────
+
+_TABLE_EVENTS  = "events"
+_EVENTS_FILE   = _DATA_DIR / "events.jsonl"
+
+
+def upsert_events(records: list[dict]):
+    """
+    upsert events 表（§3.2 + 冪等鍵 accession_no+seq_in_filing）。
+
+    Supabase：ON CONFLICT (accession_no, seq_in_filing) DO NOTHING（§8.1 冪等）
+    Fallback：本地 events.jsonl append（去重同鍵）
+
+    注意：records 不得包含公告全文（§6.8 版權）。
+    """
+    if not records:
+        return
+
+    sb = _supabase()
+    if sb:
+        try:
+            # ignore_duplicates=True → ON CONFLICT DO NOTHING（supabase-py v2+）
+            try:
+                sb.table(_TABLE_EVENTS).upsert(
+                    records,
+                    on_conflict="accession_no,seq_in_filing",
+                    ignore_duplicates=True,
+                ).execute()
+            except TypeError:
+                # 舊版 supabase-py 不支援 ignore_duplicates，改普通 upsert（仍冪等）
+                sb.table(_TABLE_EVENTS).upsert(
+                    records,
+                    on_conflict="accession_no,seq_in_filing",
+                ).execute()
+            print(f"[storage] events upsert {len(records)} rows → Supabase")
+        except Exception as e:
+            print(f"[storage] events Supabase upsert error: {e}")
+            _fallback_events(records)
+    else:
+        _fallback_events(records)
+
+
+def _fallback_events(records: list[dict]):
+    """
+    本地 JSONL append，去重同鍵 (accession_no, seq_in_filing)。
+    保證重跑不新增列（§8.1 冪等）。
+    """
+    _DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+    # 載入已有 keys
+    existing_keys: set[tuple] = set()
+    if _EVENTS_FILE.exists():
+        with _EVENTS_FILE.open("r", encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    r = json.loads(line)
+                    existing_keys.add(
+                        (r.get("accession_no"), r.get("seq_in_filing"))
+                    )
+                except Exception:
+                    pass
+
+    new_count = 0
+    with _EVENTS_FILE.open("a", encoding="utf-8") as fh:
+        for r in records:
+            key = (r.get("accession_no"), r.get("seq_in_filing"))
+            if key in existing_keys:
+                continue
+            fh.write(json.dumps(r, ensure_ascii=False, default=str) + "\n")
+            existing_keys.add(key)
+            new_count += 1
+
+    skipped = len(records) - new_count
+    print(
+        f"[storage] events fallback → {_EVENTS_FILE} "
+        f"(+{new_count} new, {skipped} skipped/dup)"
+    )

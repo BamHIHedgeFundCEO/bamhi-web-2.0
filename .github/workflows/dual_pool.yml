@@ -1,4 +1,4 @@
-name: Dual Pool Stage 1
+name: Dual Pool Stage 1 + Stage 2
 
 on:
   schedule:
@@ -17,18 +17,25 @@ jobs:
         with:
           python-version: '3.13'
 
-      # ── OHLCV cache（Actions cache）─────────────────────────────────
+      # ── dual_pool 狀態 cache（Actions cache）─────────────────────────
       # 取捨說明：
-      #   用 actions/cache 保留 parquet 快取，每晚僅拉增量 → 省時省配額。
-      #   代價：cache key 每日輪換（以日期為 suffix），首次當日 run 為 cache miss，
-      #   但 restore-keys 接上前一日的 cache，實際只拉 1-5 日增量。
-      #   若 cache size 超過 10GB GitHub 會清理；L1 會自動全量重拉（透明降級）。
-      - name: Restore OHLCV cache
+      #   涵蓋整個 data/dual_pool/：ohlcv parquet 快取 + 全部增量狀態檔
+      #   （processed_accessions.json / run_status.json / data_gap.json / cik_cache.json）。
+      #   狀態檔若不進 cache：runner 暫態，processed_accessions 每晚歸零
+      #   → stage2 每晚重抓 90 日全量，白燒 EDGAR 請求與 LLM 配額。
+      #   events.jsonl 是無 Supabase 憑證時的 fallback，Actions 上有憑證不會產生，
+      #   涵蓋進去無害。
+      #   key 以 run_number 輪換（每次 run 必為 miss → run 結束時必存今晚新 cache），
+      #   restore-keys 前綴匹配還原最近一晚 cache → 「還原昨晚 + 存今晚」。
+      #   若 cache 被 GitHub 清理（10GB 上限/7 天未用）：L1 全量重拉、
+      #   stage2 回補 90 日（皆冪等，Supabase ON CONFLICT 不重複寫入，透明降級）。
+      - name: Restore dual_pool cache
         uses: actions/cache@v4
         with:
-          path: data/dual_pool/ohlcv
-          key: ohlcv-${{ runner.os }}-${{ github.run_number }}
+          path: data/dual_pool
+          key: dual-pool-${{ runner.os }}-${{ github.run_number }}
           restore-keys: |
+            dual-pool-${{ runner.os }}-
             ohlcv-${{ runner.os }}-
 
       - name: Install dependencies
@@ -40,9 +47,11 @@ jobs:
             supabase \
             pandas \
             pyarrow \
+            pydantic \
+            requests \
             python-dotenv
 
-      # ── 幂等性（以 run_date 為鍵）：
+      # ── Stage 1 幂等性：
       #    storage.py upsert watchpool（ON CONFLICT DO UPDATE）
       #    storage.py upsert universe_snapshot（ON CONFLICT DO UPDATE）
       #    重跑同一天不會產生重複列。
@@ -54,3 +63,19 @@ jobs:
           PYTHONIOENCODING: "utf-8"
         run: |
           python -m data_pipeline.dual_pool.run_stage1
+
+      # ── Stage 2 幂等性：
+      #    events upsert ON CONFLICT (accession_no, seq_in_filing) DO NOTHING
+      #    processed_accessions.json 記錄已處理 accession，重跑不重複抓取
+      #    GEMINI_API_KEY / NVIDIA_NIM_API_KEY 缺失時安靜降級規則引擎，不 fail
+      - name: Run Stage 2 (L2 EDGAR + LLM extract)
+        env:
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          GEMINI_API_KEY:       ${{ secrets.GEMINI_API_KEY }}
+          NVIDIA_NIM_API_KEY:   ${{ secrets.NVIDIA_NIM_API_KEY }}
+          EDGAR_USER_AGENT:     ${{ secrets.EDGAR_USER_AGENT }}
+          PYTHONUTF8: "1"
+          PYTHONIOENCODING: "utf-8"
+        run: |
+          python -m data_pipeline.dual_pool.run_stage2
