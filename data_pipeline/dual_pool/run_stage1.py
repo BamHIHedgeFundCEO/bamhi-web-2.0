@@ -83,11 +83,15 @@ def _load_cached_ohlcv(ticker: str) -> Optional[pd.DataFrame]:
         return None
     try:
         if _PARQUET_SUPPORT and p.suffix == ".parquet":
-            return pd.read_parquet(p)
+            df = pd.read_parquet(p)
         else:
             df = pd.read_csv(p, index_col=0, parse_dates=True)
             df.index = pd.to_datetime(df.index, utc=True)
-            return df
+        # 修復前存的 cache 帶 MultiIndex 欄位，與現在的扁平 new_data concat 會炸
+        # （union MultiIndex with Index）。讀回時攤平，兼容舊 cache。
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
+        return df
     except Exception as e:
         print(f"[stage1] cache load error {ticker}: {e}")
         return None
