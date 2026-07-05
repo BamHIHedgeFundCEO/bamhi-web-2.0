@@ -108,8 +108,13 @@ L0 粗篩(yfscreen)→ L1 形態識別(本地算)→ L2 催化劑抽取(EDGAR+LL
 | dist_low | NUMERIC | 距 52 週低比例 |
 | adv_dollar | NUMERIC | 20 日均成交額 |
 | liquidity_ok | BOOLEAN | |
+| low_adv_streak | INT | [v1.1 實作補充] 連續 adv_dollar<$2M 交易日數（§5.6 rolling counter，連 5 日→移出） |
+| status | TEXT | [v1.1 實作補充] 'active' \| 'cooldown'。移出採軟刪除：標 cooldown 不刪列，供 §5.6 冷卻檢查；讀取端只取 active |
+| removed_at | DATE | [v1.1 實作補充] 移出日（status='cooldown' 時有值）；冷卻期滿且未重進由管線清列 |
 | entered_at | DATE | [v1.1] 進池日，遲滯機制用(§5.6) |
 | updated_at | TIMESTAMPTZ | |
+
+> [v1.1 實作補充] 冷卻持久化選「watchpool 軟刪除」而非獨立 state 表：單一持久化路徑同時覆蓋 Supabase 與本地 JSON fallback，且守住階段 1 只建兩張表。
 
 ### 3.2 `events`(L2 輸出)
 | 欄位 | 型別 | 說明 |
@@ -278,6 +283,7 @@ $150M–$20B + 量>500K 估 universe **2,500–3,500 檔**，L1 逐檔拉歷史�
 - 10 日後仍不滿足進池條件 → 移出。
 - 例外立即移出：觸發任一 veto（§7.5）、adv_dollar 連續 5 日 < $2M、或左池畢業轉右池。
 - 移出後**冷卻 5 個交易日**才可重進，防單日邊界震盪。
+- [v1.1 實作補充] right→left 重分類走 remove + cooldown：動能瓦解退回盤整形態 = 移出，冷卻 5 交易日後若仍判左才進左池（不無縫轉池；與左→右畢業的「立即」不對稱是設計行為）。
 
 **畢業機制自動成立**：一檔從左池站穩多頭排列後，下次批次會落到右池——這是把左側核心倉轉成右側動能倉的減倉信號，不是新開倉，避免重複追高。畢業不受 10 日保留限制。
 

@@ -1,0 +1,56 @@
+name: Dual Pool Stage 1
+
+on:
+  schedule:
+    # 每日 22:00 UTC（美東收盤後；06:00 TPE 次日）— §8.1
+    - cron: '0 22 * * *'
+  workflow_dispatch:   # 手動觸發（冷啟動、除錯用）
+
+jobs:
+  stage1:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      # ── OHLCV cache（Actions cache）─────────────────────────────────
+      # 取捨說明：
+      #   用 actions/cache 保留 parquet 快取，每晚僅拉增量 → 省時省配額。
+      #   代價：cache key 每日輪換（以日期為 suffix），首次當日 run 為 cache miss，
+      #   但 restore-keys 接上前一日的 cache，實際只拉 1-5 日增量。
+      #   若 cache size 超過 10GB GitHub 會清理；L1 會自動全量重拉（透明降級）。
+      - name: Restore OHLCV cache
+        uses: actions/cache@v4
+        with:
+          path: data/dual_pool/ohlcv
+          key: ohlcv-${{ runner.os }}-${{ github.run_number }}
+          restore-keys: |
+            ohlcv-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install \
+            yfscreen \
+            yfinance \
+            supabase \
+            pandas \
+            pyarrow \
+            python-dotenv
+
+      # ── 幂等性（以 run_date 為鍵）：
+      #    storage.py upsert watchpool（ON CONFLICT DO UPDATE）
+      #    storage.py upsert universe_snapshot（ON CONFLICT DO UPDATE）
+      #    重跑同一天不會產生重複列。
+      - name: Run Stage 1 (L0 + L1)
+        env:
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          PYTHONUTF8: "1"
+          PYTHONIOENCODING: "utf-8"
+        run: |
+          python -m data_pipeline.dual_pool.run_stage1
