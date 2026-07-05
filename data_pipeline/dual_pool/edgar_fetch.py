@@ -32,6 +32,9 @@ _USER_AGENT = os.getenv(
 )
 _DATA_DIR = Path(os.getenv("DUAL_POOL_DATA_DIR", "data/dual_pool"))
 _CIK_CACHE_FILE      = _DATA_DIR / "cik_cache.json"
+# 種子檔放 data_pipeline/dual_pool/（進版控；data/dual_pool 被 gitignore）。
+# SEC 擋 GitHub Actions IP（company_tickers.json 回 403），下載失敗時靠此離線解析。
+_CIK_SEED_FILE       = Path(__file__).parent / "cik_seed.json"
 _PROCESSED_FILE      = _DATA_DIR / "processed_accessions.json"
 _BACKFILL_DAYS       = 90   # 初次回補天數
 _INCREMENTAL_DAYS    = 2    # 每日增量天數
@@ -51,14 +54,17 @@ def _rate_limited_get(
     url: str,
     timeout: int = 30,
     retry_503: int = 0,
+    retry_403_429: int = 0,
 ) -> Optional[requests.Response]:
     """
     帶限速的 GET 請求（§6.1：≤ 1 req/s）。
-    retry_503 > 0 → 遇 503 指數退避重試（2s/4s/...）。
+    retry_503 > 0     → 遇 503 指數退避重試（2s/4s/...）。
+    retry_403_429 > 0 → 遇 403/429 指數退避重試（SEC 擋 IP 時用）。
     失敗回 None（呼叫端自行處理）。
     """
     global _last_request_ts
-    for attempt in range(retry_503 + 1):
+    max_attempts = max(retry_503, retry_403_429) + 1
+    for attempt in range(max_attempts):
         elapsed = time.time() - _last_request_ts
         if elapsed < _RATE_INTERVAL:
             time.sleep(_RATE_INTERVAL - elapsed)  # ← 限速 1 req/s，§6.1 規定（此行）
@@ -73,9 +79,13 @@ def _rate_limited_get(
             return resp
         except requests.HTTPError as e:
             status = e.response.status_code
-            if status == 503 and attempt < retry_503:
+            retryable = (
+                (status == 503 and attempt < retry_503) or
+                (status in (403, 429) and attempt < retry_403_429)
+            )
+            if retryable:
                 wait = 2.0 * (2 ** attempt)  # 2s, 4s 指數退避
-                print(f"[edgar] HTTP 503 → retry {attempt+1}/{retry_503} in {wait:.0f}s: {url}")
+                print(f"[edgar] HTTP {status} → retry {attempt+1} in {wait:.0f}s: {url}")
                 time.sleep(wait)
                 continue
             print(f"[edgar] HTTP {status} → {url}")
@@ -105,8 +115,9 @@ def reset_fetch_degraded_count():
 def _download_cik_map() -> dict[str, str]:
     """
     下載 SEC company_tickers.json，回傳 {TICKER_UPPER: cik_str(10位數補零)} 對映。
+    對 403/429 指數退避 retry 2 次（2s/4s）再放棄（呼叫端降級種子檔）。
     """
-    resp = _rate_limited_get(_TICKERS_URL)
+    resp = _rate_limited_get(_TICKERS_URL, retry_503=0, retry_403_429=2)
     if not resp:
         return {}
     try:
@@ -124,9 +135,23 @@ def _download_cik_map() -> dict[str, str]:
         return {}
 
 
+def _load_cik_seed() -> dict[str, str]:
+    """讀 repo 種子檔 cik_seed.json（Actions 上下載 403 時的離線來源）。"""
+    if not _CIK_SEED_FILE.exists():
+        return {}
+    try:
+        return json.loads(_CIK_SEED_FILE.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"[edgar] CIK 種子檔讀取失敗：{e}")
+        return {}
+
+
 def _load_cik_map(tickers: list[str]) -> dict[str, str]:
     """
-    載入 CIK 對映（優先本地 cache，缺失才重新下載）。
+    載入 CIK 對映，降級鏈（任一來源拿到就用，全空才回 {}）：
+      1. 本地 cache（data/dual_pool/cik_cache.json）
+      2. 缺 → 嘗試下載 company_tickers.json
+      3. 下載失敗（403/429/空）→ repo 種子檔 cik_seed.json
     """
     _DATA_DIR.mkdir(parents=True, exist_ok=True)
     cache: dict[str, str] = {}
@@ -136,16 +161,35 @@ def _load_cik_map(tickers: list[str]) -> dict[str, str]:
         except Exception:
             pass
 
-    needed = [t.upper() for t in tickers if t.upper() not in cache]
+    upper = [t.upper() for t in tickers]
+    source = "cache"
+    needed = [t for t in upper if t not in cache]
     if needed:
-        print(f"[edgar] CIK 缺少 {len(needed)} 筆，重新下載 company_tickers.json")
+        print(f"[edgar] CIK 缺少 {len(needed)} 筆，嘗試下載 company_tickers.json")
         fresh = _download_cik_map()
+        if not fresh:
+            # 下載失敗（Actions IP 被擋等）→ 種子檔離線降級
+            fresh = _load_cik_seed()
+            if fresh:
+                source = "seed"
+                print(f"[edgar] 下載失敗，降級 repo 種子檔（{len(fresh)} 筆）")
+        else:
+            source = "download"
         if fresh:
             cache.update(fresh)
-            _CIK_CACHE_FILE.write_text(
-                json.dumps(cache, ensure_ascii=False),
-                encoding="utf-8",
-            )
+            try:
+                _CIK_CACHE_FILE.write_text(
+                    json.dumps(cache, ensure_ascii=False), encoding="utf-8",
+                )
+            except Exception:
+                pass
+
+    # ── 診斷 log（命中率 + 未命中樣本）─────────────────────────────
+    hit = [t for t in upper if t in cache]
+    miss = [t for t in upper if t not in cache]
+    print(f"[edgar] CIK 命中 {len(hit)}/{len(upper)}（來源: {source}）")
+    if miss:
+        print(f"[edgar] 未命中前 5：{miss[:5]}")
 
     return cache
 
