@@ -107,10 +107,12 @@ jobs:
             fi
           done
 
-          echo "[stage2] TIMEOUT after ${TIMEOUT}s — stage2 may still be running on Render"
-          # stage2 逾時時 partial events 已落庫（Supabase 持久化），
-          # stage3 照跑：用已有的 events 計分，不因 stage2 未完成而中斷。
-          exit 1
+          echo "[stage2] ⚠ TIMEOUT after ${TIMEOUT}s — stage2 仍在 Render 背景執行"
+          # 逾時是良性的：stage2 冪等、可續跑，已完成批的 events 已落 Supabase，
+          # 下輪從斷點續。stage3 用當下 events 快照計分（不依賴 stage2 完成）。
+          # 因此逾時 exit 0，不讓整個 nightly job 假性標紅——真正失敗（trigger 非 202、
+          # status=failed）在上面已各自 exit 1，仍會正確標紅。
+          exit 0
 
       # ── Stage 3：L3 計分卡（GitHub Actions 上跑，yfinance 無 SEC 封鎖問題）
       #    stage2 done/timeout/partial 都照跑——scores 以當下 events 快照計算（冪等）。
