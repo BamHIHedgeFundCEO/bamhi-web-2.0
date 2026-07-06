@@ -39,10 +39,17 @@ def _run_stage2_bg(started_at: str) -> None:
     Render 工作目錄是 repo 根，可直接 import data_pipeline。
     """
     global _stage2_state, _stage2_running
+
+    # 共享進度 dict（每批更新；status endpoint 輪詢可見到有沒有前進）
+    progress: dict = {}
+
     try:
         from data_pipeline.dual_pool.run_stage2 import run_stage2  # noqa: PLC0415
 
-        result = run_stage2()
+        result = run_stage2(
+            max_runtime_s=5400,   # 90 分鐘軟時限；超時留斷點，下輪續跑
+            progress_dict=progress,
+        )
 
         finished_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
         with _state_lock:
@@ -51,6 +58,7 @@ def _run_stage2_bg(started_at: str) -> None:
                 "started_at":  started_at,
                 "finished_at": finished_at,
                 "result":      result,
+                "progress":    progress,
                 "error":       None,
             }
     except Exception as exc:
@@ -63,6 +71,7 @@ def _run_stage2_bg(started_at: str) -> None:
                 "started_at":  started_at,
                 "finished_at": finished_at,
                 "result":      None,
+                "progress":    progress,
                 "error":       err_msg,
             }
     finally:
@@ -102,6 +111,7 @@ async def trigger_stage2(
             "started_at":  started_at,
             "finished_at": None,
             "result":      None,
+            "progress":    {},
             "error":       None,
         }
 
