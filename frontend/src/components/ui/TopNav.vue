@@ -51,6 +51,7 @@ const TOOLS = [
   { name: 'worldSectors', label: '🐫 全球市場強弱' },
   { name: 'insider', label: '🕵️ 內部人追蹤雷達' },
   { name: 'marketWatch', label: '🔭 市場觀察' },
+  { name: 'smallCap', label: '💰 小市值策略' },
 ]
 const toolActive = computed(() => TOOLS.some((t) => route.name === t.name))
 

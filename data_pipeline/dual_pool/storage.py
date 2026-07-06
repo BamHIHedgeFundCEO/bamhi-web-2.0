@@ -336,3 +336,178 @@ def _fallback_events(records: list[dict]):
         f"[storage] events fallback → {_EVENTS_FILE} "
         f"(+{new_count} new, {skipped} skipped/dup)"
     )
+
+
+def load_events(days: int = 365) -> list[dict]:
+    """
+    載入近 N 天的 events（給 scoring 用）。
+
+    Supabase：SELECT * FROM events WHERE known_at >= now()-interval 'N days'
+    Fallback：讀本地 events.jsonl，依 known_at 過濾。
+    """
+    from datetime import datetime, timezone, timedelta
+    cutoff = (datetime.now(tz=timezone.utc) - timedelta(days=days)).isoformat()
+
+    sb = _supabase()
+    if sb:
+        try:
+            resp = (
+                sb.table(_TABLE_EVENTS)
+                .select("*")
+                .gte("known_at", cutoff)
+                .execute()
+            )
+            return resp.data or []
+        except Exception as e:
+            print(f"[storage] events load error: {e}")
+
+    # fallback：本地 JSONL
+    records = []
+    if _EVENTS_FILE.exists():
+        try:
+            with _EVENTS_FILE.open("r", encoding="utf-8") as fh:
+                for line in fh:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        r = json.loads(line)
+                        ts = r.get("known_at") or r.get("event_date") or ""
+                        if ts >= cutoff:
+                            records.append(r)
+                    except Exception:
+                        pass
+        except Exception as e:
+            print(f"[storage] events local load error: {e}")
+    return records
+
+
+# ── scores 落庫（L3 評分輸出）────────────────────────────────────────────
+
+_TABLE_SCORES = "scores"
+_SCORES_FILE  = _DATA_DIR / "scores.jsonl"
+
+
+def upsert_scores(records: list[dict]):
+    """
+    upsert scores 表（PK = ticker + score_date，冪等，§3.3）。
+
+    Supabase：ON CONFLICT (ticker, score_date) DO UPDATE
+    Fallback：本地 JSONL（覆寫同鍵）
+
+    欄位：ticker, score_date, side, total,
+          catalyst, institution, op_leverage, partnership, insider, narrative,
+          gate_passed, veto_flags(TEXT[]), data_gaps(TEXT[])
+    """
+    if not records:
+        return
+
+    sb = _supabase()
+    if sb:
+        try:
+            sb.table(_TABLE_SCORES).upsert(
+                records, on_conflict="ticker,score_date"
+            ).execute()
+            print(f"[storage] scores upsert {len(records)} rows → Supabase")
+        except Exception as e:
+            print(f"[storage] scores Supabase upsert error: {e}")
+            _fallback_scores(records)
+    else:
+        _fallback_scores(records)
+
+
+def load_scores(score_date: Optional[date] = None) -> list[dict]:
+    """
+    載入指定日期的 scores（預設：最新 score_date）。
+
+    Supabase：
+      有日期 → SELECT * WHERE score_date=X
+      無日期 → SELECT * WHERE score_date=(SELECT MAX(score_date) FROM scores)
+    Fallback：本地 JSONL 過濾。
+    """
+    sb = _supabase()
+    if sb:
+        try:
+            if score_date:
+                resp = (
+                    sb.table(_TABLE_SCORES)
+                    .select("*")
+                    .eq("score_date", score_date.isoformat())
+                    .execute()
+                )
+            else:
+                # 先查最新日期
+                latest_resp = (
+                    sb.table(_TABLE_SCORES)
+                    .select("score_date")
+                    .order("score_date", desc=True)
+                    .limit(1)
+                    .execute()
+                )
+                if not latest_resp.data:
+                    return []
+                latest_date = latest_resp.data[0]["score_date"]
+                resp = (
+                    sb.table(_TABLE_SCORES)
+                    .select("*")
+                    .eq("score_date", latest_date)
+                    .execute()
+                )
+            return resp.data or []
+        except Exception as e:
+            print(f"[storage] scores load error: {e}")
+
+    # fallback：本地 JSONL
+    records = []
+    if _SCORES_FILE.exists():
+        try:
+            all_records = []
+            with _SCORES_FILE.open("r", encoding="utf-8") as fh:
+                for line in fh:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        all_records.append(json.loads(line))
+                    except Exception:
+                        pass
+            if score_date:
+                records = [r for r in all_records if r.get("score_date") == score_date.isoformat()]
+            elif all_records:
+                latest = max(r.get("score_date", "") for r in all_records)
+                records = [r for r in all_records if r.get("score_date") == latest]
+        except Exception as e:
+            print(f"[storage] scores local load error: {e}")
+    return records
+
+
+def _fallback_scores(records: list[dict]):
+    """本地 JSONL 更新（upsert 語意：以 ticker+score_date 為鍵）。"""
+    _DATA_DIR.mkdir(parents=True, exist_ok=True)
+    existing: dict[tuple, dict] = {}
+
+    if _SCORES_FILE.exists():
+        try:
+            with _SCORES_FILE.open("r", encoding="utf-8") as fh:
+                for line in fh:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        r = json.loads(line)
+                        key = (r.get("ticker"), r.get("score_date"))
+                        existing[key] = r
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+
+    for r in records:
+        key = (r.get("ticker"), r.get("score_date"))
+        existing[key] = r
+
+    with _SCORES_FILE.open("w", encoding="utf-8") as fh:
+        for r in existing.values():
+            fh.write(json.dumps(r, ensure_ascii=False, default=str) + "\n")
+
+    print(f"[storage] scores fallback → {_SCORES_FILE} ({len(existing)} rows)")

@@ -50,6 +50,7 @@ jobs:
       #    storage.py upsert universe_snapshot（ON CONFLICT DO UPDATE）
       #    重跑同一天不會產生重複列。
       - name: Run Stage 1 (L0 + L1)
+        id: stage1
         env:
           SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
@@ -107,4 +108,25 @@ jobs:
           done
 
           echo "[stage2] TIMEOUT after ${TIMEOUT}s — stage2 may still be running on Render"
+          # stage2 逾時時 partial events 已落庫（Supabase 持久化），
+          # stage3 照跑：用已有的 events 計分，不因 stage2 未完成而中斷。
           exit 1
+
+      # ── Stage 3：L3 計分卡（GitHub Actions 上跑，yfinance 無 SEC 封鎖問題）
+      #    stage2 done/timeout/partial 都照跑——scores 以當下 events 快照計算（冪等）。
+      #    continue-on-error: false → 若計分炸掉整個 run 失敗，保留告警可見性。
+      - name: Run Stage 3 (L3 scoring + veto + Gate)
+        # stage2 失敗/逾時也跑（用已有 events），但 stage1（checkout/安裝含在其前置）
+        # 失敗就不跑——always() 會在 checkout 炸掉時也觸發，產生噪音 run 與誤報。
+        # 注意 !cancelled() 必須顯式寫，否則隱含 success() 會讓 stage2 失敗時跳過本步。
+        if: ${{ !cancelled() && steps.stage1.outcome == 'success' }}
+        env:
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          DISCORD_WEBHOOK_URL:  ${{ secrets.DISCORD_WEBHOOK_URL }}
+          PYTHONUTF8: "1"
+          PYTHONIOENCODING: "utf-8"
+        run: |
+          pip install --upgrade pip
+          pip install yfinance supabase pandas httpx python-dotenv 2>/dev/null | tail -1
+          python -m data_pipeline.dual_pool.run_stage3

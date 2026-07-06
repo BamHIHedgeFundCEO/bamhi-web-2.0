@@ -150,6 +150,7 @@ L0 粗篩(yfscreen)→ L1 形態識別(本地算)→ L2 催化劑抽取(EDGAR+LL
 | catalyst / institution / op_leverage / partnership / insider / narrative | NUMERIC | 各因子分 |
 | gate_passed | BOOLEAN | [v1.1] 是否過催化劑 Gate(§7.4)，前端兩級呈現用 |
 | veto_flags | TEXT[] | 非空 = 不可買 |
+| data_gaps | TEXT[] | [v1.1 實作補充] 缺資料註記（如 institution 未就緒、cash_runway 抓不到），與 veto 區分——缺資料不否決 |
 | PK | (ticker, score_date) | |
 
 ### 3.4 `track_record`(誠信 guidance 兌現率)
