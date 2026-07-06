@@ -1,15 +1,11 @@
 """
 scoring.py — L3 計分卡純函式（§7）
 
-stage 5 就緒後：
-  1. 還原 §7.4 原始 institution 權重（左 0.20 / 右 0.20）
-  2. 把暫移的 catalyst +0.10、narrative +0.10 還原
-  3. 移除 data_gap:institution 標記
-  4. 把 institution() 函式改為讀 institution_quarterly 表
-
-暫行（stage 3）：institution 恆 0，data_gap 標記，
-  權重暫移：左 catalyst 0.30+0.10=0.40 / narrative 0.05+0.10=0.15
-            右 catalyst 0.20+0.10=0.30 / narrative 0.20+0.10=0.30
+stage 5（本版本）：institution 因子改讀 institution_quarterly 表。
+  - 已還原 §7.4 原始權重（左 catalyst 0.30 / narrative 0.05 / institution 0.20 等）
+  - institution 因子讀 new_holders percentile（同池同市場）
+  - guidance_missed veto 接上 track_record 資料源
+  - 仍無 institution 資料的 ticker 標 data_gap:institution，因子當 0
 """
 
 from __future__ import annotations
@@ -20,25 +16,31 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
 
-# ── 權重表（§7.4）— institution 就緒後還原原表 ──────────────────────────
-# 左池：institution 0.20 暫移 catalyst +0.10 / narrative +0.10
-# 右池：institution 0.20 暫移 catalyst +0.10 / narrative +0.10
+# ── 權重表（§7.4）— 已還原原始表（stage 5 institution 就緒）─────────────
+# 左池：catalyst 0.30 / op_leverage 0.25 / institution 0.20 / partnership 0.10
+#         insider 0.10 / narrative 0.05  → 合計 1.00
+# 右池：catalyst 0.20 / op_leverage 0.15 / institution 0.20 / partnership 0.15
+#         insider 0.10 / narrative 0.20  → 合計 1.00
+#
+# §6.9 已知限制（回測歸因必讀）：institution 因子來自 13F 申報，
+#   45 天延遲對右池「快進快出」是時效錯配（反映 1.5-4.5 個月前持倉）。
+#   右池回測若 institution 因子無效，考慮把 0.20 移給 narrative/catalyst。
 WEIGHTS = {
     "left": {
-        "catalyst":     0.40,   # §7.4 原 0.30；+0.10 暫代 institution
+        "catalyst":     0.30,
         "op_leverage":  0.25,
-        "institution":  0.00,   # 未就緒，恆 0（§12 底部註記）
+        "institution":  0.20,
         "partnership":  0.10,
         "insider":      0.10,
-        "narrative":    0.15,   # §7.4 原 0.05；+0.10 暫代 institution
+        "narrative":    0.05,
     },
     "right": {
-        "catalyst":     0.30,   # §7.4 原 0.20；+0.10 暫代 institution
+        "catalyst":     0.20,
         "op_leverage":  0.15,
-        "institution":  0.00,
+        "institution":  0.20,
         "partnership":  0.15,
         "insider":      0.10,
-        "narrative":    0.30,   # §7.4 原 0.20；+0.10 暫代 institution
+        "narrative":    0.20,
     },
 }
 
@@ -130,12 +132,31 @@ def factor_catalyst(events: list[dict], score_date: date) -> float:
 
 
 # ──────────────────────────────────────────────────────────────────────────
-# 因子 2：institution（§7.2 + §12 stage 5 未就緒）
+# 因子 2：institution（§7.2 + §6.9 13F 管線，stage 5 已就緒）
 # ──────────────────────────────────────────────────────────────────────────
 
-def factor_institution() -> float:
-    """institution 因子 — stage 5 未就緒，恆 0（§12）。"""
-    return 0.0
+def factor_institution(
+    new_holders: Optional[int],
+    pool_new_holders: list[int],
+) -> float:
+    """
+    institution 因子（0-1）。
+
+    13F 新進機構數 percentile（§7.2）：
+      new_holders = 本季新出現的機構 filer 數（上季無、本季有）
+      pool_new_holders = 同池所有 ticker 的 new_holders 列表（包含自身）
+
+    無資料（new_holders=None）→ 0.0；呼叫端負責標 data_gap:institution。
+
+    §6.9 已知限制：13F 申報 45 天延遲對右池是時效錯配，
+      回測歸因需單獨檢視此因子對右池的有效性。
+    """
+    if new_holders is None or not pool_new_holders:
+        return 0.0
+    sorted_vals = sorted(pool_new_holders)
+    n = len(sorted_vals)
+    rank = sum(1 for v in sorted_vals if v <= new_holders)
+    return rank / n if n > 0 else 0.0
 
 
 # ──────────────────────────────────────────────────────────────────────────
@@ -471,6 +492,25 @@ def factor_narrative(
 # veto（§7.5 + v1.1 時間窗）
 # ──────────────────────────────────────────────────────────────────────────
 
+def _check_guidance_missed(ticker: str) -> bool:
+    """
+    guidance_missed veto（§7.5）：兌現率<0.5 且樣本≥4 才啟用。
+    讀 track_record 表已驗證紀錄（verified IS NOT NULL）。
+    讀取失敗 → False（不否決，缺資料不等於否決，§7.5 原則）。
+    """
+    try:
+        from data_pipeline.dual_pool import storage as _storage
+        records = _storage.load_track_record_completed(ticker)
+        if len(records) < 4:
+            return False  # 樣本不足，不啟用
+        fulfilled = sum(1 for r in records if r.get("verified") is True)
+        rate = fulfilled / len(records)
+        return rate < 0.5
+    except Exception as e:
+        print(f"[scoring] guidance_missed check error for {ticker}: {e}")
+        return False
+
+
 def compute_veto(
     events: list[dict],
     adv_dollar: Optional[float],
@@ -482,8 +522,8 @@ def compute_veto(
 
     回傳非空清單 → 不可買（前端標紅）。
 
-    已實作：integrity(365天) / dilution(180天) / cash_runway / liquidity。
-    guidance_missed：未就緒（track_record 樣本不足），跳過（§12）。
+    已實作：integrity(365天) / dilution(180天) / cash_runway / liquidity /
+            guidance_missed（接上 track_record，樣本≥4 且兌現率<0.5）。
     """
     flags = []
 
@@ -546,8 +586,9 @@ def compute_veto(
     if adv_dollar is not None and adv_dollar < 2_000_000:
         flags.append("liquidity")
 
-    # ── guidance_missed：未就緒，跳過（§12）────────────────────────────
-    # TODO stage 5：讀 track_record 表，樣本≥4 且兌現率<0.5 → "guidance_missed"
+    # ── guidance_missed：track_record 兌現率<0.5 且樣本≥4（§7.5）──────────
+    if _check_guidance_missed(ticker):
+        flags.append("guidance_missed")
 
     return flags
 
@@ -595,9 +636,15 @@ def score_ticker(
     sector_cache: dict,
     rs_map: dict[str, float],
     score_date: date,
+    ticker_new_holders: Optional[int] = None,
+    pool_institution_new_holders: Optional[list[int]] = None,
 ) -> dict:
     """
     計算一檔的完整 L3 分數。
+
+    新增參數（stage 5）：
+      ticker_new_holders: 本季新進機構 filer 數（來自 institution_quarterly）
+      pool_institution_new_holders: 同池所有 ticker 的 new_holders 列表
 
     回傳 dict 對應 §3.3 scores schema：
       ticker, score_date, side, total,
@@ -608,13 +655,16 @@ def score_ticker(
 
     # 各因子
     f_catalyst    = factor_catalyst(events, score_date)
-    f_institution = factor_institution()                         # 恆 0（stage 5）
+    f_institution = factor_institution(
+        ticker_new_holders,
+        pool_institution_new_holders or [],
+    )
+    if ticker_new_holders is None:
+        data_gaps.append("data_gap:institution")  # 無 13F 資料（新上市/CUSIP 對不上）
     f_op_leverage = factor_op_leverage(ticker, data_gaps)
     f_partnership = factor_partnership(events)
     f_insider     = factor_insider(events, market_cap or 0.0, pool_insider_ratios)
     f_narrative   = factor_narrative(ticker, sector_cache, rs_map)
-
-    data_gaps.append("data_gap:institution")  # §12 stage 5 未就緒
 
     # 加權和
     w = WEIGHTS[side]

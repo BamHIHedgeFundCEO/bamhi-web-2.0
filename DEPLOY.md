@@ -126,10 +126,11 @@ Render 後端 IP 可正常連線。GitHub Actions 每晚只當鬧鐘，curl 觸�
 
 | 變數 | 說明 |
 |------|------|
-| `DUAL_POOL_TRIGGER_TOKEN` | 自產隨機字串（`openssl rand -hex 32`），GitHub Actions 用此驗身觸發 stage2 |
+| `DUAL_POOL_TRIGGER_TOKEN` | 自產隨機字串（`openssl rand -hex 32`），GitHub Actions 用此驗身觸發 stage2/13F/verify |
 | `GEMINI_API_KEY` | Gemini Flash 免費層（LLM 抽取主力；未設時自動降規則引擎，可後補） |
 | `SUPABASE_SERVICE_KEY` | 確認已設（edgar_processed 表 + events 表讀寫） |
 | `EDGAR_USER_AGENT` | 可選，預設 `BamHI research frank940702@gmail.com` |
+| `OPENFIGI_API_KEY` | 可選（13F job 的 CUSIP→ticker 對映）。免費註冊 openfigi.com 取得，可大幅加速：無 key 每批 10 個/25 req/min，有 key 每批 100 個/25 req/6s。首季全量對映（~數萬 CUSIP）無 key 需數小時、有 key 約十分鐘；之後只查 cache miss，兩者皆快 |
 
 ### GitHub Secrets（新增）
 
@@ -149,4 +150,6 @@ Render 後端 IP 可正常連線。GitHub Actions 每晚只當鬧鐘，curl 觸�
 - [ ] Render 環境變數已設（至少 `DUAL_POOL_TRIGGER_TOKEN` + `SUPABASE_URL` + `SUPABASE_SERVICE_KEY`）
 - [ ] GitHub Secrets 已設（`DUAL_POOL_TRIGGER_TOKEN` + `RENDER_API_URL`）
 - [ ] `docs/sql/dual_pool_processed.sql` 已在 Supabase 執行
+- [ ] `docs/sql/dual_pool_institution.sql`（institution_quarterly + cusip_map）已在 Supabase 執行
+- [ ] `docs/sql/dual_pool_track_record.sql` 已在 Supabase 執行
 - [ ] 本機驗收：`POST /api/dual-pool/run-stage2`（401/202）+ `GET /api/dual-pool/stage2-status`

@@ -31,7 +31,7 @@ run_stage2.py — 階段 2 Orchestrator
 from __future__ import annotations
 
 import os
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -45,6 +45,56 @@ from data_pipeline.dual_pool.edgar_fetch import (
 # （edgar_processed 表 → Supabase 跨部署持久；無憑證 fallback 本地 JSON）
 from data_pipeline.dual_pool.rule_filter import filter_filings
 from data_pipeline.dual_pool.llm_extract import extract_events
+
+# guidance/commitment 事件寫入 track_record 的 event_type 集合（§6.4 + §3.4）
+_TRACK_RECORD_EVENT_TYPES = frozenset({"guidance", "commitment"})
+_PROMISE_DEFAULT_DAYS = 90  # timeline_months 未知時的保守截止天數（§7.6）
+
+
+def _events_to_track_records(events: list[dict]) -> list[dict]:
+    """
+    從 L2 抽取的事件中挑出 guidance/commitment，轉為 track_record 記錄。
+
+    promise_date    = event_date
+    promise_text    = headline（≤20字）
+    promise_deadline = known_at + timeline_months*30 天（無則 +90 天保守值）
+    verified        = NULL（待核）
+    """
+    records = []
+    for e in events:
+        if e.get("event_type") not in _TRACK_RECORD_EVENT_TYPES:
+            continue
+        ticker = e.get("ticker") or ""
+        promise_date = e.get("event_date") or e.get("known_at", "")[:10]
+        promise_text = e.get("headline") or ""
+        if not ticker or not promise_date or not promise_text:
+            continue
+
+        # 推算截止日
+        tl = e.get("timeline_months")
+        try:
+            base_date = datetime.fromisoformat(
+                e.get("known_at") or (promise_date + "T00:00:00+00:00")
+            ).date()
+        except Exception:
+            base_date = date.today()
+
+        if tl and isinstance(tl, (int, float)) and tl > 0:
+            deadline = base_date + timedelta(days=int(tl * 30))
+        else:
+            deadline = base_date + timedelta(days=_PROMISE_DEFAULT_DAYS)
+
+        records.append({
+            "ticker":           ticker,
+            "promise_date":     promise_date,
+            "promise_text":     promise_text[:200],   # 截斷保護
+            "promise_deadline": deadline.isoformat(),
+            "verified":         None,
+            "verify_date":      None,
+            "verify_method":    None,
+            "verify_attempts":  0,
+        })
+    return records
 
 # ── 常數 ──────────────────────────────────────────────────────────────
 DAILY_LLM_LIMIT = 500  # LLM 每日配額保守上限（§8.3；超過 → 規則引擎接手）
@@ -182,10 +232,15 @@ def run_stage2(
                 ev.pop("text", None)  # 不落庫（§6.8 版權）
             batch_events.extend(events)
 
-        # ── 5d. 立即落庫（events 先，accessions 後）─────────────────
+        # ── 5d. 立即落庫（events 先，track_record，accessions 後）──────
         # 順序保證：被殺時最多重抓此批，不會丟已落庫事件
         if batch_events:
             storage.upsert_events(batch_events)
+            # guidance/commitment 事件同步寫入 track_record（§7.6）
+            tr_records = _events_to_track_records(batch_events)
+            if tr_records:
+                storage.upsert_track_record(tr_records)
+                print(f"[stage2] track_record upsert {len(tr_records)} 筆 promise")
         elif batch_filings and not filtered_filings:
             pass  # 全被過濾掉，正常
         elif batch_filings and filtered_filings:

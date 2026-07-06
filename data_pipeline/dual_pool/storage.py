@@ -511,3 +511,378 @@ def _fallback_scores(records: list[dict]):
             fh.write(json.dumps(r, ensure_ascii=False, default=str) + "\n")
 
     print(f"[storage] scores fallback → {_SCORES_FILE} ({len(existing)} rows)")
+
+
+# ── institution_quarterly 落庫（§6.9 13F 季度 job）───────────────────────
+
+_TABLE_INSTITUTION = "institution_quarterly"
+_INSTITUTION_FILE  = _DATA_DIR / "institution_quarterly.json"
+
+
+def upsert_institution_quarterly(records: list[dict]):
+    """
+    upsert institution_quarterly（PK = ticker + quarter）。
+
+    records 欄位：ticker, quarter, new_holders, total_holders, known_at
+    Supabase：ON CONFLICT (ticker, quarter) DO UPDATE
+    Fallback：本地 JSON（以 ticker+quarter 為鍵）
+    """
+    if not records:
+        return
+
+    sb = _supabase()
+    if sb:
+        try:
+            sb.table(_TABLE_INSTITUTION).upsert(
+                records, on_conflict="ticker,quarter"
+            ).execute()
+            print(f"[storage] institution_quarterly upsert {len(records)} rows → Supabase")
+            return
+        except Exception as e:
+            print(f"[storage] institution_quarterly Supabase upsert error: {e}")
+
+    # fallback：本地 JSON
+    _DATA_DIR.mkdir(parents=True, exist_ok=True)
+    existing: dict[str, dict] = {}
+    if _INSTITUTION_FILE.exists():
+        try:
+            existing = json.loads(_INSTITUTION_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    for r in records:
+        key = f"{r['ticker']}|{r['quarter']}"
+        existing[key] = r
+    _INSTITUTION_FILE.write_text(
+        json.dumps(existing, ensure_ascii=False, default=str), encoding="utf-8"
+    )
+    print(f"[storage] institution_quarterly fallback → {_INSTITUTION_FILE} ({len(existing)} rows)")
+
+
+def load_institution_latest_batch(tickers: list[str]) -> dict[str, Optional[int]]:
+    """
+    批次載入各 ticker 最新季的 new_holders（scoring 用）。
+    回傳 {ticker: new_holders}，無資料者對應 None。
+    """
+    if not tickers:
+        return {}
+
+    sb = _supabase()
+    if sb:
+        try:
+            # Supabase 不支援 DISTINCT ON；用 ORDER BY + 逐 ticker 取最新
+            resp = (
+                sb.table(_TABLE_INSTITUTION)
+                .select("ticker,quarter,new_holders")
+                .in_("ticker", tickers)
+                .order("quarter", desc=True)
+                .execute()
+            )
+            # 每個 ticker 只取最新 quarter（已按 quarter desc 排序）
+            result: dict[str, int] = {}
+            for row in (resp.data or []):
+                t = row["ticker"]
+                if t not in result:  # 第一筆就是最新季
+                    result[t] = row["new_holders"]
+            return {t: result.get(t) for t in tickers}
+        except Exception as e:
+            print(f"[storage] institution_quarterly load error: {e}")
+
+    # fallback：本地 JSON
+    result = {}
+    if _INSTITUTION_FILE.exists():
+        try:
+            data = json.loads(_INSTITUTION_FILE.read_text(encoding="utf-8"))
+            # 找每個 ticker 最新 quarter
+            ticker_quarters: dict[str, list] = {}
+            for key, rec in data.items():
+                t = rec.get("ticker", "")
+                if t in tickers:
+                    ticker_quarters.setdefault(t, []).append(rec)
+            for t, recs in ticker_quarters.items():
+                latest = max(recs, key=lambda r: r.get("quarter", ""))
+                result[t] = latest.get("new_holders")
+        except Exception as e:
+            print(f"[storage] institution_quarterly local load error: {e}")
+
+    return {t: result.get(t) for t in tickers}
+
+
+# ── cusip_map（CUSIP→ticker 對映，跨部署持久）─────────────────────────
+
+_TABLE_CUSIP_MAP = "cusip_map"
+_CUSIP_MAP_FILE  = _DATA_DIR / "cusip_map.json"
+
+
+def load_cusip_map() -> dict[str, Optional[str]]:
+    """
+    載入 CUSIP→ticker 對映（institution_13f.py 查 OpenFIGI 前先讀）。
+    Supabase cusip_map 表為主（跨部署持久）；無憑證/失敗 → 本地 JSON。
+    分頁讀全表（supabase-py 預設 1000 列上限）。
+    """
+    sb = _supabase()
+    if sb:
+        try:
+            result: dict[str, Optional[str]] = {}
+            page_size = 1000
+            offset = 0
+            while True:
+                resp = (
+                    sb.table(_TABLE_CUSIP_MAP)
+                    .select("cusip,ticker")
+                    .range(offset, offset + page_size - 1)
+                    .execute()
+                )
+                rows = resp.data or []
+                for row in rows:
+                    result[row["cusip"]] = row.get("ticker")
+                if len(rows) < page_size:
+                    break
+                offset += page_size
+            if result:
+                print(f"[storage] cusip_map loaded {len(result)} rows ← Supabase")
+                return result
+        except Exception as e:
+            print(f"[storage] cusip_map load error: {e}")
+
+    # fallback：本地 JSON
+    if _CUSIP_MAP_FILE.exists():
+        try:
+            return json.loads(_CUSIP_MAP_FILE.read_text(encoding="utf-8"))
+        except Exception as e:
+            print(f"[storage] cusip_map local load error: {e}")
+    return {}
+
+
+def upsert_cusip_map(mapping: dict[str, Optional[str]]):
+    """
+    upsert CUSIP→ticker 對映（含查無結果的 None，避免重複查同一 CUSIP）。
+    Supabase：ON CONFLICT (cusip) DO UPDATE；fallback 本地 JSON merge。
+    """
+    if not mapping:
+        return
+
+    sb = _supabase()
+    if sb:
+        try:
+            now = datetime.now().astimezone().isoformat()
+            records = [
+                {"cusip": c, "ticker": t, "updated_at": now}
+                for c, t in mapping.items()
+            ]
+            # 分批 upsert（避免單請求過大）
+            for i in range(0, len(records), 500):
+                sb.table(_TABLE_CUSIP_MAP).upsert(
+                    records[i: i + 500], on_conflict="cusip"
+                ).execute()
+            print(f"[storage] cusip_map upsert {len(records)} rows → Supabase")
+            return
+        except Exception as e:
+            print(f"[storage] cusip_map Supabase upsert error: {e}")
+
+    # fallback：本地 JSON merge
+    _DATA_DIR.mkdir(parents=True, exist_ok=True)
+    existing: dict[str, Optional[str]] = {}
+    if _CUSIP_MAP_FILE.exists():
+        try:
+            existing = json.loads(_CUSIP_MAP_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    existing.update(mapping)
+    _CUSIP_MAP_FILE.write_text(
+        json.dumps(existing, ensure_ascii=False), encoding="utf-8"
+    )
+    print(f"[storage] cusip_map fallback → {_CUSIP_MAP_FILE} ({len(existing)} rows)")
+
+
+def load_institution_holders_cache(quarter: str) -> dict[str, set]:
+    """
+    載入某季 ticker→filer CIK 集合快取（institution_13f.py 用，計算 new_holders 用）。
+    本地 JSON only（太大不進 Supabase），格式：{ticker: [cik1, cik2, ...]}
+    """
+    cache_file = _DATA_DIR / f"institution_holders_{quarter.replace('-','')}.json"
+    if not cache_file.exists():
+        return {}
+    try:
+        raw = json.loads(cache_file.read_text(encoding="utf-8"))
+        return {t: set(ciks) for t, ciks in raw.items()}
+    except Exception as e:
+        print(f"[storage] institution holders cache load error ({quarter}): {e}")
+        return {}
+
+
+def save_institution_holders_cache(quarter: str, holders: dict[str, set]):
+    """儲存某季 ticker→filer CIK 集合快取。"""
+    _DATA_DIR.mkdir(parents=True, exist_ok=True)
+    cache_file = _DATA_DIR / f"institution_holders_{quarter.replace('-','')}.json"
+    try:
+        serializable = {t: sorted(ciks) for t, ciks in holders.items()}
+        cache_file.write_text(
+            json.dumps(serializable, ensure_ascii=False), encoding="utf-8"
+        )
+        print(f"[storage] institution holders cache → {cache_file}")
+    except Exception as e:
+        print(f"[storage] institution holders cache save error ({quarter}): {e}")
+
+
+# ── track_record 落庫（§3.4 guidance/commitment 兌現率）────────────────────
+
+_TABLE_TRACK_RECORD = "track_record"
+_TRACK_RECORD_FILE  = _DATA_DIR / "track_record.json"
+
+
+def upsert_track_record(records: list[dict]):
+    """
+    INSERT track_record（新 promise；ON CONFLICT DO NOTHING，不覆蓋已有紀錄）。
+
+    records 欄位：ticker, promise_date, promise_text, promise_deadline,
+                  verified(NULL), verify_date(NULL), verify_method(NULL), verify_attempts(0)
+    Supabase：ON CONFLICT (ticker, promise_date, promise_text) DO NOTHING
+    Fallback：本地 JSON（以 ticker+promise_date+前50字 為鍵）
+    """
+    if not records:
+        return
+
+    sb = _supabase()
+    if sb:
+        try:
+            try:
+                sb.table(_TABLE_TRACK_RECORD).upsert(
+                    records,
+                    on_conflict="ticker,promise_date,promise_text",
+                    ignore_duplicates=True,
+                ).execute()
+            except TypeError:
+                sb.table(_TABLE_TRACK_RECORD).upsert(
+                    records,
+                    on_conflict="ticker,promise_date,promise_text",
+                ).execute()
+            print(f"[storage] track_record upsert {len(records)} rows → Supabase")
+            return
+        except Exception as e:
+            print(f"[storage] track_record Supabase upsert error: {e}")
+
+    # fallback：本地 JSON
+    _DATA_DIR.mkdir(parents=True, exist_ok=True)
+    existing: dict[str, dict] = {}
+    if _TRACK_RECORD_FILE.exists():
+        try:
+            existing = json.loads(_TRACK_RECORD_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    for r in records:
+        key = f"{r['ticker']}|{r['promise_date']}|{str(r.get('promise_text',''))[:50]}"
+        if key not in existing:  # DO NOTHING semantics
+            existing[key] = r
+    _TRACK_RECORD_FILE.write_text(
+        json.dumps(existing, ensure_ascii=False, default=str), encoding="utf-8"
+    )
+    print(f"[storage] track_record fallback → {_TRACK_RECORD_FILE} ({len(existing)} rows)")
+
+
+def load_track_record_expired(before_date: date) -> list[dict]:
+    """
+    載入 promise_deadline < before_date 且 verified IS NULL 的 promise（verify job 用）。
+    包含 verify_attempts 欄位供 verify job 判斷是否升級為人工佇列。
+    """
+    sb = _supabase()
+    if sb:
+        try:
+            resp = (
+                sb.table(_TABLE_TRACK_RECORD)
+                .select("*")
+                .lt("promise_deadline", before_date.isoformat())
+                .is_("verified", "null")
+                .execute()
+            )
+            return resp.data or []
+        except Exception as e:
+            print(f"[storage] track_record expired load error: {e}")
+
+    # fallback
+    records = []
+    if _TRACK_RECORD_FILE.exists():
+        try:
+            all_recs = list(json.loads(_TRACK_RECORD_FILE.read_text(encoding="utf-8")).values())
+            for r in all_recs:
+                deadline = r.get("promise_deadline", "9999-12-31")
+                if deadline < before_date.isoformat() and r.get("verified") is None:
+                    records.append(r)
+        except Exception as e:
+            print(f"[storage] track_record local load error: {e}")
+    return records
+
+
+def load_track_record_completed(ticker: str) -> list[dict]:
+    """
+    載入 ticker 所有 verified IS NOT NULL 的紀錄（scoring guidance_missed veto 用）。
+    """
+    sb = _supabase()
+    if sb:
+        try:
+            resp = (
+                sb.table(_TABLE_TRACK_RECORD)
+                .select("ticker,verified")
+                .eq("ticker", ticker)
+                .not_.is_("verified", "null")
+                .execute()
+            )
+            return resp.data or []
+        except Exception as e:
+            print(f"[storage] track_record completed load error: {e}")
+
+    # fallback
+    records = []
+    if _TRACK_RECORD_FILE.exists():
+        try:
+            all_recs = list(json.loads(_TRACK_RECORD_FILE.read_text(encoding="utf-8")).values())
+            records = [
+                r for r in all_recs
+                if r.get("ticker") == ticker and r.get("verified") is not None
+            ]
+        except Exception:
+            pass
+    return records
+
+
+def update_track_record(updates: list[dict]):
+    """
+    更新 track_record 的 verified/verify_date/verify_method/verify_attempts。
+
+    updates 欄位：ticker, promise_date, promise_text, verified, verify_date,
+                  verify_method, verify_attempts
+    Supabase：UPSERT（以 id 或 ticker+promise_date+promise_text 更新）
+    Fallback：本地 JSON 同鍵覆蓋
+    """
+    if not updates:
+        return
+
+    sb = _supabase()
+    if sb:
+        try:
+            sb.table(_TABLE_TRACK_RECORD).upsert(
+                updates,
+                on_conflict="ticker,promise_date,promise_text",
+            ).execute()
+            print(f"[storage] track_record update {len(updates)} rows → Supabase")
+            return
+        except Exception as e:
+            print(f"[storage] track_record Supabase update error: {e}")
+
+    # fallback
+    _DATA_DIR.mkdir(parents=True, exist_ok=True)
+    existing: dict[str, dict] = {}
+    if _TRACK_RECORD_FILE.exists():
+        try:
+            existing = json.loads(_TRACK_RECORD_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    for r in updates:
+        key = f"{r['ticker']}|{r['promise_date']}|{str(r.get('promise_text',''))[:50]}"
+        if key in existing:
+            existing[key].update(r)
+        else:
+            existing[key] = r
+    _TRACK_RECORD_FILE.write_text(
+        json.dumps(existing, ensure_ascii=False, default=str), encoding="utf-8"
+    )
+    print(f"[storage] track_record fallback update → {_TRACK_RECORD_FILE}")

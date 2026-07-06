@@ -150,10 +150,11 @@ def run() -> None:
     if not rs_map:
         print("[stage3] rs_map 空（signals.json 不存在或無資料），narrative 因子將回中性", flush=True)
 
-    # 4. 第一輪：計算 insider ratio（需要 pool 層級 percentile）
-    #    分左右池分別建 pool_insider_ratios
+    # 4. 第一輪：計算 insider ratio 與 institution new_holders
+    #    分左右池分別建 pool 層級列表（供 percentile 計算用）
     left_tickers  = [w["ticker"] for w in active if w.get("side") == "left"]
     right_tickers = [w["ticker"] for w in active if w.get("side") == "right"]
+    all_active_tickers = [w["ticker"] for w in active]
 
     ticker_to_wp = {w["ticker"]: w for w in active}
 
@@ -171,6 +172,16 @@ def run() -> None:
     left_pool_ratios  = [v for v in left_ratios_map.values()  if v is not None]
     right_pool_ratios = [v for v in right_ratios_map.values() if v is not None]
 
+    # institution new_holders（stage 5：從 institution_quarterly 表批次載入）
+    institution_map = storage.load_institution_latest_batch(all_active_tickers)
+    left_inst_vals  = [v for t in left_tickers  for v in [institution_map.get(t)] if v is not None]
+    right_inst_vals = [v for t in right_tickers for v in [institution_map.get(t)] if v is not None]
+    print(
+        f"[stage3] institution 資料：左池 {len(left_inst_vals)}/{len(left_tickers)} 檔，"
+        f"右池 {len(right_inst_vals)}/{len(right_tickers)} 檔",
+        flush=True,
+    )
+
     # 5. 逐檔計分
     prev_scores = _load_prev_scores()
     results: list[dict] = []
@@ -184,7 +195,9 @@ def run() -> None:
         mc     = wp.get("market_cap") or 0.0
         adv    = wp.get("adv_dollar")
 
-        pool_ratios = left_pool_ratios if side == "left" else right_pool_ratios
+        pool_ratios    = left_pool_ratios    if side == "left" else right_pool_ratios
+        pool_inst_vals = left_inst_vals if side == "left" else right_inst_vals
+        ticker_new_holders = institution_map.get(ticker)  # None if no data
 
         try:
             result = score_ticker(
@@ -197,6 +210,8 @@ def run() -> None:
                 sector_cache=sector_cache,
                 rs_map=rs_map,
                 score_date=today,
+                ticker_new_holders=ticker_new_holders,
+                pool_institution_new_holders=pool_inst_vals,
             )
         except Exception as e:
             print(f"[stage3] ⚠ {ticker} 計分失敗: {e}", flush=True)

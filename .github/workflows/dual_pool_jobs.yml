@@ -1,0 +1,155 @@
+name: Dual Pool Low-Frequency Jobs (13F + track_record verify)
+
+# 低頻 job 獨立 workflow：避免其 cron 觸發 dual_pool.yml 整條 nightly stage1-3。
+# 兩個 job 都在 Render 背景執行（SEC 封鎖 Actions IP + LLM key 在 Render env），
+# Actions 只當鬧鐘 + poll status（順帶保活 Render 免費層防 spin-down）。
+
+on:
+  schedule:
+    # track_record 每週驗證（週六 00:00 UTC = 08:00 TPE）— §8.1
+    - cron: '0 0 * * 6'
+    # 13F 季度 job — 13F 截止日（季末+45天）後一週內跑：
+    #   2/15 = Q4 data（Oct-Dec，截止 Feb 14）
+    #   5/15 = Q1 data（Jan-Mar，截止 May 15）
+    #   8/15 = Q2 data（Apr-Jun，截止 Aug 14）
+    #   11/15 = Q3 data（Jul-Sep，截止 Nov 14）
+    - cron: '0 12 15 2,5,8,11 *'
+  workflow_dispatch:
+    inputs:
+      run_13f:
+        description: '手動觸發 13F job（輸入目標季度如 2025-Q1；輸入 auto 自動推算；留空跳過）'
+        required: false
+        default: ''
+      run_verify:
+        description: '手動觸發 track_record verify job（true/false）'
+        required: false
+        default: 'false'
+
+jobs:
+  low_freq_jobs:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 13F 季度 job：季度 cron 或 workflow_dispatch run_13f 非空 ──────
+      - name: Trigger 13F institution job on Render (quarterly, §6.9)
+        if: >-
+          ${{ (github.event_name == 'schedule' &&
+               github.event.schedule == '0 12 15 2,5,8,11 *') ||
+              (github.event_name == 'workflow_dispatch' &&
+               github.event.inputs.run_13f != '') }}
+        env:
+          RENDER_API_URL:          ${{ secrets.RENDER_API_URL }}
+          DUAL_POOL_TRIGGER_TOKEN: ${{ secrets.DUAL_POOL_TRIGGER_TOKEN }}
+          TARGET_QUARTER:          ${{ github.event.inputs.run_13f }}
+        run: |
+          set -e
+
+          # 指定季度（非 auto）才帶 body；否則讓 Render 自動推算上一完整季
+          if [ -n "${TARGET_QUARTER}" ] && [ "${TARGET_QUARTER}" != "auto" ]; then
+            BODY="{\"quarter\": \"${TARGET_QUARTER}\"}"
+          else
+            BODY="{}"
+          fi
+
+          echo "[13f] Triggering Render 13F job... quarter=${TARGET_QUARTER:-auto}"
+          HTTP_CODE=$(curl -s -o /tmp/13f_resp.json -w "%{http_code}" \
+            -X POST "${RENDER_API_URL}/api/dual-pool/run-13f" \
+            -H "X-Trigger-Token: ${DUAL_POOL_TRIGGER_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d "${BODY}")
+          echo "[13f] trigger HTTP ${HTTP_CODE}: $(cat /tmp/13f_resp.json)"
+          if [ "${HTTP_CODE}" = "409" ]; then
+            echo "[13f] ⚠ 409: another 13F run in progress — skipping (idempotent, benign)"
+            exit 0
+          fi
+          if [ "${HTTP_CODE}" != "202" ]; then
+            echo "[13f] ERROR: trigger failed (expected 202, got ${HTTP_CODE})"
+            exit 1
+          fi
+
+          TIMEOUT=7200   # 13F 下載+解析+OpenFIGI 對映，無 key 首跑可能 1-2 小時
+          ELAPSED=0
+          POLL_INTERVAL=60
+
+          while [ "${ELAPSED}" -lt "${TIMEOUT}" ]; do
+            sleep "${POLL_INTERVAL}"
+            ELAPSED=$((ELAPSED + POLL_INTERVAL))
+
+            STATUS_JSON=$(curl -s "${RENDER_API_URL}/api/dual-pool/13f-status" \
+              -H "X-Trigger-Token: ${DUAL_POOL_TRIGGER_TOKEN}")
+            STATUS=$(echo "${STATUS_JSON}" | python3 -c \
+              "import sys,json; print(json.load(sys.stdin).get('status',''))" 2>/dev/null || echo "")
+            echo "[13f] elapsed=${ELAPSED}s status=${STATUS}"
+
+            if [ "${STATUS}" = "done" ]; then
+              echo "[13f] DONE:"
+              echo "${STATUS_JSON}" | python3 -c \
+                "import sys,json; r=json.load(sys.stdin).get('result') or {}; [print(f'  {k}: {v}') for k,v in r.items()]"
+              exit 0
+            elif [ "${STATUS}" = "failed" ]; then
+              ERR=$(echo "${STATUS_JSON}" | python3 -c \
+                "import sys,json; print(json.load(sys.stdin).get('error',''))" 2>/dev/null || echo "")
+              echo "[13f] FAILED: ${ERR}"
+              exit 1
+            fi
+          done
+
+          echo "[13f] ⚠ TIMEOUT — 13F job 仍在 Render 背景執行（冪等，可下輪補跑）"
+          exit 0
+
+      # ── track_record 每週驗證：週六 cron 或 workflow_dispatch run_verify=true ──
+      - name: Trigger track_record verify job on Render (weekly, §7.6)
+        if: >-
+          ${{ (github.event_name == 'schedule' &&
+               github.event.schedule == '0 0 * * 6') ||
+              (github.event_name == 'workflow_dispatch' &&
+               github.event.inputs.run_verify == 'true') }}
+        env:
+          RENDER_API_URL:          ${{ secrets.RENDER_API_URL }}
+          DUAL_POOL_TRIGGER_TOKEN: ${{ secrets.DUAL_POOL_TRIGGER_TOKEN }}
+        run: |
+          set -e
+
+          echo "[verify] Triggering Render track_record verify job..."
+          HTTP_CODE=$(curl -s -o /tmp/verify_resp.json -w "%{http_code}" \
+            -X POST "${RENDER_API_URL}/api/dual-pool/run-verify-track-record" \
+            -H "X-Trigger-Token: ${DUAL_POOL_TRIGGER_TOKEN}" \
+            -H "Content-Type: application/json")
+          echo "[verify] trigger HTTP ${HTTP_CODE}: $(cat /tmp/verify_resp.json)"
+          if [ "${HTTP_CODE}" = "409" ]; then
+            echo "[verify] ⚠ 409: another verify run in progress — skipping (idempotent, benign)"
+            exit 0
+          fi
+          if [ "${HTTP_CODE}" != "202" ]; then
+            echo "[verify] ERROR: trigger failed (expected 202, got ${HTTP_CODE})"
+            exit 1
+          fi
+
+          TIMEOUT=3600
+          ELAPSED=0
+
+          while [ "${ELAPSED}" -lt "${TIMEOUT}" ]; do
+            sleep 60
+            ELAPSED=$((ELAPSED + 60))
+
+            STATUS_JSON=$(curl -s "${RENDER_API_URL}/api/dual-pool/verify-status" \
+              -H "X-Trigger-Token: ${DUAL_POOL_TRIGGER_TOKEN}")
+            STATUS=$(echo "${STATUS_JSON}" | python3 -c \
+              "import sys,json; print(json.load(sys.stdin).get('status',''))" 2>/dev/null || echo "")
+            echo "[verify] elapsed=${ELAPSED}s status=${STATUS}"
+
+            if [ "${STATUS}" = "done" ]; then
+              echo "[verify] DONE:"
+              echo "${STATUS_JSON}" | python3 -c \
+                "import sys,json; r=json.load(sys.stdin).get('result') or {}; [print(f'  {k}: {v}') for k,v in r.items()]"
+              exit 0
+            elif [ "${STATUS}" = "failed" ]; then
+              ERR=$(echo "${STATUS_JSON}" | python3 -c \
+                "import sys,json; print(json.load(sys.stdin).get('error',''))" 2>/dev/null || echo "")
+              echo "[verify] FAILED: ${ERR}"
+              exit 1
+            fi
+          done
+
+          echo "[verify] ⚠ TIMEOUT — verify job 仍在 Render 背景執行"
+          exit 0
