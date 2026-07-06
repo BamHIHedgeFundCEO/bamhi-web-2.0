@@ -131,6 +131,25 @@ def me(user: dict = Depends(get_current_user)):
     return {"user_id": user.get("sub"), "email": user.get("email")}
 
 
+@app.get("/health/edgar-probe")
+def edgar_probe():
+    """臨時探針：驗證 Render IP 能否連 SEC EDGAR API（GitHub Actions IP 被 SEC 403，
+    評估把 dual_pool stage2 抓取段移到 Render）。驗證完即移除。"""
+    import requests as _rq
+    results = {}
+    ua = {"User-Agent": "BamHI research frank940702@gmail.com"}
+    for name, url in {
+        "data_api": "https://data.sec.gov/submissions/CIK0001045810.json",
+        "archives": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001045810&type=8-K&count=1",
+    }.items():
+        try:
+            r = _rq.get(url, headers=ua, timeout=10)
+            results[name] = {"status": r.status_code, "bytes": len(r.content)}
+        except Exception as e:
+            results[name] = {"error": str(e)[:120]}
+    return results
+
+
 # ── 功能 router ──
 app.include_router(dark_pool.router)
 app.include_router(macro.router)
