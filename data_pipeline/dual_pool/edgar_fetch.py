@@ -35,7 +35,7 @@ _CIK_CACHE_FILE      = _DATA_DIR / "cik_cache.json"
 # 種子檔放 data_pipeline/dual_pool/（進版控；data/dual_pool 被 gitignore）。
 # SEC 擋 GitHub Actions IP（company_tickers.json 回 403），下載失敗時靠此離線解析。
 _CIK_SEED_FILE       = Path(__file__).parent / "cik_seed.json"
-_PROCESSED_FILE      = _DATA_DIR / "processed_accessions.json"
+# _PROCESSED_FILE 已移至 storage.py（edgar_processed 表 + 本地 JSON fallback）
 _BACKFILL_DAYS       = 90   # 初次回補天數
 _INCREMENTAL_DAYS    = 2    # 每日增量天數
 _TEXT_MAX_CHARS      = 4000 # LLM 輸入上限（不落庫，§6.8）
@@ -192,27 +192,6 @@ def _load_cik_map(tickers: list[str]) -> dict[str, str]:
         print(f"[edgar] 未命中前 5：{miss[:5]}")
 
     return cache
-
-
-# ── Processed accessions（冪等判斷）──────────────────────────────────
-
-def load_processed_accessions() -> set[str]:
-    """載入已處理的 accession number 集合（冪等用）。"""
-    if _PROCESSED_FILE.exists():
-        try:
-            return set(json.loads(_PROCESSED_FILE.read_text(encoding="utf-8")))
-        except Exception:
-            pass
-    return set()
-
-
-def save_processed_accessions(accessions: set[str]):
-    """持久化已處理 accession 集合。"""
-    _DATA_DIR.mkdir(parents=True, exist_ok=True)
-    _PROCESSED_FILE.write_text(
-        json.dumps(sorted(accessions), ensure_ascii=False),
-        encoding="utf-8",
-    )
 
 
 # ── 申報文件取得 ──────────────────────────────────────────────────────

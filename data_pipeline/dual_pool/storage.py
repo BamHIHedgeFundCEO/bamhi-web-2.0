@@ -183,6 +183,79 @@ def _fallback_snapshot(snapshot_date: date, records: list[dict]):
     print(f"[storage] universe_snapshot fallback → {path} ({len(records)} rows)")
 
 
+# ── edgar_processed 落庫（accession 冪等記錄，解決 Render 暫態FS 問題）──────
+
+_TABLE_PROCESSED  = "edgar_processed"
+_PROCESSED_FILE   = _DATA_DIR / "processed_accessions.json"
+
+
+def load_processed_accessions() -> set[str]:
+    """
+    載入已處理的 EDGAR accession number 集合（冪等用）。
+
+    有 Supabase 憑證 → SELECT accession_no FROM edgar_processed（全表，跨部署持久）。
+    無憑證 → fallback 本地 JSON（本機開發路徑不變）。
+    """
+    sb = _supabase()
+    if sb:
+        try:
+            resp = sb.table(_TABLE_PROCESSED).select("accession_no").execute()
+            return {row["accession_no"] for row in (resp.data or [])}
+        except Exception as e:
+            print(f"[storage] edgar_processed load error: {e}")
+    # fallback
+    if _PROCESSED_FILE.exists():
+        try:
+            return set(json.loads(_PROCESSED_FILE.read_text(encoding="utf-8")))
+        except Exception as e:
+            print(f"[storage] edgar_processed local load error: {e}")
+    return set()
+
+
+def add_processed_accessions(accessions: set[str]):
+    """
+    新增已處理 accession（INSERT ON CONFLICT DO NOTHING，冪等）。
+
+    Supabase：bulk upsert with ignore_duplicates，只寫入尚未存在的記錄。
+    Fallback：本地 JSON 讀 + merge + 寫（同樣冪等）。
+    """
+    if not accessions:
+        return
+
+    sb = _supabase()
+    if sb:
+        try:
+            records = [{"accession_no": a} for a in accessions]
+            try:
+                sb.table(_TABLE_PROCESSED).upsert(
+                    records,
+                    on_conflict="accession_no",
+                    ignore_duplicates=True,
+                ).execute()
+            except TypeError:
+                # 舊版 supabase-py 不支援 ignore_duplicates，改普通 upsert
+                sb.table(_TABLE_PROCESSED).upsert(
+                    records, on_conflict="accession_no"
+                ).execute()
+            print(f"[storage] edgar_processed upsert {len(accessions)} rows → Supabase")
+            return
+        except Exception as e:
+            print(f"[storage] edgar_processed Supabase upsert error: {e}")
+    # fallback：本地 JSON merge
+    _DATA_DIR.mkdir(parents=True, exist_ok=True)
+    existing: set[str] = set()
+    if _PROCESSED_FILE.exists():
+        try:
+            existing = set(json.loads(_PROCESSED_FILE.read_text(encoding="utf-8")))
+        except Exception:
+            pass
+    merged = existing | accessions
+    _PROCESSED_FILE.write_text(
+        json.dumps(sorted(merged), ensure_ascii=False), encoding="utf-8"
+    )
+    print(f"[storage] edgar_processed fallback → {_PROCESSED_FILE} ({len(merged)} total)")
+
+
 # ── events 落庫（L2 催化劑抽取輸出）────────────────────────────────
 
 _TABLE_EVENTS  = "events"

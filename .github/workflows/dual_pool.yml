@@ -18,17 +18,11 @@ jobs:
           python-version: '3.13'
 
       # ── dual_pool 狀態 cache（Actions cache）─────────────────────────
-      # 取捨說明：
-      #   涵蓋整個 data/dual_pool/：ohlcv parquet 快取 + 全部增量狀態檔
-      #   （processed_accessions.json / run_status.json / data_gap.json / cik_cache.json）。
-      #   狀態檔若不進 cache：runner 暫態，processed_accessions 每晚歸零
-      #   → stage2 每晚重抓 90 日全量，白燒 EDGAR 請求與 LLM 配額。
-      #   events.jsonl 是無 Supabase 憑證時的 fallback，Actions 上有憑證不會產生，
-      #   涵蓋進去無害。
-      #   key 以 run_number 輪換（每次 run 必為 miss → run 結束時必存今晚新 cache），
-      #   restore-keys 前綴匹配還原最近一晚 cache → 「還原昨晚 + 存今晚」。
-      #   若 cache 被 GitHub 清理（10GB 上限/7 天未用）：L1 全量重拉、
-      #   stage2 回補 90 日（皆冪等，Supabase ON CONFLICT 不重複寫入，透明降級）。
+      # 涵蓋 data/dual_pool/：ohlcv parquet 快取 + cik_cache.json + data_gap.json。
+      # processed_accessions 已移至 Supabase edgar_processed 表（跨部署持久），
+      # 不再依賴 Actions cache 維持冪等（cache 被清理仍冪等，但 stage2 不再重回補 90 天）。
+      # key 以 run_number 輪換（每次 run 必為 miss → 存今晚新 cache）；
+      # restore-keys 前綴匹配還原最近一晚 cache → 「還原昨晚 + 存今晚」。
       - name: Restore dual_pool cache
         uses: actions/cache@v4
         with:
@@ -64,18 +58,53 @@ jobs:
         run: |
           python -m data_pipeline.dual_pool.run_stage1
 
-      # ── Stage 2 幂等性：
-      #    events upsert ON CONFLICT (accession_no, seq_in_filing) DO NOTHING
-      #    processed_accessions.json 記錄已處理 accession，重跑不重複抓取
-      #    GEMINI_API_KEY / NVIDIA_NIM_API_KEY 缺失時安靜降級規則引擎，不 fail
-      - name: Run Stage 2 (L2 EDGAR + LLM extract)
+      # ── Stage 2：觸發 Render 執行（SEC 封鎖 Actions IP，Render IP 可達）
+      #    GEMINI_API_KEY / NVIDIA_NIM_API_KEY / EDGAR_USER_AGENT 已移到 Render env，
+      #    此處不再傳遞。
+      #    poll 每 60s 打一次 status → 同時保活 Render 免費層防 spin-down 殺掉背景工作。
+      - name: Trigger Stage 2 on Render (L2 EDGAR + LLM extract)
         env:
-          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-          GEMINI_API_KEY:       ${{ secrets.GEMINI_API_KEY }}
-          NVIDIA_NIM_API_KEY:   ${{ secrets.NVIDIA_NIM_API_KEY }}
-          EDGAR_USER_AGENT:     ${{ secrets.EDGAR_USER_AGENT }}
-          PYTHONUTF8: "1"
-          PYTHONIOENCODING: "utf-8"
+          RENDER_API_URL:          ${{ secrets.RENDER_API_URL }}
+          DUAL_POOL_TRIGGER_TOKEN: ${{ secrets.DUAL_POOL_TRIGGER_TOKEN }}
         run: |
-          python -m data_pipeline.dual_pool.run_stage2
+          set -e
+
+          echo "[stage2] Triggering Render stage2..."
+          HTTP_CODE=$(curl -s -o /tmp/trigger_resp.json -w "%{http_code}" \
+            -X POST "${RENDER_API_URL}/api/dual-pool/run-stage2" \
+            -H "X-Trigger-Token: ${DUAL_POOL_TRIGGER_TOKEN}" \
+            -H "Content-Type: application/json")
+          echo "[stage2] trigger HTTP ${HTTP_CODE}: $(cat /tmp/trigger_resp.json)"
+          if [ "${HTTP_CODE}" != "202" ]; then
+            echo "[stage2] ERROR: trigger failed (expected 202, got ${HTTP_CODE})"
+            exit 1
+          fi
+
+          TIMEOUT=3600   # 60 分鐘逾時（首次 90 日回補較久；每晚增量遠短於此）
+          ELAPSED=0
+          POLL_INTERVAL=60
+
+          while [ "${ELAPSED}" -lt "${TIMEOUT}" ]; do
+            sleep "${POLL_INTERVAL}"
+            ELAPSED=$((ELAPSED + POLL_INTERVAL))
+
+            STATUS_JSON=$(curl -s "${RENDER_API_URL}/api/dual-pool/stage2-status")
+            STATUS=$(echo "${STATUS_JSON}" | python3 -c \
+              "import sys,json; print(json.load(sys.stdin).get('status',''))" 2>/dev/null || echo "")
+            echo "[stage2] elapsed=${ELAPSED}s status=${STATUS}"
+
+            if [ "${STATUS}" = "done" ]; then
+              echo "[stage2] DONE. Result summary:"
+              echo "${STATUS_JSON}" | python3 -c \
+                "import sys,json; r=json.load(sys.stdin).get('result') or {}; [print(f'  {k}: {v}') for k,v in r.items()]"
+              exit 0
+            elif [ "${STATUS}" = "failed" ]; then
+              ERR=$(echo "${STATUS_JSON}" | python3 -c \
+                "import sys,json; print(json.load(sys.stdin).get('error','(no error message)'))" 2>/dev/null || echo "")
+              echo "[stage2] FAILED: ${ERR}"
+              exit 1
+            fi
+          done
+
+          echo "[stage2] TIMEOUT after ${TIMEOUT}s — stage2 may still be running on Render"
+          exit 1

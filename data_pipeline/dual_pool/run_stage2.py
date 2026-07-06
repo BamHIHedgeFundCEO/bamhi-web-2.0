@@ -32,10 +32,10 @@ from data_pipeline.dual_pool import storage
 from data_pipeline.dual_pool.edgar_fetch import (
     fetch_watchpool_filings,
     get_fetch_degraded_count,
-    load_processed_accessions,
     reset_fetch_degraded_count,
-    save_processed_accessions,
 )
+# load_processed_accessions / add_processed_accessions 已移至 storage
+# （edgar_processed 表 → Supabase 跨部署持久；無憑證 fallback 本地 JSON）
 from data_pipeline.dual_pool.rule_filter import filter_filings
 from data_pipeline.dual_pool.llm_extract import extract_events
 
@@ -64,7 +64,8 @@ def run_stage2():
     print(f"[stage2] watchpool active ticker 數：{len(active_tickers)}")
 
     # ── 2. 載入已處理 accession（冪等用）────────────────────────────
-    processed_accessions = load_processed_accessions()
+    # 從 Supabase edgar_processed 表讀取（Render 跨部署持久）；無憑證 fallback 本地 JSON
+    processed_accessions = storage.load_processed_accessions()
     print(f"[stage2] 已處理 accession 數：{len(processed_accessions)}")
 
     # ── 3. EDGAR 抓取（增量；初次 90 日回補，後續 2 日增量）─────────
@@ -133,7 +134,8 @@ def run_stage2():
         )
 
     # ── 7. 持久化已處理 accession（冪等維護）────────────────────────
-    save_processed_accessions(processed_accessions)
+    # 只送本次新抓到的 accession（INSERT ON CONFLICT DO NOTHING；本地 fallback 自動 merge）
+    storage.add_processed_accessions({f["accession_no"] for f in raw_filings})
 
     elapsed = (datetime.now(timezone.utc) - run_start).total_seconds()
     print(

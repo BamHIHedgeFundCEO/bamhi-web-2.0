@@ -113,3 +113,40 @@ git push
 - `SUPABASE_URL` = `https://vgbmwlxrmxlptptdjauy.supabase.co`
 - `FRONTEND_ORIGIN` = Vercel 網址
 - （`PYTHON_VERSION` 已在 render.yaml 設好，不用管）
+
+---
+
+## Dual Pool Stage 2 — Render 執行設定
+
+Stage 2（EDGAR 抓取 + LLM 抽取）從 GitHub Actions 移到 Render 執行。
+背景：SEC 封鎖 GitHub Actions IP 段（data.sec.gov / www.sec.gov 均 403），
+Render 後端 IP 可正常連線。GitHub Actions 每晚只當鬧鐘，curl 觸發 Render。
+
+### Render 環境變數（新增）
+
+| 變數 | 說明 |
+|------|------|
+| `DUAL_POOL_TRIGGER_TOKEN` | 自產隨機字串（`openssl rand -hex 32`），GitHub Actions 用此驗身觸發 stage2 |
+| `GEMINI_API_KEY` | Gemini Flash 免費層（LLM 抽取主力；未設時自動降規則引擎，可後補） |
+| `SUPABASE_SERVICE_KEY` | 確認已設（edgar_processed 表 + events 表讀寫） |
+| `EDGAR_USER_AGENT` | 可選，預設 `BamHI research frank940702@gmail.com` |
+
+### GitHub Secrets（新增）
+
+| 變數 | 說明 |
+|------|------|
+| `DUAL_POOL_TRIGGER_TOKEN` | 與 Render 設定同值（Actions 呼叫 POST 用） |
+| `RENDER_API_URL` | Render 後端 URL，結尾不加 `/`（如 `https://bamhi-quant-api.onrender.com`） |
+
+### Supabase 建表（一次性）
+
+在 Supabase SQL editor 執行 `docs/sql/dual_pool_processed.sql`。
+此表（edgar_processed）持久化已處理的 EDGAR accession number，
+解決 Render 暫態檔案系統問題（每次部署歸零 → stage2 重回補 90 天）。
+
+### 確認清單
+
+- [ ] Render 環境變數已設（至少 `DUAL_POOL_TRIGGER_TOKEN` + `SUPABASE_URL` + `SUPABASE_SERVICE_KEY`）
+- [ ] GitHub Secrets 已設（`DUAL_POOL_TRIGGER_TOKEN` + `RENDER_API_URL`）
+- [ ] `docs/sql/dual_pool_processed.sql` 已在 Supabase 執行
+- [ ] 本機驗收：`POST /api/dual-pool/run-stage2`（401/202）+ `GET /api/dual-pool/stage2-status`
