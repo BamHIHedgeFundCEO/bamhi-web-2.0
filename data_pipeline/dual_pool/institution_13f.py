@@ -53,6 +53,7 @@ import csv
 import io
 import json
 import os
+import tempfile
 import time
 import zipfile
 from datetime import date, datetime, timedelta, timezone
@@ -329,8 +330,15 @@ def _resolve_cusips_to_tickers(
 # 13F ZIP 下載與解析
 # ──────────────────────────────────────────────────────────────────────
 
-def _download_13f_zip(url: str) -> Optional[bytes]:
-    """下載 13F bulk ZIP，回傳 bytes 或 None（失敗）。"""
+def _download_13f_zip(url: str) -> Optional[str]:
+    """
+    下載 13F bulk ZIP 到暫存檔，回傳檔案路徑或 None（失敗）。
+
+    串流寫入磁碟而非全載入 RAM：Render free tier 僅 512MB，ZIP 80-200MB
+    全放記憶體（再包 io.BytesIO）會 OOM，process 被殺 + 重啟 → 背景任務狀態歸零
+    （status 卡在 never_run）。zipfile 直接讀磁碟檔支援串流解壓，峰值 RAM <100MB。
+    呼叫端負責用完刪除暫存檔（os.remove）。
+    """
     print(f"[13f] 下載 {url}")
     try:
         resp = requests.get(
@@ -342,13 +350,14 @@ def _download_13f_zip(url: str) -> Optional[bytes]:
         if resp.status_code != 200:
             print(f"[13f] 下載失敗 HTTP {resp.status_code}: {url}")
             return None
-        chunks = []
+        fd, tmp_path = tempfile.mkstemp(suffix=".zip", prefix="form13f_")
         total = 0
-        for chunk in resp.iter_content(chunk_size=1024 * 1024):
-            chunks.append(chunk)
-            total += len(chunk)
-        print(f"[13f] 下載完成 {total / 1_000_000:.1f} MB")
-        return b"".join(chunks)
+        with os.fdopen(fd, "wb") as out:
+            for chunk in resp.iter_content(chunk_size=1024 * 1024):
+                out.write(chunk)
+                total += len(chunk)
+        print(f"[13f] 下載完成 {total / 1_000_000:.1f} MB → {tmp_path}")
+        return tmp_path
     except Exception as e:
         print(f"[13f] 下載例外: {e}")
         return None
@@ -469,10 +478,10 @@ def run_institution_job(
         return {"quarter": quarter_name, "tickers_processed": 0, "error": "empty watchpool"}
     print(f"[13f] watchpool active: {len(active_tickers)} 個 ticker")
 
-    # 3. 下載目標季 ZIP
+    # 3. 下載目標季 ZIP（串流寫磁碟，避免 200MB 進 RAM 撐爆 Render free tier）
     zip_url = _get_zip_url(year, q)
-    zip_bytes = _download_13f_zip(zip_url)
-    if not zip_bytes:
+    zip_path = _download_13f_zip(zip_url)
+    if not zip_path:
         return {"quarter": quarter_name, "error": f"download failed: {zip_url}"}
 
     # 4. 解析 SUBMISSION + INFOTABLE
@@ -480,7 +489,7 @@ def run_institution_job(
     data_gaps: list[str] = []
 
     try:
-        with zipfile.ZipFile(io.BytesIO(zip_bytes)) as z:
+        with zipfile.ZipFile(zip_path) as z:
             accession_to_cik = _parse_submission_tsv(z, target_period_str)
             if not accession_to_cik:
                 return {
@@ -492,6 +501,12 @@ def run_institution_job(
             cusip_to_accessions = _parse_infotable_tsv(z, target_accessions)
     except zipfile.BadZipFile as e:
         return {"quarter": quarter_name, "error": f"bad ZIP: {e}"}
+    finally:
+        # 解析完立即刪暫存檔（釋放磁碟；下季 ZIP 才有空間）
+        try:
+            os.remove(zip_path)
+        except OSError:
+            pass
 
     # 5. CUSIP → ticker 對映（OpenFIGI）
     all_cusips = list(cusip_to_accessions.keys())
@@ -522,16 +537,21 @@ def run_institution_job(
         if not prev_holders:
             print(f"[13f] 前季 {prev_quarter_name} 快取不存在，嘗試下載前季 ZIP")
             prev_url      = _get_zip_url(prev_year, prev_q)
-            prev_zip_bytes = _download_13f_zip(prev_url)
-            if prev_zip_bytes:
+            prev_zip_path = _download_13f_zip(prev_url)
+            if prev_zip_path:
                 prev_target_period = _period_of_report_str(prev_year, prev_q)
                 try:
-                    with zipfile.ZipFile(io.BytesIO(prev_zip_bytes)) as z_prev:
+                    with zipfile.ZipFile(prev_zip_path) as z_prev:
                         prev_acc_to_cik = _parse_submission_tsv(z_prev, prev_target_period)
                         prev_cusip_to_acc = _parse_infotable_tsv(z_prev, set(prev_acc_to_cik.keys()))
                 except zipfile.BadZipFile:
                     prev_cusip_to_acc = {}
                     prev_acc_to_cik   = {}
+                finally:
+                    try:
+                        os.remove(prev_zip_path)
+                    except OSError:
+                        pass
 
                 # 對 active tickers 建前季 holders
                 for cusip, accessions in prev_cusip_to_acc.items():
