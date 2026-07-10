@@ -16,8 +16,6 @@
         <h1>💰 小市值策略 — 雙池選股計分卡</h1>
         <p class="sc-sub">
           L3 評分每日夜間批次更新。左池：底部拐頭催化劑驅動；右池：動能趨勢強勢股。
-          <br />
-          <span class="note">institution 因子（stage 5）未就緒，顯示「—」。</span>
         </p>
       </div>
       <div class="tab-bar">
@@ -170,7 +168,7 @@ const ScoreTable = defineComponent({
               h('th', {}, '夥伴'),
               h('th', {}, '內部人'),
               h('th', {}, '板塊'),
-              h('th', { title: 'stage 5 未就緒' }, '機構'),
+              h('th', { title: '本季新進機構家數（13F）' }, '機構'),
               h('th', {}, 'Gate'),
               h('th', {}, 'Veto'),
               h('th', {}, '市值'),
@@ -207,7 +205,7 @@ const ScoreTable = defineComponent({
               h('td', { class: 'center' }, fmtFactor(row.partnership)),
               h('td', { class: 'center' }, fmtFactor(row.insider)),
               h('td', { class: 'center' }, fmtFactor(row.narrative)),
-              h('td', { class: 'center muted' }, '—'),
+              h('td', { class: 'center' }, fmtFactor(row.institution)),
               // gate
               h('td', { class: 'center' }, row.gate_passed
                 ? h('span', { class: 'badge gate-pass' }, '✅ Gate')
