@@ -38,6 +38,7 @@ const routes = [
       { path: 'insider', name: 'insider', component: () => import('@/views/InsiderView.vue') },
       { path: 'market-watch', name: 'marketWatch', component: () => import('@/views/MarketWatchView.vue') },
       { path: 'small-cap', name: 'smallCap', component: () => import('@/views/SmallCapView.vue') },
+      { path: 'guide', name: 'guide', component: () => import('@/views/GuideView.vue') },
     ],
   },
   {

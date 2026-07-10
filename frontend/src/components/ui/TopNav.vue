@@ -18,6 +18,7 @@
       </div>
 
       <RouterLink :to="{ name: 'models' }" class="link" active-class="active">交易模型</RouterLink>
+      <RouterLink :to="{ name: 'guide' }" class="link" active-class="active">使用說明</RouterLink>
     </nav>
 
     <form class="search" @submit.prevent="doSearch">
