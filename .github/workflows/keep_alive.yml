@@ -1,0 +1,28 @@
+name: Keep Render Warm
+
+# Render free tier 閒置 15 分鐘會 spin-down，冷啟喚醒要 ~50 秒。
+# 每 10 分鐘 ping /health 保活，避免使用者開網站時撞冷啟。
+#
+# 弱點：GitHub Actions cron 高負載時會延遲，偶爾間隔 >15 分鐘可能讓它睡著一次。
+#       要更準時用外部監控（UptimeRobot 免費 5 分鐘），或升 Render 付費徹底無休眠。
+#
+# 額度：free tier 每月 750 instance-hours。單一服務 24/7 ≈ 730h 剛好在額度內
+#       （前提是沒有別的 free web service 一起吃 hours）。
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping /health
+        env:
+          RENDER_API_URL: ${{ secrets.RENDER_API_URL }}
+        run: |
+          # 失敗不標紅：偶發冷啟/網路抖動不需告警，下一輪自然補上。
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 90 \
+            "${RENDER_API_URL}/health" || echo "000")
+          echo "[keep-alive] /health -> HTTP ${CODE}"
