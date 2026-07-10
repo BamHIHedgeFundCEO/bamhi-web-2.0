@@ -401,21 +401,20 @@ def _parse_submission_tsv(z: zipfile.ZipFile, target_period: str) -> dict[str, s
     return accession_to_cik
 
 
-def _parse_infotable_tsv(
+def _collect_infotable_cusips(
     z: zipfile.ZipFile,
     target_accessions: set[str],
-) -> dict[str, set[str]]:
+) -> set[str]:
     """
-    解析 INFOTABLE.tsv，只取 target_accessions 內的申報。
-    回傳 {cusip: {cik1, cik2, ...}}（持有該 CUSIP 的機構 CIK 集合）。
-    accession_to_cik 用來從 ACCESSION_NUMBER 取回 CIK。
-    """
-    # 需要能從 accession 查到 cik
-    # 此函式僅接受 target_accessions 集合，CIK 由呼叫端傳入
-    # → 改為直接由外層呼叫處理，此函式回傳 {cusip: {accession_number}} 中間結果
-    # 外層再 join accession_to_cik
-    cusip_to_accessions: dict[str, set[str]] = {}
+    第一次掃描 INFOTABLE.tsv，只收集 unique CUSIP 集合（記憶體極小）。
 
+    RAM 問題根因：舊版把 {cusip: {acc1, acc2, ...}} 整張 dict 存入記憶體，
+    全市場 30K+ CUSIP × 平均數百個 accession = 數百萬條 set entry → 輕易超 512MB。
+    此函式只回傳 set[str]（30K 個 CUSIP 字串 ≈ 300KB），供後續 OpenFIGI 批次使用。
+    知道 ticker 對映後，用 _parse_infotable_tickers 做第二次 streaming 掃描，
+    直接輸出 {ticker: {cik}} ≈ 260 個 watchpool ticker → 記憶體幾乎為零。
+    """
+    cusips: set[str] = set()
     try:
         with z.open("INFOTABLE.tsv") as f:
             reader = csv.DictReader(
@@ -427,14 +426,51 @@ def _parse_infotable_tsv(
                 if acc not in target_accessions:
                     continue
                 cusip = row.get("CUSIP", "").strip()
-                if not cusip or len(cusip) < 8:  # 過濾空值與格式異常
-                    continue
-                cusip_to_accessions.setdefault(cusip, set()).add(acc)
+                if cusip and len(cusip) >= 8:
+                    cusips.add(cusip)
     except Exception as e:
-        print(f"[13f] INFOTABLE.tsv 解析錯誤: {e}")
+        print(f"[13f] INFOTABLE.tsv（第一次掃描）解析錯誤: {e}")
+    print(f"[13f] INFOTABLE pass-1: {len(cusips)} unique CUSIP")
+    return cusips
 
-    print(f"[13f] INFOTABLE: {len(cusip_to_accessions)} 個 unique CUSIP")
-    return cusip_to_accessions
+
+def _parse_infotable_tickers(
+    z: zipfile.ZipFile,
+    target_accessions: set[str],
+    accession_to_cik: dict[str, str],
+    cusip_cache: dict[str, Optional[str]],
+    active_tickers: set[str],
+) -> dict[str, set[str]]:
+    """
+    第二次掃描 INFOTABLE.tsv，直接輸出 {ticker: {cik1, cik2, ...}}。
+
+    需 cusip_cache 已包含本季所有 CUSIP 的 ticker 對映（由 OpenFIGI 在 pass-1 之後填入）。
+    輸出 dict 大小 ≤ watchpool active ticker 數（約 260 筆），幾乎不佔記憶體。
+    """
+    ticker_to_filers: dict[str, set[str]] = {}
+    try:
+        with z.open("INFOTABLE.tsv") as f:
+            reader = csv.DictReader(
+                io.TextIOWrapper(f, encoding="utf-8", errors="replace"),
+                delimiter="\t",
+            )
+            for row in reader:
+                acc = row.get("ACCESSION_NUMBER", "").strip()
+                if acc not in target_accessions:
+                    continue
+                cusip = row.get("CUSIP", "").strip()
+                if not cusip or len(cusip) < 8:
+                    continue
+                ticker = cusip_cache.get(cusip)
+                if not ticker or ticker not in active_tickers:
+                    continue
+                cik = accession_to_cik.get(acc)
+                if cik:
+                    ticker_to_filers.setdefault(ticker, set()).add(cik)
+    except Exception as e:
+        print(f"[13f] INFOTABLE.tsv（第二次掃描）解析錯誤: {e}")
+    print(f"[13f] INFOTABLE pass-2: {len(ticker_to_filers)} ticker 有持倉資料")
+    return ticker_to_filers
 
 
 # ──────────────────────────────────────────────────────────────────────
@@ -484,45 +520,58 @@ def run_institution_job(
     if not zip_path:
         return {"quarter": quarter_name, "error": f"download failed: {zip_url}"}
 
-    # 4. 解析 SUBMISSION + INFOTABLE
-    target_period_str = _period_of_report_str(year, q)  # e.g. "31-MAR-2025"
+    # 4. 解析 SUBMISSION + INFOTABLE（兩次 streaming scan，消除大 dict OOM）
+    #
+    #  舊方案：一次掃描累積 {cusip: {acc...}} → 30K CUSIP × 多個 accession → 超 512MB 被殺
+    #  新方案：
+    #    pass-1  僅收集 unique CUSIP set（≈300KB）→ OpenFIGI 對映 → 填滿 cusip_cache
+    #    pass-2  再掃一次，直接輸出 {ticker: {cik}}（≈260 筆）→ 無大 dict
+    target_period_str = _period_of_report_str(year, q)  # e.g. "31-MAR-2026"
     data_gaps: list[str] = []
 
     try:
         with zipfile.ZipFile(zip_path) as z:
+            # SUBMISSION：建立 accession→CIK 對映（筆數少，記憶體安全）
             accession_to_cik = _parse_submission_tsv(z, target_period_str)
             if not accession_to_cik:
                 return {
                     "quarter": quarter_name,
                     "error": f"no filings for PERIODOFREPORT={target_period_str} in {zip_url}",
                 }
-
             target_accessions = set(accession_to_cik.keys())
-            cusip_to_accessions = _parse_infotable_tsv(z, target_accessions)
+
+            # INFOTABLE pass-1：只收集 CUSIP set（≈300KB，無大 dict）
+            all_cusips_set = _collect_infotable_cusips(z, target_accessions)
+
+        # ── ZIP 在 with 區塊結束後仍在磁碟；pass-2 前先做 OpenFIGI，ZIP 保留供 pass-2 ──
     except zipfile.BadZipFile as e:
-        return {"quarter": quarter_name, "error": f"bad ZIP: {e}"}
-    finally:
-        # 解析完立即刪暫存檔（釋放磁碟；下季 ZIP 才有空間）
         try:
             os.remove(zip_path)
         except OSError:
             pass
+        return {"quarter": quarter_name, "error": f"bad ZIP: {e}"}
 
-    # 5. CUSIP → ticker 對映（OpenFIGI）
-    all_cusips = list(cusip_to_accessions.keys())
-    print(f"[13f] 共 {len(all_cusips)} 個 unique CUSIP，開始對映 ticker...")
-
+    # 5. CUSIP → ticker 對映（OpenFIGI，pass-1 之後，pass-2 之前）
+    print(f"[13f] 共 {len(all_cusips_set)} 個 unique CUSIP，開始對映 ticker...")
     cusip_cache = _load_cusip_cache()
-    cusip_to_ticker = _resolve_cusips_to_tickers(all_cusips, cusip_cache)
+    _resolve_cusips_to_tickers(list(all_cusips_set), cusip_cache)
+    # cusip_cache 已在 _resolve_cusips_to_tickers 內原地 update + upsert Supabase
 
-    # 6. 建立 ticker→filer CIK 集合（當季）
-    ticker_to_filers: dict[str, set[str]] = {}
-    for cusip, accessions in cusip_to_accessions.items():
-        ticker = cusip_to_ticker.get(cusip)
-        if not ticker or ticker not in active_tickers:
-            continue
-        ciks = {accession_to_cik[acc] for acc in accessions if acc in accession_to_cik}
-        ticker_to_filers.setdefault(ticker, set()).update(ciks)
+    # 6. INFOTABLE pass-2：直接輸出 {ticker: {cik}}（≈260 筆，幾乎不佔記憶體）
+    try:
+        with zipfile.ZipFile(zip_path) as z:
+            ticker_to_filers = _parse_infotable_tickers(
+                z, target_accessions, accession_to_cik, cusip_cache, active_tickers
+            )
+    except zipfile.BadZipFile as e:
+        ticker_to_filers = {}
+        print(f"[13f] ⚠ pass-2 BadZipFile: {e}（ticker_to_filers 為空）")
+    finally:
+        # 兩次掃描都完成後才刪暫存檔
+        try:
+            os.remove(zip_path)
+        except OSError:
+            pass
 
     print(f"[13f] watchpool 內找到 {len(ticker_to_filers)} 個 ticker 有持倉")
 
@@ -541,25 +590,30 @@ def run_institution_job(
             if prev_zip_path:
                 prev_target_period = _period_of_report_str(prev_year, prev_q)
                 try:
+                    # 前季也使用兩次掃描（pass-1 收 CUSIP，pass-2 直接輸出 ticker→filers）
                     with zipfile.ZipFile(prev_zip_path) as z_prev:
                         prev_acc_to_cik = _parse_submission_tsv(z_prev, prev_target_period)
-                        prev_cusip_to_acc = _parse_infotable_tsv(z_prev, set(prev_acc_to_cik.keys()))
+                        prev_target_acc = set(prev_acc_to_cik.keys())
+                        # pass-1：收 CUSIP（前季 cache miss 較少，主要用於 cusip_cache 補充）
+                        prev_cusips_set = _collect_infotable_cusips(z_prev, prev_target_acc)
+
+                    # 前季 CUSIP 對映（cache 已有大部分；只補 miss）
+                    _resolve_cusips_to_tickers(list(prev_cusips_set), cusip_cache)
+
+                    # pass-2：直接輸出前季 {ticker: {cik}}
+                    with zipfile.ZipFile(prev_zip_path) as z_prev:
+                        prev_holders = _parse_infotable_tickers(
+                            z_prev, prev_target_acc, prev_acc_to_cik,
+                            cusip_cache, active_tickers,
+                        )
                 except zipfile.BadZipFile:
-                    prev_cusip_to_acc = {}
-                    prev_acc_to_cik   = {}
+                    prev_holders = {}
+                    print("[13f] ⚠ 前季 BadZipFile，new_holders = total_holders")
                 finally:
                     try:
                         os.remove(prev_zip_path)
                     except OSError:
                         pass
-
-                # 對 active tickers 建前季 holders
-                for cusip, accessions in prev_cusip_to_acc.items():
-                    ticker = cusip_cache.get(cusip) or cusip_to_ticker.get(cusip)
-                    if not ticker or ticker not in active_tickers:
-                        continue
-                    ciks = {prev_acc_to_cik[acc] for acc in accessions if acc in prev_acc_to_cik}
-                    prev_holders.setdefault(ticker, set()).update(ciks)
 
                 storage.save_institution_holders_cache(prev_quarter_name, prev_holders)
             else:
