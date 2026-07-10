@@ -13,7 +13,7 @@ from __future__ import annotations
 import json
 import os
 import threading
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -842,6 +842,41 @@ def load_track_record_completed(ticker: str) -> list[dict]:
         except Exception:
             pass
     return records
+
+
+# ── job state（13F 等長時任務跨 Render 重啟持久；Supabase only，無本地 fallback）──
+
+_TABLE_JOB_STATE = "dual_pool_job_state"
+
+
+def upsert_job_state(job_type: str, data: dict) -> None:
+    """Upsert job state (best-effort; no-op if Supabase not configured)."""
+    sb = _supabase()
+    if not sb:
+        return
+    try:
+        payload = {
+            "job_type":   job_type,
+            "updated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            **data,
+        }
+        sb.table(_TABLE_JOB_STATE).upsert(payload, on_conflict="job_type").execute()
+    except Exception as e:
+        print(f"[storage] upsert_job_state({job_type}) error: {e}")
+
+
+def load_job_state(job_type: str) -> Optional[dict]:
+    """Load job state from Supabase. Returns None if not found or Supabase unavailable."""
+    sb = _supabase()
+    if not sb:
+        return None
+    try:
+        resp = sb.table(_TABLE_JOB_STATE).select("*").eq("job_type", job_type).execute()
+        if resp.data:
+            return resp.data[0]
+    except Exception as e:
+        print(f"[storage] load_job_state({job_type}) error: {e}")
+    return None
 
 
 def update_track_record(updates: list[dict]):

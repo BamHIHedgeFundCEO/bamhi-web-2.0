@@ -91,6 +91,11 @@ jobs:
                 "import sys,json; print(json.load(sys.stdin).get('error',''))" 2>/dev/null || echo "")
               echo "[13f] FAILED: ${ERR}"
               exit 1
+            elif [ "${STATUS}" = "interrupted" ]; then
+              AGE=$(echo "${STATUS_JSON}" | python3 -c \
+                "import sys,json; print(json.load(sys.stdin).get('interrupted_age_s','?'))" 2>/dev/null || echo "?")
+              echo "[13f] ⚠ INTERRUPTED: Render process died (heartbeat stale ${AGE}s). Re-trigger to resume (OpenFIGI cache preserved)."
+              exit 1
             fi
           done
 
