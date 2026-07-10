@@ -119,9 +119,9 @@ app.add_middleware(
 )
 
 
-@app.get("/health")
+@app.api_route("/health", methods=["GET", "HEAD"])
 def health():
-    """Render 健康檢查 / 前端探活。"""
+    """Render 健康檢查 / 前端探活。收 GET + HEAD（UptimeRobot 預設用 HEAD）。"""
     return {"status": "ok", "service": "bamhi-quant-api"}
 
 
