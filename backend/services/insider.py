@@ -97,16 +97,29 @@ def _strip_sb_fields(record: dict) -> dict:
 
 
 def _load_from_supabase(sb) -> list[dict]:
+    """載入近 90 天全量交易。分頁撈（supabase-py 單請求上限 1000 列），
+    依 id 升序穩定分頁，避免只拿到任意 1000 筆。"""
     cutoff = (date.today() - timedelta(days=90)).isoformat()
     try:
-        resp = (
-            sb.table(_SUPABASE_TABLE)
-            .select("*")
-            .gte("transaction_date", cutoff)
-            .execute()
-        )
-        rows = resp.data or []
-        return [_strip_sb_fields(r) for r in rows]
+        out: list[dict] = []
+        page_size = 1000
+        offset = 0
+        while True:
+            resp = (
+                sb.table(_SUPABASE_TABLE)
+                .select("*")
+                .gte("transaction_date", cutoff)
+                .order("id")
+                .range(offset, offset + page_size - 1)
+                .execute()
+            )
+            rows = resp.data or []
+            out.extend(rows)
+            if len(rows) < page_size:
+                break
+            offset += page_size
+        print(f"[insider] Supabase load: {len(out)} rows (paged)")
+        return [_strip_sb_fields(r) for r in out]
     except Exception as e:
         print(f"[insider] Supabase load error: {e}")
         return []
