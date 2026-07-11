@@ -189,10 +189,11 @@
 <script setup>
 import { reactive, ref, computed, onMounted, watch } from 'vue'
 import VChart from 'vue-echarts'
-import { toPng } from 'html-to-image'
 import '@/lib/echarts'
 import apiClient from '@/api/client'
 import DataTable from '@/components/ui/DataTable.vue'
+import { dlCsv, dlImg, today } from '@/lib/exporters'
+import { TIERS, capTier, fmtCap, capColor } from '@/lib/marketcap'
 
 const TABS = [
   { key: 'kings',   label: '👑 The Kings' },
@@ -239,24 +240,6 @@ function switchTab(k) {
   else if (k === 'compass') loadCompass()
 }
 onMounted(loadKings)
-
-// ── 市值分級 ──────────────────────────────────────────────────────────────
-const TIERS = ['Mega', 'Large', 'Mid', 'Small', 'Micro']
-function capTier(mc) {
-  if (mc == null) return null
-  if (mc >= 100e9) return 'Mega'   // ≥ $100B
-  if (mc >= 10e9)  return 'Large'  // $10–100B
-  if (mc >= 2e9)   return 'Mid'    // $2–10B
-  if (mc >= 0.3e9) return 'Small'  // $0.3–2B
-  return 'Micro'                   // < $0.3B
-}
-function fmtCap(v) {
-  if (v == null) return '—'
-  const s = v >= 1e12 ? `$${(v / 1e12).toFixed(2)}T` : v >= 1e9 ? `$${(v / 1e9).toFixed(1)}B` : `$${(v / 1e6).toFixed(0)}M`
-  return `${s} ${capTier(v)}`
-}
-const TIER_COLORS = { Mega: '#a78bfa', Large: 'var(--color-accent-cyan)', Mid: 'var(--color-bull)', Small: '#fcd34d', Micro: 'var(--color-bear)' }
-function capColor(v) { return TIER_COLORS[capTier(v)] ?? '' }
 
 // ── 自定義篩選（localStorage 持久化） ────────────────────────────────────
 const FILTER_KEY = 'mw_filters_v1'
@@ -333,44 +316,9 @@ function rankColor(v) { return v >= 80 ? 'var(--color-bull)' : v >= 60 ? 'var(--
 function rsiColor(v)  { return v < 60 ? 'var(--color-bull)' : v > 70 ? 'var(--color-bear)' : '' }
 function offHighColor(v) { return v == null ? '' : v >= -5 ? 'var(--color-bull)' : v <= -20 ? 'var(--color-bear)' : '' }
 
-// ── CSV / 圖片下載 ─────────────────────────────────────────────────────────
+// ── CSV / 圖片下載（共用 lib/exporters，截圖含完整表格範圍） ──────────────
 const kingsExport = ref(null)
 const starsExport = ref(null)
-
-const today = () => new Date().toISOString().slice(0, 10)
-
-function csvCell(v) {
-  if (v === null || v === undefined) return ''
-  if (typeof v === 'boolean') return v ? 'true' : ''
-  const s = String(v)
-  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
-}
-
-function dlCsv(rows, cols, filename) {
-  if (!rows?.length) return
-  const header = cols.map((c) => c.label)
-  const lines = rows.map((row) => cols.map((c) => csvCell(row[c.key])).join(','))
-  const csv = '﻿' + [header.join(','), ...lines].join('\n')  // BOM，Excel 中文不亂碼
-  const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }))
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  a.click()
-  URL.revokeObjectURL(url)
-}
-
-async function dlImg(el, filename) {
-  if (!el) return
-  try {
-    const dataUrl = await toPng(el, { backgroundColor: '#0a0e1a', pixelRatio: 2 })
-    const a = document.createElement('a')
-    a.href = dataUrl
-    a.download = filename
-    a.click()
-  } catch (e) {
-    console.error('[market-watch] 圖片匯出失敗', e)
-  }
-}
 
 // ── Macro Compass heatmap ─────────────────────────────────────────────────
 const topEdges = computed(() => (compass.value?.edges ?? []).slice(0, 10))
@@ -509,6 +457,11 @@ const heatOption = computed(() => {
 :deep(.row-signal-alt td) { background: rgba(34, 211, 238, 0.06); }
 :deep(.export-region .dt-wrap) { max-height: 72vh; overflow: auto; }
 :deep(.export-region .dt thead th) { position: sticky; top: 0; background: var(--color-bg-raised); z-index: 2; }
+
+/* 截圖模式：解除高度限制與捲動，讓 PNG 涵蓋整份表格（電腦/平板結果一致） */
+.export-region.exporting { width: max-content; min-width: 100%; }
+:deep(.export-region.exporting .dt-wrap) { max-height: none !important; overflow: visible !important; }
+:deep(.export-region.exporting .dt thead th) { position: static; }
 .ph { color: var(--color-text-muted); padding: 24px 0; }
 .err { color: var(--color-warning); background: rgba(245,158,11,0.1); border: 1px solid var(--color-warning); padding: 12px 16px; border-radius: var(--radius-md); font-size: 13px; }
 

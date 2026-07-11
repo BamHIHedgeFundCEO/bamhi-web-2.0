@@ -3,6 +3,7 @@
   左側池 = 營收高成長且加速（二階導數為正），獲利只看改善方向（允許為負）。
   右側池 = 左側池 ∩ 週線 Stage 2 ∩ 日線 Minervini 模板 ∩ RS_rank ≥ 80。
   資料：每週六 GitHub Actions → Supabase → /api/inflection。
+  比照市場觀察：自定義篩選列（localStorage）、市值分級、CSV/PNG 全範圍匯出。
 -->
 <template>
   <div class="inf-view">
@@ -23,6 +24,33 @@
       <button class="tab" :class="{ on: tab === 'left' }" @click="tab = 'left'">
         🌱 左側池（基本面拐點）{{ store.left.length ? `· ${store.left.length}` : '' }}
       </button>
+    </div>
+
+    <!-- 自定義篩選列（條件記在 localStorage） -->
+    <div class="filter-bar">
+      <div class="f-group">
+        <label>營收YoY ≥ %</label>
+        <input v-model.number="filters.yoyMin" type="number" placeholder="—" class="f-num" />
+      </div>
+      <div class="f-group">
+        <label>加速t ≥ %</label>
+        <input v-model.number="filters.accelMin" type="number" placeholder="—" class="f-num" />
+      </div>
+      <div v-if="tab === 'right'" class="f-group">
+        <label>RS百分位 ≥</label>
+        <input v-model.number="filters.rsMin" type="number" min="0" max="100" placeholder="—" class="f-num" />
+      </div>
+      <div class="f-group f-tiers">
+        <label>市值</label>
+        <button
+          v-for="t in TIERS" :key="t"
+          class="f-chip" :class="{ on: filters.tiers.includes(t) }"
+          @click="toggleTier(t)"
+        >{{ t }}</button>
+      </div>
+      <label class="f-check"><input v-model="filters.flaggedOnly" type="checkbox" /> 只看 🔺</label>
+      <button class="f-reset" @click="resetFilters">清除</button>
+      <span class="f-count">{{ currentRows.length }} 檔符合</span>
     </div>
 
     <details class="explain">
@@ -63,12 +91,20 @@
     <div v-else-if="store.error" class="alert">⚠️ {{ store.error }}</div>
 
     <template v-else>
+      <div v-if="currentRows.length || store[tab].length" class="toolbar">
+        <button class="btn-dl" @click="dlCsv(currentRows, currentCols, `BamHI_Inflection_${tab}_${today()}.csv`)">📥 CSV（篩後）</button>
+        <button class="btn-dl" @click="dlImg(exportEl, `BamHI_Inflection_${tab}_${today()}.png`)">🖼️ 圖片</button>
+      </div>
+
       <section v-if="tab === 'right'" class="block">
         <p class="hint">
           左側池成員中同時通過：週線（收盤 > MA30↑、MA10 > MA30）＋ 日線趨勢模板（close > MA50 > MA150 > MA200 等五條）＋ RS 百分位 ≥ 80。
           🔺RS領先 = RS Line 創 126 日新高但價格未創高（最純左側訊號）。
         </p>
-        <DataTable :columns="rightCols" :rows="store.right" row-key="ticker" />
+        <div ref="rightExport" class="export-region">
+          <p class="meta mono">BamHI 拐點篩選 · 右側池（技術確認）· 篩選日 {{ store.runDate }}　共 {{ filteredRight.length }} 檔</p>
+          <DataTable :columns="rightCols" :rows="filteredRight" row-key="ticker" :row-class="flagRowClass" />
+        </div>
       </section>
 
       <section v-else class="block">
@@ -76,38 +112,74 @@
           硬閘門：營收 YoY ≥ 25% 且連兩季加速；流動性（市值 ≥ 1 億、價 ≥ $3、20 日均額 ≥ $30M）。
           🔺翻正 = 淨利剛由負轉正；🔺近轉正 = 虧損收窄且外推下季穿零。旗標無條件置頂。
         </p>
-        <DataTable :columns="leftCols" :rows="store.left" row-key="ticker" />
+        <div ref="leftExport" class="export-region">
+          <p class="meta mono">BamHI 拐點篩選 · 左側池（基本面拐點）· 篩選日 {{ store.runDate }}　共 {{ filteredLeft.length }} 檔</p>
+          <DataTable :columns="leftCols" :rows="filteredLeft" row-key="ticker" :row-class="flagRowClass" />
+        </div>
       </section>
     </template>
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, reactive, ref, computed, watch } from 'vue'
 import { useInflectionStore } from '@/stores/inflection'
 import DataTable from '@/components/ui/DataTable.vue'
+import { dlCsv, dlImg, today } from '@/lib/exporters'
+import { TIERS, capTier, fmtCap, capColor } from '@/lib/marketcap'
 
 const store = useInflectionStore()
 const tab = ref('right')
 const selectedRun = ref(null)
 
 const fmtPct = (v) => (v == null ? '—' : `${(v * 100).toFixed(1)}%`)
-const fmtUsd = (v) => {
-  if (v == null) return '—'
-  if (v >= 1e9) return `$${(v / 1e9).toFixed(1)}B`
-  if (v >= 1e6) return `$${(v / 1e6).toFixed(0)}M`
-  return `$${Number(v).toFixed(0)}`
-}
 const fmtNum = (d) => (v) => (v == null ? '—' : Number(v).toFixed(d))
 const fmtBool = (v) => (v ? '✅' : '—')
 const upDown = (v) => (v == null ? null : v > 0 ? 'var(--up, #2ecc71)' : 'var(--down, #e74c3c)')
+
+// ── 自定義篩選（localStorage 持久化，比照市場觀察） ──────────────────────
+const FILTER_KEY = 'inflection_filters_v1'
+const DEFAULT_FILTERS = { yoyMin: null, accelMin: null, rsMin: null, tiers: [], flaggedOnly: false }
+const filters = reactive({ ...DEFAULT_FILTERS, ...(JSON.parse(localStorage.getItem(FILTER_KEY) || 'null') ?? {}) })
+watch(filters, (f) => localStorage.setItem(FILTER_KEY, JSON.stringify(f)), { deep: true })
+
+function toggleTier(t) {
+  const i = filters.tiers.indexOf(t)
+  if (i >= 0) filters.tiers.splice(i, 1)
+  else filters.tiers.push(t)
+}
+function resetFilters() { Object.assign(filters, JSON.parse(JSON.stringify(DEFAULT_FILTERS))) }
+
+function passCommon(r) {
+  if (filters.yoyMin != null && filters.yoyMin !== '' && (r.yoy_t == null || r.yoy_t * 100 < filters.yoyMin)) return false
+  if (filters.accelMin != null && filters.accelMin !== '' && (r.accel_t == null || r.accel_t * 100 < filters.accelMin)) return false
+  if (filters.tiers.length && !filters.tiers.includes(capTier(r.market_cap))) return false
+  if (filters.flaggedOnly && !r.flags) return false
+  return true
+}
+const filteredLeft = computed(() => (store.left ?? []).filter(passCommon))
+const filteredRight = computed(() =>
+  (store.right ?? []).filter(
+    (r) => passCommon(r) && (filters.rsMin == null || filters.rsMin === '' || (r.rs_rank != null && r.rs_rank >= filters.rsMin)),
+  ),
+)
+const currentRows = computed(() => (tab.value === 'right' ? filteredRight.value : filteredLeft.value))
+const currentCols = computed(() => (tab.value === 'right' ? rightCols : leftCols))
+
+// 🔺旗標列高亮
+const flagRowClass = (r) => (r.flags ? 'row-flag' : '')
+
+// 截圖目標（含完整表格範圍）
+const leftExport = ref(null)
+const rightExport = ref(null)
+const exportEl = computed(() => (tab.value === 'right' ? rightExport.value : leftExport.value))
 
 const baseCols = [
   { key: 'flags', label: '🔺', sortable: false },
   { key: 'ticker', label: '代碼' },
   { key: 'name', label: '公司', mono: false },
+  { key: 'market_cap', label: '市值', align: 'right', format: fmtCap, color: capColor },
   { key: 'price', label: '價格', align: 'right', format: fmtNum(2) },
-  { key: 'market_cap', label: '市值', align: 'right', format: fmtUsd },
   { key: 'yoy_t', label: '營收YoY', align: 'right', format: fmtPct, color: upDown },
   { key: 'accel_t', label: '加速t', align: 'right', format: fmtPct, color: upDown },
   { key: 'accel_t1', label: '加速t-1', align: 'right', format: fmtPct, color: upDown },
@@ -149,11 +221,6 @@ onMounted(async () => {
 .run-sel { background: transparent; border: 1px solid var(--border, #444); border-radius: 6px; padding: 4px 8px; color: inherit; }
 .asof { opacity: 0.7; font-size: 0.85rem; }
 .tabs { display: flex; gap: 8px; margin: 16px 0 4px; }
-.explain { margin-top: 12px; border: 1px solid var(--border, #444); border-radius: 8px; padding: 10px 14px; }
-.explain summary { cursor: pointer; font-weight: 600; opacity: 0.85; }
-.explain-body { margin-top: 8px; font-size: 0.88rem; line-height: 1.7; opacity: 0.85; }
-.explain-body h3 { font-size: 0.95rem; margin: 14px 0 4px; opacity: 1; }
-.explain-body p { margin: 4px 0; }
 .tab { border: 1px solid var(--border, #444); background: transparent; color: inherit; border-radius: 8px; padding: 6px 14px; cursor: pointer; }
 .tab.on { border-color: var(--accent, #2ecc71); color: var(--accent, #2ecc71); }
 .block { margin-top: 12px; }
@@ -161,4 +228,49 @@ onMounted(async () => {
 .ph { padding: 40px 0; text-align: center; opacity: 0.7; }
 .alert { padding: 12px; border: 1px solid #e74c3c66; border-radius: 8px; margin-top: 16px; }
 .mono { font-family: ui-monospace, monospace; }
+.meta { opacity: 0.6; font-size: 0.8rem; margin: 0 0 8px; }
+
+.explain { margin-top: 12px; border: 1px solid var(--border, #444); border-radius: 8px; padding: 10px 14px; }
+.explain summary { cursor: pointer; font-weight: 600; opacity: 0.85; }
+.explain-body { margin-top: 8px; font-size: 0.88rem; line-height: 1.7; opacity: 0.85; }
+.explain-body h3 { font-size: 0.95rem; margin: 14px 0 4px; opacity: 1; }
+.explain-body p { margin: 4px 0; }
+
+/* 篩選列（比照市場觀察） */
+.filter-bar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
+  border: 1px solid var(--border, #444); border-radius: 8px;
+  padding: 10px 14px; margin-top: 12px; font-size: 0.82rem;
+}
+.f-group { display: flex; align-items: center; gap: 6px; }
+.f-group label { opacity: 0.75; white-space: nowrap; }
+.f-num {
+  width: 56px; background: transparent; border: 1px solid var(--border, #444);
+  border-radius: 6px; color: inherit; padding: 4px 6px; font-size: 0.82rem;
+}
+.f-chip {
+  background: none; border: 1px solid var(--border, #444); color: inherit; opacity: 0.8;
+  border-radius: 999px; padding: 3px 10px; font-size: 0.78rem; cursor: pointer;
+}
+.f-chip.on { border-color: var(--accent, #2ecc71); color: var(--accent, #2ecc71); opacity: 1; }
+.f-check { display: flex; align-items: center; gap: 5px; opacity: 0.8; cursor: pointer; }
+.f-reset { background: none; border: none; color: inherit; opacity: 0.6; cursor: pointer; font-size: 0.78rem; text-decoration: underline; }
+.f-reset:hover { opacity: 1; }
+.f-count { margin-left: auto; color: var(--accent, #2ecc71); font-weight: 600; }
+
+/* 匯出 */
+.toolbar { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
+.btn-dl {
+  background: transparent; border: 1px solid var(--border, #444); color: inherit; opacity: 0.85;
+  font-size: 0.8rem; font-weight: 600; padding: 6px 12px; border-radius: 6px; cursor: pointer;
+}
+.btn-dl:hover { opacity: 1; border-color: var(--accent, #2ecc71); }
+.export-region { background: #0a0e1a; padding: 12px; border-radius: 8px; }
+
+/* 🔺旗標列高亮 */
+:deep(.row-flag td) { background: rgba(46, 204, 113, 0.07); }
+
+/* 截圖模式：解除捲動限制，PNG 涵蓋整份表格 */
+.export-region.exporting { width: max-content; min-width: 100%; }
+:deep(.export-region.exporting .dt-wrap) { max-height: none !important; overflow: visible !important; }
 </style>
