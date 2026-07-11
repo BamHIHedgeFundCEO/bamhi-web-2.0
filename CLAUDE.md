@@ -30,6 +30,7 @@ bamhi-web-2.0/
 ├── frontend/         # Vue 3 + Vite + Pinia + ECharts，部署 Vercel
 │   └── src/          # views/ stores/ components/ router/ api/client.js lib/
 ├── data_pipeline/    # 資料更新管線（update_data.py 呼叫；含 sanity_check.py 資料檢核）
+├── inflection_screener/  # 拐點篩選（EDGAR+yfinance 兩池，週六 Actions → Supabase，見其 README.md）
 ├── data/             # 每日 pipeline 產出 CSV（機器人自動 commit）
 ├── legacy/           # 舊版 Streamlit 全部遺留（app.py、views/、data_engine/ 等），禁止 import，見 legacy/README.md
 ├── sector_config.py  # 板塊設定唯一來源（backend + pipeline 共用）

@@ -52,7 +52,7 @@ class SafeJSONResponse(JSONResponse):
         return json.dumps(_deep_sanitize(content), ensure_ascii=False).encode("utf-8")
 
 from backend.auth import get_current_user  # noqa: E402
-from backend.routers import dark_pool, dual_pool, dual_pool_admin, equity, insider, macro, market_watch, models, notes, screener, sector_rotation, sector_strength, world_sectors  # noqa: E402
+from backend.routers import dark_pool, dual_pool, dual_pool_admin, equity, inflection, insider, macro, market_watch, models, notes, screener, sector_rotation, sector_strength, world_sectors  # noqa: E402
 from backend.services.insider import bg_update, init_cache  # noqa: E402
 
 app = FastAPI(title="BamHI Quant API", version="2.0.0", default_response_class=SafeJSONResponse)
@@ -145,3 +145,4 @@ app.include_router(notes.router)
 app.include_router(screener.router)
 app.include_router(insider.router)
 app.include_router(market_watch.router)
+app.include_router(inflection.router)

@@ -21,3 +21,7 @@ Thumbs.db
 
 # dual_pool 執行期快取（OHLCV/本地 fallback，不進版控）
 data/dual_pool/
+
+# inflection screener 本地產物
+cache/
+output/

@@ -46,6 +46,7 @@ const q = ref('')
 
 const TOOLS = [
   { name: 'screener', label: '🎯 BamHI 模型選股' },
+  { name: 'inflection', label: '📐 拐點篩選' },
   { name: 'darkPool', label: '🕳️ 暗池異常資金監控' },
   { name: 'sectorRotation', label: '🔄 板塊輪動 + VCP' },
   { name: 'sectorStrength', label: '🧭 美股板塊強弱' },
