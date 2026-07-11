@@ -29,7 +29,7 @@ DATA_DIR = ROOT_DIR / "data"
 RUSSELL_XLSX = ROOT_DIR / "羅素1000.xlsx"
 
 MIN_ADV = 300_000
-DAYS = 200
+DAYS = 260  # ≥252 個交易日，供 52 週高距離（OffHigh）計算
 GRANGER_LAG = 3
 GRANGER_ALPHA = 0.05
 BATCH = 100          # smaller batches → less rate-limit pressure
@@ -74,13 +74,25 @@ def _run():
     df_rank["sub_industry"] = df_rank["sub_industry"].fillna("Other")
     df_rank = df_rank.dropna(subset=["Rank"])
 
-    kings = _kings(df_rank, close, spy)
-    kings.to_csv(DATA_DIR / "mr_kings.csv", index=False)
-    print(f"      Kings: {len(kings)}")
+    # 🆕 比對前一次名單（在覆寫 CSV 前讀舊檔）
+    prev_kings = _prev_tickers(DATA_DIR / "mr_kings.csv")
+    prev_stars = _prev_tickers(DATA_DIR / "mr_rising_stars.csv")
 
+    kings = _kings(df_rank, close, spy)
     stars = _rising_stars(df_rank, close)
+
+    # 市值：只對上榜的 ~200 檔抓 fast_info
+    caps = _fetch_mktcaps(sorted(set(kings["ticker"]) | set(stars["ticker"])))
+    kings["MktCap"] = kings["ticker"].map(caps)
+    stars["MktCap"] = stars["ticker"].map(caps)
+
+    kings["Is_New"] = kings["ticker"].apply(lambda t: t not in prev_kings) if prev_kings is not None else False
+    stars["Is_New"] = stars["ticker"].apply(lambda t: t not in prev_stars) if prev_stars is not None else False
+
+    kings.to_csv(DATA_DIR / "mr_kings.csv", index=False)
+    print(f"      Kings: {len(kings)} (new: {int(kings['Is_New'].sum())})")
     stars.to_csv(DATA_DIR / "mr_rising_stars.csv", index=False)
-    print(f"      Rising Stars: {len(stars)}")
+    print(f"      Rising Stars: {len(stars)} (new: {int(stars['Is_New'].sum())})")
 
     # Macro Compass: top 1 per sector
     top1 = (
@@ -251,6 +263,40 @@ def _pullback_buy(ticker: str, close: pd.DataFrame, spy: pd.Series | None) -> bo
     return True
 
 
+def _prev_tickers(path) -> set | None:
+    """上一次輸出的 ticker 名單；檔案不存在/壞掉 → None（Is_New 全 False，避免首跑全標 🆕）。"""
+    try:
+        return set(pd.read_csv(path)["ticker"])
+    except Exception:
+        return None
+
+
+def _fetch_mktcaps(tickers: list) -> dict:
+    """僅對上榜 ticker 逐檔抓市值（fast_info），失敗記 None 不中斷。"""
+    caps = {}
+    for t in tickers:
+        try:
+            fi = yf.Ticker(t).fast_info
+            mc = fi.get("marketCap") or fi.get("market_cap")
+            caps[t] = float(mc) if mc else None
+        except Exception:
+            caps[t] = None
+    n_miss = sum(1 for v in caps.values() if v is None)
+    if n_miss:
+        print(f"      [warn] 市值缺失 {n_miss}/{len(caps)} 檔")
+    return caps
+
+
+def _off_high(ticker: str, close: pd.DataFrame) -> float | None:
+    """離 52 週高距離（%，負值 = 低於高點）。"""
+    if ticker not in close.columns:
+        return None
+    c = close[ticker].dropna().tail(252)
+    if c.empty or c.max() <= 0:
+        return None
+    return round((c.iloc[-1] / c.max() - 1) * 100, 1)
+
+
 _KINGS_RS_FLOOR = 80  # 絕對 RS Rank 下限：只留全市場動能前 20% 的真龍頭（IBD 風格）
 
 
@@ -270,7 +316,8 @@ def _kings(df_rank: pd.DataFrame, close: pd.DataFrame, spy) -> pd.DataFrame:
     top3["RSI14"] = top3["ticker"].apply(
         lambda t: round(_rsi14(close[t].dropna()), 1) if t in close.columns else None
     )
-    cols = ["ticker", "sector", "sub_industry", "Rank", "20R", "60R", "120R", "RSI14", "Pullback_Buy", "Price"]
+    top3["OffHigh"] = top3["ticker"].apply(lambda t: _off_high(t, close))
+    cols = ["ticker", "sector", "sub_industry", "Rank", "20R", "60R", "120R", "RSI14", "OffHigh", "Pullback_Buy", "Price"]
     return top3[[c for c in cols if c in top3.columns]].round({"Rank": 1, "20R": 1, "60R": 1, "120R": 1, "Price": 2})
 
 
@@ -293,7 +340,8 @@ def _rising_stars(df_rank: pd.DataFrame, close: pd.DataFrame) -> pd.DataFrame:
     stars["Entry_Momentum"] = (stars["RSI14"] >= 55) & (stars["RSI14"] < 75) & (stars["Accel"] > 40)
     stars["Entry_Pullback"] = (stars["RSI14"] > 30) & (stars["RSI14"] < 55) & (stars["Accel"] > 40)
 
-    cols = ["ticker", "sector", "sub_industry", "20R", "60R", "120R", "Accel", "Rank", "RSI14", "Entry_Momentum", "Entry_Pullback", "Price"]
+    stars["OffHigh"] = stars["ticker"].apply(lambda t: _off_high(t, close))
+    cols = ["ticker", "sector", "sub_industry", "20R", "60R", "120R", "Accel", "Rank", "RSI14", "OffHigh", "Entry_Momentum", "Entry_Pullback", "Price"]
     return (
         stars[[c for c in cols if c in stars.columns]]
         .sort_values("Accel", ascending=False)

@@ -16,6 +16,36 @@
       </button>
     </div>
 
+    <!-- 自定義篩選列（Kings / Stars 共用，條件記在 localStorage） -->
+    <div v-if="tab !== 'compass'" class="filter-bar">
+      <div class="f-group">
+        <label>RSI</label>
+        <input v-model.number="filters.rsiMin" type="number" min="0" max="100" placeholder="低" class="f-num" />
+        <span class="f-sep">–</span>
+        <input v-model.number="filters.rsiMax" type="number" min="0" max="100" placeholder="高" class="f-num" />
+      </div>
+      <div class="f-group">
+        <label>RS Rank ≥</label>
+        <input v-model.number="filters.rankMin" type="number" min="0" max="100" placeholder="—" class="f-num" />
+      </div>
+      <div v-if="tab === 'stars'" class="f-group">
+        <label>加速度 ≥</label>
+        <input v-model.number="filters.accelMin" type="number" min="0" placeholder="—" class="f-num" />
+      </div>
+      <div class="f-group f-tiers">
+        <label>市值</label>
+        <button
+          v-for="t in TIERS" :key="t"
+          class="f-chip" :class="{ on: filters.tiers.includes(t) }"
+          @click="toggleTier(t)"
+        >{{ t }}</button>
+      </div>
+      <label class="f-check"><input v-model="filters.signalOnly" type="checkbox" /> 只看訊號股</label>
+      <label class="f-check"><input v-model="filters.newOnly" type="checkbox" /> 只看 🆕</label>
+      <button class="f-reset" @click="resetFilters">清除</button>
+      <span class="f-count">{{ tab === 'kings' ? filteredKings.length : filteredStars.length }} 檔符合</span>
+    </div>
+
     <!-- The Kings -->
     <section v-show="tab === 'kings'">
       <div v-if="loading.kings" class="ph">套用板塊 RS 排名中…</div>
@@ -23,7 +53,7 @@
       <template v-else-if="kings">
         <p v-if="kings.error" class="err">⚠️ {{ kings.error }}</p>
         <div v-if="kings.items?.length" class="toolbar">
-          <button class="btn-dl" @click="dlCsv(kings.items, kingsCols, `BamHI_Kings_${today()}.csv`)">📥 CSV</button>
+          <button class="btn-dl" @click="dlCsv(filteredKings, kingsCols, `BamHI_Kings_${today()}.csv`)">📥 CSV（篩後）</button>
           <button class="btn-dl" @click="dlImg(kingsExport, `BamHI_Kings_${today()}.png`)">🖼️ 圖片</button>
         </div>
         <div ref="kingsExport" class="export-region">
@@ -62,7 +92,7 @@
               </p>
             </div>
           </details>
-          <DataTable v-if="kings.items?.length" :columns="kingsCols" :rows="kings.items" row-key="ticker" />
+          <DataTable v-if="kings.items?.length" :columns="kingsCols" :rows="filteredKings" row-key="ticker" :row-class="kingsRowClass" />
           <p v-else class="ph">目前無資料。</p>
         </div>
       </template>
@@ -75,7 +105,7 @@
       <template v-else-if="stars">
         <p v-if="stars.error" class="err">⚠️ {{ stars.error }}</p>
         <div v-if="stars.items?.length" class="toolbar">
-          <button class="btn-dl" @click="dlCsv(stars.items, starsCols, `BamHI_RisingStars_${today()}.csv`)">📥 CSV</button>
+          <button class="btn-dl" @click="dlCsv(filteredStars, starsCols, `BamHI_RisingStars_${today()}.csv`)">📥 CSV（篩後）</button>
           <button class="btn-dl" @click="dlImg(starsExport, `BamHI_RisingStars_${today()}.png`)">🖼️ 圖片</button>
         </div>
         <div ref="starsExport" class="export-region">
@@ -111,7 +141,7 @@
               </p>
             </div>
           </details>
-          <DataTable v-if="stars.items?.length" :columns="starsCols" :rows="stars.items" row-key="ticker" />
+          <DataTable v-if="stars.items?.length" :columns="starsCols" :rows="filteredStars" row-key="ticker" :row-class="starsRowClass" />
           <p v-else class="ph">目前無符合門檻的標的。</p>
         </div>
       </template>
@@ -157,7 +187,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, computed, onMounted } from 'vue'
+import { reactive, ref, computed, onMounted, watch } from 'vue'
 import VChart from 'vue-echarts'
 import { toPng } from 'html-to-image'
 import '@/lib/echarts'
@@ -210,29 +240,90 @@ function switchTab(k) {
 }
 onMounted(loadKings)
 
+// ── 市值分級 ──────────────────────────────────────────────────────────────
+const TIERS = ['Mega', 'Large', 'Mid', 'Small', 'Micro']
+function capTier(mc) {
+  if (mc == null) return null
+  if (mc >= 100e9) return 'Mega'   // ≥ $100B
+  if (mc >= 10e9)  return 'Large'  // $10–100B
+  if (mc >= 2e9)   return 'Mid'    // $2–10B
+  if (mc >= 0.3e9) return 'Small'  // $0.3–2B
+  return 'Micro'                   // < $0.3B
+}
+function fmtCap(v) {
+  if (v == null) return '—'
+  const s = v >= 1e12 ? `$${(v / 1e12).toFixed(2)}T` : v >= 1e9 ? `$${(v / 1e9).toFixed(1)}B` : `$${(v / 1e6).toFixed(0)}M`
+  return `${s} ${capTier(v)}`
+}
+const TIER_COLORS = { Mega: '#a78bfa', Large: 'var(--color-accent-cyan)', Mid: 'var(--color-bull)', Small: '#fcd34d', Micro: 'var(--color-bear)' }
+function capColor(v) { return TIER_COLORS[capTier(v)] ?? '' }
+
+// ── 自定義篩選（localStorage 持久化） ────────────────────────────────────
+const FILTER_KEY = 'mw_filters_v1'
+const DEFAULT_FILTERS = { rsiMin: null, rsiMax: null, rankMin: null, accelMin: null, tiers: [], signalOnly: false, newOnly: false }
+const filters = reactive({ ...DEFAULT_FILTERS, ...(JSON.parse(localStorage.getItem(FILTER_KEY) || 'null') ?? {}) })
+watch(filters, (f) => localStorage.setItem(FILTER_KEY, JSON.stringify(f)), { deep: true })
+
+function toggleTier(t) {
+  const i = filters.tiers.indexOf(t)
+  if (i >= 0) filters.tiers.splice(i, 1)
+  else filters.tiers.push(t)
+}
+function resetFilters() { Object.assign(filters, JSON.parse(JSON.stringify(DEFAULT_FILTERS))) }
+
+function passCommon(r) {
+  if (filters.rsiMin != null && filters.rsiMin !== '' && (r.RSI14 == null || r.RSI14 < filters.rsiMin)) return false
+  if (filters.rsiMax != null && filters.rsiMax !== '' && (r.RSI14 == null || r.RSI14 > filters.rsiMax)) return false
+  if (filters.rankMin != null && filters.rankMin !== '' && (r.Rank == null || r.Rank < filters.rankMin)) return false
+  if (filters.tiers.length && !filters.tiers.includes(capTier(r.MktCap))) return false
+  if (filters.newOnly && !r.Is_New) return false
+  return true
+}
+const filteredKings = computed(() =>
+  (kings.value?.items ?? []).filter((r) => passCommon(r) && (!filters.signalOnly || r.Pullback_Buy)),
+)
+const filteredStars = computed(() =>
+  (stars.value?.items ?? []).filter(
+    (r) =>
+      passCommon(r) &&
+      (filters.accelMin == null || filters.accelMin === '' || (r.Accel != null && r.Accel >= filters.accelMin)) &&
+      (!filters.signalOnly || r.Entry_Momentum || r.Entry_Pullback),
+  ),
+)
+
+// 訊號股整列高亮
+const kingsRowClass = (r) => (r.Pullback_Buy ? 'row-signal' : '')
+const starsRowClass = (r) => (r.Entry_Momentum ? 'row-signal' : r.Entry_Pullback ? 'row-signal-alt' : '')
+
 // ── Kings 表 ──────────────────────────────────────────────────────────────
 const kingsCols = [
+  { key: 'Is_New', label: '', align: 'center', format: (v) => (v ? '🆕' : ''), sortable: false },
   { key: 'ticker', label: '代碼', align: 'left' },
   { key: 'sub_industry', label: 'Sub-Industry', align: 'left', mono: false },
+  { key: 'MktCap', label: '市值', align: 'right', format: fmtCap, color: capColor },
   { key: 'Rank', label: 'RS Rank', align: 'right', format: (v) => v?.toFixed(1) ?? '—' },
   { key: '20R',  label: '20R', align: 'right', format: (v) => v?.toFixed(1) ?? '—', color: rankColor },
   { key: '60R',  label: '60R', align: 'right', format: (v) => v?.toFixed(1) ?? '—' },
   { key: '120R', label: '120R', align: 'right', format: (v) => v?.toFixed(1) ?? '—' },
   { key: 'RSI14', label: 'RSI14', align: 'right', format: (v) => v?.toFixed(1) ?? '—', color: rsiColor },
+  { key: 'OffHigh', label: '離52週高', align: 'right', format: (v) => v != null ? `${v.toFixed(1)}%` : '—', color: offHighColor },
   { key: 'Price', label: '價格', align: 'right', format: (v) => v != null ? `$${v.toFixed(2)}` : '—' },
   { key: 'Pullback_Buy', label: '進場訊號', align: 'center', format: (v) => v ? '✅ 買點' : '' },
 ]
 
 // ── Stars 表 ──────────────────────────────────────────────────────────────
 const starsCols = [
+  { key: 'Is_New', label: '', align: 'center', format: (v) => (v ? '🆕' : ''), sortable: false },
   { key: 'ticker', label: '代碼', align: 'left' },
   { key: 'sub_industry', label: 'Sub-Industry', align: 'left', mono: false },
+  { key: 'MktCap', label: '市值', align: 'right', format: fmtCap, color: capColor },
   { key: '20R',  label: '20R', align: 'right', format: (v) => v?.toFixed(1) ?? '—', color: rankColor },
   { key: '60R',  label: '60R', align: 'right', format: (v) => v?.toFixed(1) ?? '—' },
   { key: '120R', label: '120R', align: 'right', format: (v) => v?.toFixed(1) ?? '—' },
   { key: 'Accel', label: '加速度', align: 'right', format: (v) => v != null ? `+${v.toFixed(1)}` : '—', color: () => 'var(--color-bull)' },
   { key: 'Rank', label: 'RS Rank', align: 'right', format: (v) => v?.toFixed(1) ?? '—' },
   { key: 'RSI14', label: 'RSI14', align: 'right', format: (v) => v?.toFixed(1) ?? '—', color: rsiColor },
+  { key: 'OffHigh', label: '離52週高', align: 'right', format: (v) => v != null ? `${v.toFixed(1)}%` : '—', color: offHighColor },
   { key: 'Entry_Momentum', label: '追動能', align: 'center', format: (v) => v ? '✓' : '—', color: (v) => v ? 'var(--color-bull)' : '' },
   { key: 'Entry_Pullback', label: '等回調', align: 'center', format: (v) => v ? '✓' : '—', color: (v) => v ? 'var(--color-accent-cyan)' : '' },
   { key: 'Price', label: '價格', align: 'right', format: (v) => v != null ? `$${v.toFixed(2)}` : '—' },
@@ -240,6 +331,7 @@ const starsCols = [
 
 function rankColor(v) { return v >= 80 ? 'var(--color-bull)' : v >= 60 ? 'var(--color-accent-cyan)' : '' }
 function rsiColor(v)  { return v < 60 ? 'var(--color-bull)' : v > 70 ? 'var(--color-bear)' : '' }
+function offHighColor(v) { return v == null ? '' : v >= -5 ? 'var(--color-bull)' : v <= -20 ? 'var(--color-bear)' : '' }
 
 // ── CSV / 圖片下載 ─────────────────────────────────────────────────────────
 const kingsExport = ref(null)
@@ -384,6 +476,39 @@ const heatOption = computed(() => {
 .explain-body h4 { font-size: 13px; color: var(--color-text-primary); margin: 12px 0 4px; }
 .explain-body p { margin: 4px 0; }
 .explain-body b { color: var(--color-text-primary); }
+
+/* 自定義篩選列 */
+.filter-bar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
+  background: var(--color-bg-raised); border: 1px solid var(--color-border);
+  border-radius: var(--radius-md); padding: 10px 14px; margin-bottom: 16px;
+  font-size: 12.5px;
+}
+.f-group { display: flex; align-items: center; gap: 6px; }
+.f-group label { color: var(--color-text-secondary); white-space: nowrap; }
+.f-num {
+  width: 52px; background: var(--color-bg-base, #0a0e1a); border: 1px solid var(--color-border);
+  border-radius: 6px; color: var(--color-text-primary); padding: 4px 6px; font-size: 12.5px;
+}
+.f-sep { color: var(--color-text-muted); }
+.f-chip {
+  background: none; border: 1px solid var(--color-border); color: var(--color-text-secondary);
+  border-radius: 999px; padding: 3px 10px; font-size: 12px; cursor: pointer;
+}
+.f-chip.on { border-color: var(--color-accent-cyan); color: var(--color-accent-cyan); }
+.f-check { display: flex; align-items: center; gap: 5px; color: var(--color-text-secondary); cursor: pointer; }
+.f-reset {
+  background: none; border: none; color: var(--color-text-muted); cursor: pointer;
+  font-size: 12px; text-decoration: underline;
+}
+.f-reset:hover { color: var(--color-text-primary); }
+.f-count { margin-left: auto; color: var(--color-accent-cyan); font-weight: 600; }
+
+/* 訊號列高亮 + 表頭 sticky（長表往下捲仍看得到欄名） */
+:deep(.row-signal td) { background: rgba(0, 255, 136, 0.06); }
+:deep(.row-signal-alt td) { background: rgba(34, 211, 238, 0.06); }
+:deep(.export-region .dt-wrap) { max-height: 72vh; overflow: auto; }
+:deep(.export-region .dt thead th) { position: sticky; top: 0; background: var(--color-bg-raised); z-index: 2; }
 .ph { color: var(--color-text-muted); padding: 24px 0; }
 .err { color: var(--color-warning); background: rgba(245,158,11,0.1); border: 1px solid var(--color-warning); padding: 12px 16px; border-radius: var(--radius-md); font-size: 13px; }
 

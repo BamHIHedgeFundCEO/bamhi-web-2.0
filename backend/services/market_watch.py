@@ -40,6 +40,8 @@ def get_kings() -> dict:
     try:
         df = pd.read_csv(path)
         df["Pullback_Buy"] = df["Pullback_Buy"].astype(bool)
+        if "Is_New" in df.columns:
+            df["Is_New"] = df["Is_New"].astype(bool)
         float_cols = df.select_dtypes("float64").columns
         df[float_cols] = df[float_cols].astype("float32")
         items = df.where(pd.notnull(df), None).to_dict(orient="records")
@@ -58,7 +60,7 @@ def get_rising_stars() -> dict:
         return hit
     try:
         df = pd.read_csv(path)
-        for col in ("Entry_Momentum", "Entry_Pullback"):
+        for col in ("Entry_Momentum", "Entry_Pullback", "Is_New"):
             if col in df.columns:
                 df[col] = df[col].astype(bool)
         float_cols = df.select_dtypes("float64").columns

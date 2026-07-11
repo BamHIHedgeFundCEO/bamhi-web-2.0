@@ -29,7 +29,7 @@
         <tr
           v-for="(row, i) in sortedRows"
           :key="rowKey ? row[rowKey] : i"
-          :class="{ clickable: clickable }"
+          :class="[{ clickable: clickable }, rowClass ? rowClass(row) : '']"
           @click="clickable && emit('row-click', row)"
         >
           <td
@@ -60,6 +60,7 @@ const props = defineProps({
   rows: { type: Array, default: () => [] },
   rowKey: { type: String, default: '' },
   clickable: { type: Boolean, default: false },
+  rowClass: { type: Function, default: null }, // (row) => class 字串，供訊號列高亮等
 })
 const emit = defineEmits(['row-click'])
 
