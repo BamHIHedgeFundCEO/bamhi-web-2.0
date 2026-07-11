@@ -22,10 +22,16 @@
       <p v-else-if="errors.kings" class="err">⚠️ {{ errors.kings }}</p>
       <template v-else-if="kings">
         <p v-if="kings.error" class="err">⚠️ {{ kings.error }}</p>
-        <p class="meta">更新：{{ kings.updated_at || '—' }}　共 {{ kings.total }} 檔（Top 3/Sub_Industry，依 RS Rank）</p>
-        <p class="hint">✅ Pullback_Buy = RSI14&lt;60 + 相對強勢線 &gt; 50MA + 50MA 斜率向上（最佳進場窗口）</p>
-        <DataTable v-if="kings.items?.length" :columns="kingsCols" :rows="kings.items" row-key="ticker" />
-        <p v-else class="ph">目前無資料。</p>
+        <div v-if="kings.items?.length" class="toolbar">
+          <button class="btn-dl" @click="dlCsv(kings.items, kingsCols, `BamHI_Kings_${today()}.csv`)">📥 CSV</button>
+          <button class="btn-dl" @click="dlImg(kingsExport, `BamHI_Kings_${today()}.png`)">🖼️ 圖片</button>
+        </div>
+        <div ref="kingsExport" class="export-region">
+          <p class="meta">更新：{{ kings.updated_at || '—' }}　共 {{ kings.total }} 檔（Top 3/Sub_Industry，依 RS Rank）</p>
+          <p class="hint">✅ Pullback_Buy = RSI14&lt;60 + 相對強勢線 &gt; 50MA + 50MA 斜率向上（最佳進場窗口）</p>
+          <DataTable v-if="kings.items?.length" :columns="kingsCols" :rows="kings.items" row-key="ticker" />
+          <p v-else class="ph">目前無資料。</p>
+        </div>
       </template>
     </section>
 
@@ -35,11 +41,17 @@
       <p v-else-if="errors.stars" class="err">⚠️ {{ errors.stars }}</p>
       <template v-else-if="stars">
         <p v-if="stars.error" class="err">⚠️ {{ stars.error }}</p>
-        <p class="meta">更新：{{ stars.updated_at || '—' }}　共 {{ stars.total }} 檔</p>
-        <p class="hint">🚀 入選門檻：20R&gt;60R&gt;120R（多頭排列）+ 加速度≥30 + 20R≥75</p>
-        <p class="hint">✓ 追動能：RSI 50–75 + 加速度&gt;40　｜　✓ 等回調：RSI 30–60 + 加速度&gt;40</p>
-        <DataTable v-if="stars.items?.length" :columns="starsCols" :rows="stars.items" row-key="ticker" />
-        <p v-else class="ph">目前無符合門檻的標的。</p>
+        <div v-if="stars.items?.length" class="toolbar">
+          <button class="btn-dl" @click="dlCsv(stars.items, starsCols, `BamHI_RisingStars_${today()}.csv`)">📥 CSV</button>
+          <button class="btn-dl" @click="dlImg(starsExport, `BamHI_RisingStars_${today()}.png`)">🖼️ 圖片</button>
+        </div>
+        <div ref="starsExport" class="export-region">
+          <p class="meta">更新：{{ stars.updated_at || '—' }}　共 {{ stars.total }} 檔</p>
+          <p class="hint">🚀 入選門檻：20R&gt;60R&gt;120R（多頭排列）+ 加速度≥30 + 20R≥75</p>
+          <p class="hint">✓ 追動能：RSI 50–75 + 加速度&gt;40　｜　✓ 等回調：RSI 30–60 + 加速度&gt;40</p>
+          <DataTable v-if="stars.items?.length" :columns="starsCols" :rows="stars.items" row-key="ticker" />
+          <p v-else class="ph">目前無符合門檻的標的。</p>
+        </div>
       </template>
     </section>
 
@@ -85,6 +97,7 @@
 <script setup>
 import { reactive, ref, computed, onMounted } from 'vue'
 import VChart from 'vue-echarts'
+import { toPng } from 'html-to-image'
 import '@/lib/echarts'
 import apiClient from '@/api/client'
 import DataTable from '@/components/ui/DataTable.vue'
@@ -165,6 +178,45 @@ const starsCols = [
 
 function rankColor(v) { return v >= 80 ? 'var(--color-bull)' : v >= 60 ? 'var(--color-accent-cyan)' : '' }
 function rsiColor(v)  { return v < 60 ? 'var(--color-bull)' : v > 70 ? 'var(--color-bear)' : '' }
+
+// ── CSV / 圖片下載 ─────────────────────────────────────────────────────────
+const kingsExport = ref(null)
+const starsExport = ref(null)
+
+const today = () => new Date().toISOString().slice(0, 10)
+
+function csvCell(v) {
+  if (v === null || v === undefined) return ''
+  if (typeof v === 'boolean') return v ? 'true' : ''
+  const s = String(v)
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
+}
+
+function dlCsv(rows, cols, filename) {
+  if (!rows?.length) return
+  const header = cols.map((c) => c.label)
+  const lines = rows.map((row) => cols.map((c) => csvCell(row[c.key])).join(','))
+  const csv = '﻿' + [header.join(','), ...lines].join('\n')  // BOM，Excel 中文不亂碼
+  const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }))
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+async function dlImg(el, filename) {
+  if (!el) return
+  try {
+    const dataUrl = await toPng(el, { backgroundColor: '#0a0e1a', pixelRatio: 2 })
+    const a = document.createElement('a')
+    a.href = dataUrl
+    a.download = filename
+    a.click()
+  } catch (e) {
+    console.error('[market-watch] 圖片匯出失敗', e)
+  }
+}
 
 // ── Macro Compass heatmap ─────────────────────────────────────────────────
 const topEdges = computed(() => (compass.value?.edges ?? []).slice(0, 10))
@@ -251,6 +303,16 @@ const heatOption = computed(() => {
 }
 .tab:hover { color: var(--color-text-primary); }
 .tab.active { color: var(--color-accent-cyan); border-bottom-color: var(--color-accent-cyan); }
+.toolbar { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 10px; }
+.btn-dl {
+  background: var(--color-bg-raised);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: 12.5px; font-weight: 600;
+  padding: 6px 12px; border-radius: var(--radius-md); cursor: pointer;
+}
+.btn-dl:hover { color: var(--color-text-primary); border-color: var(--color-accent-cyan); }
+.export-region { background: var(--color-bg-base, #0a0e1a); padding: 12px; border-radius: var(--radius-md); }
 .meta { color: var(--color-text-muted); font-size: 13px; margin: 0 0 8px; }
 .hint { color: var(--color-text-secondary); font-size: 12px; margin: 0 0 16px; }
 .ph { color: var(--color-text-muted); padding: 24px 0; }

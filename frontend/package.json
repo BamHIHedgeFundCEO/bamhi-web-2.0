@@ -12,6 +12,7 @@
     "@supabase/supabase-js": "^2.45.0",
     "axios": "^1.7.7",
     "echarts": "^5.5.1",
+    "html-to-image": "^1.11.13",
     "lightweight-charts": "^4.2.0",
     "marked": "^14.1.4",
     "pinia": "^2.2.2",
