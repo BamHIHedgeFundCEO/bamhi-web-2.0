@@ -28,7 +28,40 @@
         </div>
         <div ref="kingsExport" class="export-region">
           <p class="meta">更新：{{ kings.updated_at || '—' }}　共 {{ kings.total }} 檔（RS Rank ≥ 80，每 Sub_Industry 取前 3）</p>
-          <p class="hint">✅ Pullback_Buy = RSI14&lt;60 + 相對強勢線 &gt; 50MA + 50MA 斜率向上（最佳進場窗口）</p>
+          <p class="hint">✅ 買點 = RSI14 介於 30–60（已降溫、未破壞）＋ 相對強勢線（個股÷SPY）&gt; 其 50 日均線（回調中仍跑贏大盤）</p>
+          <details class="explain">
+            <summary>📖 使用方法・條件・邏輯</summary>
+            <div class="explain-body">
+              <h4>這張表在幹嘛</h4>
+              <p>
+                從 Russell 1000 + BamHI 板塊 Universe 裡，找出<b>每個細分行業（Sub-Industry）動能最強的前 3 檔龍頭</b>，
+                並標出其中「正在回調、可以接」的買點窗口。邏輯：強者恆強（IBD RS 風格），但不追高 — 等強勢股回調到均值再進。
+              </p>
+              <h4>選股條件（由上到下過濾）</h4>
+              <p>
+                ① 流動性：30 日均量 ≥ 30 萬股<br />
+                ② <b>RS Rank ≥ 80</b>：全市場動能前 20% 才有資格（絕對門檻，濾掉「矮子裡的高個」）<br />
+                ③ 每個 Sub-Industry 依 RS Rank 取前 3 檔
+              </p>
+              <h4>RS Rank 怎麼算</h4>
+              <p>
+                20R / 60R / 120R = 近 20 / 60 / 120 個交易日報酬率在<b>全市場的百分位</b>（0–100）。<br />
+                <b>RS Rank = 20R×0.2 ＋ 60R×0.4 ＋ 120R×0.4</b> — 偏重中長期，短期權重低，避免被一週暴衝騙進去。
+              </p>
+              <h4>✅ 買點訊號（Pullback_Buy）— 兩條同時成立</h4>
+              <p>
+                ① <b>RSI14 介於 30–60</b>：已從過熱區降溫（&lt;60），但沒跌進趨勢破壞區（&gt;30）。
+                RSI14 = 14 日相對強弱指標（Wilder 法），&gt;70 過熱、&lt;30 超賣。<br />
+                ② <b>相對強勢線 &gt; 其 50 日均線</b>：相對強勢線 = 個股價格 ÷ SPY，這條線在自己的 50MA 之上，
+                代表個股回調期間<b>仍在跑贏大盤</b> — 是強勢整理，不是資金撤離。
+              </p>
+              <h4>怎麼用</h4>
+              <p>
+                每日更新。掃 ✅ 買點欄 → 看該檔所屬 Sub-Industry 是否也有其他龍頭同步走強（板塊共振）→
+                配合自己的進場紀律（止損、倉位）。RSI14 欄綠色 = 未過熱可留意，紅色（&gt;70）= 過熱勿追。
+              </p>
+            </div>
+          </details>
           <DataTable v-if="kings.items?.length" :columns="kingsCols" :rows="kings.items" row-key="ticker" />
           <p v-else class="ph">目前無資料。</p>
         </div>
@@ -47,8 +80,37 @@
         </div>
         <div ref="starsExport" class="export-region">
           <p class="meta">更新：{{ stars.updated_at || '—' }}　共 {{ stars.total }} 檔</p>
-          <p class="hint">🚀 入選門檻：20R&gt;60R&gt;120R（多頭排列）+ 加速度≥30 + 20R≥75</p>
-          <p class="hint">✓ 追動能：RSI 50–75 + 加速度&gt;40　｜　✓ 等回調：RSI 30–60 + 加速度&gt;40</p>
+          <p class="hint">🚀 入選門檻：20R&gt;60R&gt;120R（動能多頭排列）+ 加速度≥30 + 20R≥75</p>
+          <p class="hint">✓ 追動能：RSI 55–75 + 加速度&gt;40　｜　✓ 等回調：RSI 30–55 + 加速度&gt;40（以 55 切開，互斥）</p>
+          <details class="explain">
+            <summary>📖 使用方法・條件・邏輯</summary>
+            <div class="explain-body">
+              <h4>這張表在幹嘛</h4>
+              <p>
+                找<b>動能正在加速的黑馬</b>：短期排名 &gt; 中期排名 &gt; 長期排名，代表這檔股票在全市場的相對位置
+                一路往上爬 — 可能是剛啟動的新主流，Kings 表還來不及收錄它。
+              </p>
+              <h4>入選門檻（三條全過）</h4>
+              <p>
+                ① <b>20R &gt; 60R &gt; 120R</b>：動能多頭排列 — 近 20 日排名比 60 日強、60 日又比 120 日強，越近越強<br />
+                ② <b>加速度（Accel）= 20R − 120R ≥ 30</b>：短期排名比長期至少跳了 30 個百分位，爬升夠猛<br />
+                ③ <b>20R ≥ 75</b>：短期動能已進全市場前 25%，不是從谷底反彈的雜訊
+              </p>
+              <h4>兩個進場訊號（RSI 55 切開，互斥 — 同一檔只會亮一個）</h4>
+              <p>
+                ✓ <b>追動能（RSI 55–75）</b>：動能強勁但未過熱（&lt;75），適合順勢直接進場、突破加碼的打法。<br />
+                ✓ <b>等回調（RSI 30–55）</b>：加速度還在（Accel&gt;40）但價格已降溫，適合等回踩支撐、低吸的打法。<br />
+                兩者都要求 <b>加速度 &gt; 40</b>（比入選門檻 30 更嚴）— 只對爬升最猛的一批給訊號。<br />
+                RSI ≥ 75 = 過熱不給訊號；RSI ≤ 30 = 動能可能已壞，也不給。
+              </p>
+              <h4>怎麼用</h4>
+              <p>
+                依加速度排序，越上面爬得越快。先看訊號欄選打法（追 or 等），再看 Sub-Industry 是否成群出現 —
+                同板塊多檔同時上榜，通常是板塊輪動的早期訊號，可對照 Kings 表與 Macro Compass 確認資金流向。
+                Rising Stars 波動大於 Kings，倉位與止損要更保守。
+              </p>
+            </div>
+          </details>
           <DataTable v-if="stars.items?.length" :columns="starsCols" :rows="stars.items" row-key="ticker" />
           <p v-else class="ph">目前無符合門檻的標的。</p>
         </div>
@@ -315,6 +377,13 @@ const heatOption = computed(() => {
 .export-region { background: var(--color-bg-base, #0a0e1a); padding: 12px; border-radius: var(--radius-md); }
 .meta { color: var(--color-text-muted); font-size: 13px; margin: 0 0 8px; }
 .hint { color: var(--color-text-secondary); font-size: 12px; margin: 0 0 16px; }
+.explain { margin: 0 0 16px; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 8px 14px; }
+.explain summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--color-text-secondary); }
+.explain summary:hover { color: var(--color-text-primary); }
+.explain-body { font-size: 12.5px; line-height: 1.7; color: var(--color-text-secondary); }
+.explain-body h4 { font-size: 13px; color: var(--color-text-primary); margin: 12px 0 4px; }
+.explain-body p { margin: 4px 0; }
+.explain-body b { color: var(--color-text-primary); }
 .ph { color: var(--color-text-muted); padding: 24px 0; }
 .err { color: var(--color-warning); background: rgba(245,158,11,0.1); border: 1px solid var(--color-warning); padding: 12px 16px; border-radius: var(--radius-md); font-size: 13px; }
 

@@ -289,8 +289,9 @@ def _rising_stars(df_rank: pd.DataFrame, close: pd.DataFrame) -> pd.DataFrame:
         return _rsi14(close[t].dropna()) if t in close.columns else 50.0
 
     stars["RSI14"] = stars["ticker"].apply(_rsi_safe).round(1)
-    stars["Entry_Momentum"] = (stars["RSI14"] > 50) & (stars["RSI14"] < 75) & (stars["Accel"] > 40)
-    stars["Entry_Pullback"] = (stars["RSI14"] > 30) & (stars["RSI14"] < 60) & (stars["Accel"] > 40)
+    # 兩訊號以 RSI 55 切開互斥（55–75 追、30–55 等），同一檔只會亮一個
+    stars["Entry_Momentum"] = (stars["RSI14"] >= 55) & (stars["RSI14"] < 75) & (stars["Accel"] > 40)
+    stars["Entry_Pullback"] = (stars["RSI14"] > 30) & (stars["RSI14"] < 55) & (stars["Accel"] > 40)
 
     cols = ["ticker", "sector", "sub_industry", "20R", "60R", "120R", "Accel", "Rank", "RSI14", "Entry_Momentum", "Entry_Pullback", "Price"]
     return (
