@@ -25,6 +25,40 @@
       </button>
     </div>
 
+    <details class="explain">
+      <summary>📖 指標說明 — 這些欄位怎麼算、為什麼用斜率</summary>
+      <div class="explain-body">
+        <h3>營收端（硬閘門，淘汰用）</h3>
+        <p>
+          <b>營收YoY</b>：本季單季營收 ÷ 去年同季 − 1。門檻 ≥ 25%。<br />
+          <b>加速t</b> = 本季YoY − 上季YoY，即成長率的變化（二階導數）。YoY 說「成長多快」，
+          加速說「成長在變快還是變慢」。例：YoY 30% → 45%，加速t = +15%，成長引擎正在踩油門。<br />
+          <b>加速t-1</b>：前一季的加速值。只看一季可能是基期效應（去年同季剛好很爛，今年隨便比都好看）；
+          <b>連兩季加速 &gt; 0</b> 才算真拐點 — 這是唯一的淘汰性基本面條件。
+        </p>
+        <h3>獲利端（軟訊號，只排序不淘汰）— 為什麼用斜率不用成長率</h3>
+        <p>
+          淨利可以是負的，負數會讓成長率符號錯亂：淨利 −100 → −50 用成長率算是「−50%」，
+          看似惡化，實際是虧損砍半、大幅改善。所以獲利端一律用<b>線性回歸斜率</b>，只看方向：
+          斜率 &gt; 0 = 每季往上爬，<b>虧損收窄也算改善</b> — 這正是抓「由虧轉盈拐點」的核心，
+          公司還在虧錢時成長率沒法用，斜率可以。
+        </p>
+        <p>
+          <b>淨利率斜率</b>：近 4 季淨利率（淨利÷營收）做 OLS 線性回歸的斜率。
+          用淨利率而非淨利金額，排除營收放大的干擾，看的是「賺錢效率」的改善方向。<br />
+          <b>EPS斜率</b>：近 4 季稀釋 EPS 數值（level，非成長率）的 OLS 斜率。
+        </p>
+        <h3>分數（池內排序）</h3>
+        <p>
+          <b>分數 = 淨利率斜率排名 × 0.5 ＋ EPS斜率排名 × 0.3 ＋ 加速t排名 × 0.2</b>，
+          排名為左側池內百分位（0～1），分數越高排越前。
+          權重邏輯：營收加速已是入場門票（池內人人都有），排序主要比「誰的獲利改善最猛」。<br />
+          <b>🔺旗標無條件置頂，蓋過分數</b>：🔺翻正 = 淨利上季為負、本季轉正；
+          🔺近轉正 = 仍在虧損但淨利率斜率為正、外推下一季就穿零。
+        </p>
+      </div>
+    </details>
+
     <div v-if="store.loading" class="ph">載入篩選結果…</div>
     <div v-else-if="store.error" class="alert">⚠️ {{ store.error }}</div>
 
@@ -115,6 +149,11 @@ onMounted(async () => {
 .run-sel { background: transparent; border: 1px solid var(--border, #444); border-radius: 6px; padding: 4px 8px; color: inherit; }
 .asof { opacity: 0.7; font-size: 0.85rem; }
 .tabs { display: flex; gap: 8px; margin: 16px 0 4px; }
+.explain { margin-top: 12px; border: 1px solid var(--border, #444); border-radius: 8px; padding: 10px 14px; }
+.explain summary { cursor: pointer; font-weight: 600; opacity: 0.85; }
+.explain-body { margin-top: 8px; font-size: 0.88rem; line-height: 1.7; opacity: 0.85; }
+.explain-body h3 { font-size: 0.95rem; margin: 14px 0 4px; opacity: 1; }
+.explain-body p { margin: 4px 0; }
 .tab { border: 1px solid var(--border, #444); background: transparent; color: inherit; border-radius: 8px; padding: 6px 14px; cursor: pointer; }
 .tab.on { border-color: var(--accent, #2ecc71); color: var(--accent, #2ecc71); }
 .block { margin-top: 12px; }
