@@ -1,39 +1,50 @@
 <!--
   TopNav.vue — 全站頂部導覽列 (對應 Streamlit components/ui_layout.render_navbar)
   Logo + 導覽連結 (交易工具為下拉) + 個股搜尋框 + 使用者/登出。
+
+  觸控相容：下拉在無 hover 裝置（平板/手機）用點擊開關，桌機維持懸停；
+  ≤ 820px 收成漢堡選單（連結/搜尋/登出進垂直面板）。
 -->
 <template>
-  <header class="nav">
+  <header class="nav" ref="navEl">
     <RouterLink :to="{ name: 'home' }" class="logo">🌌 BamHI Quant</RouterLink>
 
-    <nav class="links">
-      <RouterLink :to="{ name: 'home' }" class="link" active-class="active" exact-active-class="active">首頁</RouterLink>
-      <RouterLink :to="{ name: 'macro' }" class="link" active-class="active">總經市場</RouterLink>
+    <button class="burger" :aria-expanded="mobileOpen" aria-label="選單" @click="mobileOpen = !mobileOpen">
+      {{ mobileOpen ? '✕' : '☰' }}
+    </button>
 
-      <div class="dropdown" @mouseenter="open = true" @mouseleave="open = false">
-        <span class="link" :class="{ active: toolActive }">交易工具 ▾</span>
-        <div v-show="open" class="menu">
-          <RouterLink v-for="t in TOOLS" :key="t.name" :to="{ name: t.name }" class="menu-item" @click="open = false">{{ t.label }}</RouterLink>
+    <div class="nav-body" :class="{ open: mobileOpen }">
+      <nav class="links">
+        <RouterLink :to="{ name: 'home' }" class="link" active-class="active" exact-active-class="active">首頁</RouterLink>
+        <RouterLink :to="{ name: 'macro' }" class="link" active-class="active">總經市場</RouterLink>
+
+        <div class="dropdown" @mouseenter="hasHover && (open = true)" @mouseleave="hasHover && (open = false)">
+          <button class="link drop-btn" :class="{ active: toolActive }" @click="open = !open">
+            交易工具 {{ open ? '▴' : '▾' }}
+          </button>
+          <div v-show="open" class="menu">
+            <RouterLink v-for="t in TOOLS" :key="t.name" :to="{ name: t.name }" class="menu-item" @click="closeAll">{{ t.label }}</RouterLink>
+          </div>
         </div>
+
+        <RouterLink :to="{ name: 'models' }" class="link" active-class="active">交易模型</RouterLink>
+        <RouterLink :to="{ name: 'guide' }" class="link" active-class="active">使用說明</RouterLink>
+      </nav>
+
+      <form class="search" @submit.prevent="doSearch">
+        <input v-model="q" type="text" placeholder="🔍 搜尋美股代碼 (AAPL)…" />
+      </form>
+
+      <div class="user">
+        <span class="email mono">{{ auth.user?.email ?? 'dev' }}</span>
+        <button class="logout" @click="logout">登出</button>
       </div>
-
-      <RouterLink :to="{ name: 'models' }" class="link" active-class="active">交易模型</RouterLink>
-      <RouterLink :to="{ name: 'guide' }" class="link" active-class="active">使用說明</RouterLink>
-    </nav>
-
-    <form class="search" @submit.prevent="doSearch">
-      <input v-model="q" type="text" placeholder="🔍 搜尋美股代碼 (AAPL)…" />
-    </form>
-
-    <div class="user">
-      <span class="email mono">{{ auth.user?.email ?? 'dev' }}</span>
-      <button class="logout" @click="logout">登出</button>
     </div>
   </header>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
@@ -41,8 +52,13 @@ const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 
-const open = ref(false)
+const open = ref(false)        // 交易工具下拉
+const mobileOpen = ref(false)  // 漢堡面板
 const q = ref('')
+const navEl = ref(null)
+
+// 有滑鼠（可 hover）的裝置才用懸停開關；觸控裝置用點擊
+const hasHover = window.matchMedia('(hover: hover)').matches
 
 const TOOLS = [
   { name: 'screener', label: '🎯 BamHI 模型選股' },
@@ -56,6 +72,21 @@ const TOOLS = [
   { name: 'smallCap', label: '💰 小市值策略' },
 ]
 const toolActive = computed(() => TOOLS.some((t) => route.name === t.name))
+
+function closeAll() {
+  open.value = false
+  mobileOpen.value = false
+}
+
+// 換頁自動收合（含搜尋跳轉）
+watch(() => route.fullPath, closeAll)
+
+// 點導覽列外側 → 收合下拉與面板（觸控裝置沒有 mouseleave）
+function onDocClick(e) {
+  if (navEl.value && !navEl.value.contains(e.target)) closeAll()
+}
+onMounted(() => document.addEventListener('click', onDocClick))
+onBeforeUnmount(() => document.removeEventListener('click', onDocClick))
 
 function doSearch() {
   const t = q.value.trim().toUpperCase()
@@ -84,6 +115,12 @@ async function logout() {
   backdrop-filter: blur(8px);
 }
 .logo { color: var(--color-accent); font-size: 18px; font-weight: 700; flex-shrink: 0; }
+.burger {
+  display: none;
+  background: none; border: 1px solid var(--color-border); color: var(--color-text-primary);
+  font-size: 18px; line-height: 1; padding: 6px 12px; border-radius: var(--radius-md); cursor: pointer;
+}
+.nav-body { display: flex; align-items: center; gap: 20px; flex: 1; min-width: 0; }
 .links { display: flex; align-items: center; gap: 6px; }
 .link {
   color: var(--color-text-secondary);
@@ -93,6 +130,7 @@ async function logout() {
   cursor: pointer;
   white-space: nowrap;
 }
+.drop-btn { background: none; border: none; font-family: inherit; }
 .link:hover { color: var(--color-text-primary); background: var(--color-bg-surface); }
 .link.active { color: #fff; background: var(--color-bg-raised); }
 .dropdown { position: relative; }
@@ -140,4 +178,42 @@ async function logout() {
   cursor: pointer;
 }
 .logout:hover { border-color: var(--color-bear); color: var(--color-bear); }
+
+/* ── 平板 / 手機（≤ 820px）：漢堡選單 ── */
+@media (max-width: 820px) {
+  .burger { display: block; margin-left: auto; }
+  .nav-body {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 14px 20px 18px;
+    background: rgba(10, 14, 26, 0.98);
+    border-bottom: 1px solid var(--color-border);
+    max-height: calc(100vh - 60px);
+    overflow-y: auto;
+  }
+  .nav-body.open { display: flex; }
+  .links { flex-direction: column; align-items: stretch; }
+  .link { padding: 12px 14px; font-size: 15px; }   /* 觸控目標放大 */
+  .dropdown { position: static; }
+  .menu {
+    position: static;
+    margin: 4px 0 4px 12px;
+    box-shadow: none;
+    min-width: 0;
+    border-left: 2px solid var(--color-accent-cyan, #22d3ee);
+    border-top: none; border-right: none; border-bottom: none;
+    border-radius: 0;
+    background: transparent;
+    padding: 0;
+  }
+  .search { margin-left: 0; }
+  .search input { width: 100%; box-sizing: border-box; }
+  .user { justify-content: space-between; }
+}
 </style>
