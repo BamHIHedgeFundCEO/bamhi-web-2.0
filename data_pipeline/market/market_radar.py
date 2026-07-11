@@ -251,8 +251,13 @@ def _pullback_buy(ticker: str, close: pd.DataFrame, spy: pd.Series | None) -> bo
     return True
 
 
+_KINGS_RS_FLOOR = 80  # 絕對 RS Rank 下限：只留全市場動能前 20% 的真龍頭（IBD 風格）
+
+
 def _kings(df_rank: pd.DataFrame, close: pd.DataFrame, spy) -> pd.DataFrame:
     df = df_rank.reset_index()
+    # 先過絕對門檻（濾掉「矮子裡的高個」），再各 sub_industry 取前 3
+    df = df[df["Rank"] >= _KINGS_RS_FLOOR]
     top3 = (
         df.sort_values("Rank", ascending=False)
         .groupby("sub_industry")

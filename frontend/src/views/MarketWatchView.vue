@@ -27,7 +27,7 @@
           <button class="btn-dl" @click="dlImg(kingsExport, `BamHI_Kings_${today()}.png`)">🖼️ 圖片</button>
         </div>
         <div ref="kingsExport" class="export-region">
-          <p class="meta">更新：{{ kings.updated_at || '—' }}　共 {{ kings.total }} 檔（Top 3/Sub_Industry，依 RS Rank）</p>
+          <p class="meta">更新：{{ kings.updated_at || '—' }}　共 {{ kings.total }} 檔（RS Rank ≥ 80，每 Sub_Industry 取前 3）</p>
           <p class="hint">✅ Pullback_Buy = RSI14&lt;60 + 相對強勢線 &gt; 50MA + 50MA 斜率向上（最佳進場窗口）</p>
           <DataTable v-if="kings.items?.length" :columns="kingsCols" :rows="kings.items" row-key="ticker" />
           <p v-else class="ph">目前無資料。</p>
