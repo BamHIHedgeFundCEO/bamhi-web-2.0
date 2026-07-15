@@ -1,128 +1,124 @@
 ticker,sector,sub_industry,20R,60R,120R,Accel,Rank,RSI14,OffHigh,Entry_Momentum,Entry_Pullback,Price,MktCap,Is_New
-BRBR,"Consumer, Non-cyclical",Pharmaceuticals,99.4,8.3,1.7,97.8,23.9,53.2,-79.4,False,True,12.1,1406962029.3564796,False
-BNC,BamHI,資料中心基建(Data_Center_Infra),99.7,66.4,2.7,96.9,47.6,55.9,-95.0,True,False,2.89,118992430.81930876,False
-NIQ,"Consumer, Non-cyclical",Commercial Services,99.2,34.2,7.0,92.1,36.3,71.3,-44.0,True,False,11.05,3261256635.39279,False
-INSP,"Consumer, Non-cyclical",Healthcare-Products,93.5,19.9,3.3,90.2,28.0,59.2,-65.9,True,False,49.15,1416166513.9153824,False
-RBLX,Technology,Software,97.8,23.9,10.2,87.6,33.2,56.9,-61.5,True,False,54.47,38999363114.14749,False
-CERT,"Consumer, Non-cyclical",Biotechnology,98.3,63.1,11.3,86.9,49.4,59.2,-51.0,True,False,6.67,1037615947.2286377,False
-DJT,Communications,Internet,94.1,26.5,8.1,86.0,32.7,59.8,-54.5,True,False,9.03,2500892992.8853493,True
-ARQQ,BamHI,純血量子計算 (Pure Quantum),99.6,80.7,14.6,85.0,58.0,45.6,-67.9,False,True,18.73,325947150.06380844,False
-KVYO,BamHI,AI 應用軟體 (AI Apps),97.1,32.0,13.0,84.1,37.4,63.9,-51.3,True,False,17.51,5240389594.129713,False
-KLAR,BamHI,金融科技與支付 (Fintech & Payments),96.6,92.1,12.8,83.8,61.3,57.8,-56.8,True,False,19.63,7422367412.854534,False
-CCC,Technology,Software,98.9,63.6,17.0,82.0,52.0,68.6,-39.5,True,False,6.07,3562729154.2750206,False
-INSM,"Consumer, Non-cyclical",Biotechnology,90.7,9.8,9.2,81.5,25.7,52.4,-47.9,False,True,110.11,23866612511.905197,True
-ZS,Technology,Computers,95.1,72.4,13.7,81.5,53.4,59.5,-54.8,True,False,152.09,24594401065.052032,False
-GTM,Technology,Software,80.7,0.5,0.4,80.2,16.5,47.3,-75.2,False,True,3.02,890048457.0586996,False
-DOCS,Technology,Software,83.7,23.5,3.6,80.1,27.6,52.6,-71.0,False,True,21.8,3986610485.0797005,False
-HUBS,Technology,Software,89.3,30.0,9.8,79.5,33.8,56.7,-62.6,True,False,209.68,10733667278.508057,False
-FIGR,Technology,Computers,79.8,15.7,1.2,78.6,22.7,47.1,-59.5,False,True,29.96,6624181233.616127,True
-U,Technology,Software,94.7,85.5,16.2,78.4,59.6,65.9,-35.8,True,False,31.75,13859986154.75,False
-KMPR,Financial,Insurance,93.0,21.3,15.6,77.4,33.3,56.0,-52.3,True,False,28.64,1686157968.5460205,False
-RKT,Financial,Diversified Finan Serv,85.0,25.4,7.9,77.1,30.3,49.0,-39.0,False,True,14.3,40460845564.27089,True
-NCNO,Technology,Software,92.8,33.8,16.0,76.8,38.5,60.3,-46.4,True,False,17.52,1919367734.1493607,False
-SOFI,Financial,Diversified Finan Serv,89.9,36.8,13.2,76.7,37.9,57.1,-42.4,True,False,18.55,23794848281.34613,False
-QGEN,"Consumer, Non-cyclical",Healthcare-Products,91.6,48.6,15.4,76.2,43.9,66.1,-24.7,True,False,41.56,8571750283.241272,False
-FOUR,"Consumer, Non-cyclical",Commercial Services,96.9,51.0,20.7,76.2,48.1,60.4,-53.2,True,False,50.01,3967239356.089035,False
-RYAN,Financial,Insurance,93.8,67.9,19.3,74.5,53.7,63.8,-38.0,True,False,41.18,5331497879.99054,False
-ELF,"Consumer, Non-cyclical",Cosmetics/Personal Care,95.5,53.8,21.2,74.3,49.1,57.0,-50.7,True,False,72.25,4258201212.25,False
-JKHY,Technology,Software,91.8,31.2,18.1,73.6,38.1,59.4,-23.9,True,False,145.37,10328651541.672363,False
-BFAM,"Consumer, Non-cyclical",Commercial Services,91.0,18.5,17.9,73.1,32.7,57.0,-41.6,True,False,73.09,3845021683.0986023,False
-FIG,BamHI,AI 應用軟體 (AI Apps),98.5,79.1,25.6,72.9,61.6,62.1,-80.4,True,False,23.86,12607065354.275467,False
-PODD,"Consumer, Non-cyclical",Healthcare-Products,76.8,11.1,4.6,72.2,21.6,53.0,-54.9,False,True,159.12,11021394588.673584,False
-NU,Financial,Banks,93.3,25.1,21.9,71.3,37.4,62.1,-25.4,True,False,13.99,67578478028.68982,True
-W,Communications,Internet,92.8,74.9,21.8,71.1,57.2,54.8,-25.5,False,True,88.74,11713369039.285057,False
-COTY,"Consumer, Non-cyclical",Cosmetics/Personal Care,83.5,36.5,12.6,70.9,36.3,58.9,-56.3,True,False,2.25,1981049485.5,False
-CHKP,BamHI,資安 (Cybersecurity),87.5,41.8,16.6,70.9,40.8,58.3,-38.6,True,False,137.02,14253890559.594742,False
-PATH,Technology,Software,91.7,71.1,22.6,69.1,55.8,62.0,-38.1,True,False,11.94,6186355758.628084,False
-LYFT,Communications,Internet,93.7,58.0,25.3,68.4,52.1,61.3,-36.5,True,False,15.61,5926844194.1663475,False
-AXON,Industrial,Miscellaneous Manufactur,97.4,94.3,29.2,68.2,68.9,56.6,-37.2,True,False,547.26,44110293446.14966,False
-TEM,"Consumer, Non-cyclical",Healthcare-Products,97.0,61.3,28.9,68.1,55.5,56.2,-43.2,True,False,58.67,10535064551.097092,False
-FBIN,Industrial,Building Materials,94.9,91.8,27.2,67.7,66.6,60.5,-20.5,True,False,50.62,6038632641.120884,False
-GDDY,Communications,Internet,96.0,62.2,29.1,67.0,55.7,61.3,-46.3,True,False,91.1,12062536859.658607,False
-SHOP,BamHI,AI 應用軟體 (AI Apps),94.3,40.6,27.5,66.8,46.1,62.8,-29.8,True,False,125.68,163089231780.81274,False
-ADBE,Technology,Software,82.5,22.3,15.7,66.7,31.7,50.3,-40.8,False,True,220.78,87760049514.77051,True
-NVO,BamHI,醫療生技 (Biotech & Pharma),89.6,81.8,23.3,66.4,59.9,61.7,-28.3,True,False,49.07,217125205516.05652,False
-VEEV,Technology,Software,96.7,75.4,30.3,66.4,61.6,65.2,-36.9,True,False,193.09,31366174464.3049,False
-RDDT,Communications,Internet,97.7,87.7,31.5,66.2,67.2,63.1,-24.9,True,False,203.27,39131313383.28735,False
-PYPL,"Consumer, Non-cyclical",Commercial Services,92.4,32.7,26.3,66.1,42.1,64.0,-38.9,True,False,47.37,41785336261.21968,False
-CVNA,"Consumer, Cyclical",Retail,85.8,35.9,19.6,66.1,39.3,55.2,-26.4,True,False,70.38,50412374568.95519,True
-TMO,"Consumer, Non-cyclical",Healthcare-Products,92.2,51.7,26.2,66.0,49.6,67.5,-16.3,True,False,534.07,198471878534.3869,False
-PTC,Technology,Software,81.8,21.9,15.8,66.0,31.5,47.0,-43.4,False,True,122.51,14150614702.15699,True
-MKC,"Consumer, Non-cyclical",Food,84.2,45.4,18.8,65.4,42.5,61.5,-25.1,True,False,52.85,14208804112.965088,False
-BRO,Financial,Insurance,92.6,42.3,27.6,64.9,46.5,64.8,-36.0,True,False,68.5,23217927108.5,False
-DASH,Communications,Internet,97.6,54.7,33.2,64.4,54.7,58.9,-33.3,True,False,187.79,81823615879.02237,False
-BILL,Technology,Software,97.5,62.9,33.9,63.7,58.2,63.2,-26.5,True,False,41.37,4120316489.6092186,False
-DHR,"Consumer, Non-cyclical",Healthcare-Products,88.3,50.4,24.7,63.6,47.7,62.9,-17.4,True,False,199.05,140881745464.29456,False
-IQV,"Consumer, Non-cyclical",Healthcare-Services,93.1,83.3,29.8,63.3,63.8,68.2,-14.9,True,False,207.83,34686827305.60303,False
-MEDP,"Consumer, Non-cyclical",Healthcare-Services,93.2,52.9,30.0,63.1,51.8,62.4,-13.6,True,False,536.17,15312847963.049377,False
-TOST,"Consumer, Non-cyclical",Commercial Services,96.5,56.2,33.6,62.9,55.2,67.9,-39.1,True,False,30.0,17400000000.0,False
-WDAY,Technology,Software,78.6,70.0,16.1,62.5,50.2,56.9,-43.6,True,False,139.81,34529361496.027405,False
-GWRE,Technology,Software,93.3,46.1,32.1,61.2,49.9,61.2,-46.3,True,False,140.71,11715003537.41217,False
-PCTY,"Consumer, Non-cyclical",Commercial Services,91.5,85.3,30.4,61.1,64.6,64.9,-35.3,True,False,123.13,6592879714.476852,False
-APPF,Technology,Software,82.6,70.8,22.0,60.5,53.6,58.2,-45.7,True,False,174.46,6168649904.5724945,False
-POOL,"Consumer, Cyclical",Distribution/Wholesale,81.6,29.6,21.5,60.0,36.8,57.3,-35.9,True,False,210.07,7655581907.126526,False
-KNSL,Financial,Insurance,82.7,29.8,22.8,59.9,37.6,55.9,-31.0,True,False,337.14,7775399135.494263,False
-PINS,Communications,Internet,89.8,70.7,30.2,59.6,58.3,61.1,-42.3,True,False,22.61,12665157505.3629,True
-RGEN,"Consumer, Non-cyclical",Healthcare-Products,90.9,76.6,31.5,59.4,61.4,64.6,-14.6,True,False,147.13,8299271061.628418,False
-FLO,"Consumer, Non-cyclical",Food,77.4,38.8,18.0,59.3,38.2,56.1,-46.2,True,False,8.29,1757423868.6131,False
-GPC,"Consumer, Cyclical",Retail,95.3,68.6,36.3,59.1,61.0,61.1,-16.5,True,False,122.16,16995157222.760376,False
-AVTR,"Consumer, Non-cyclical",Healthcare-Products,96.3,93.2,37.2,59.1,71.4,69.8,-27.6,True,False,11.29,7708308462.534948,True
-TRU,"Consumer, Non-cyclical",Commercial Services,92.7,42.9,34.3,58.4,49.4,58.1,-23.4,True,False,75.58,14571824353.027344,False
-TTEK,Industrial,Environmental Control,85.1,39.4,27.0,58.1,43.6,66.2,-26.7,True,False,31.11,8073813544.291306,False
-XYL,Industrial,Machinery-Diversified,87.1,36.7,29.3,57.8,43.8,67.2,-19.7,True,False,121.55,28891644799.532974,False
-SPGI,"Consumer, Non-cyclical",Commercial Services,88.2,58.8,31.0,57.2,53.6,63.9,-17.1,True,False,438.87,129905518554.6875,False
-COF,Financial,Diversified Finan Serv,88.7,49.7,32.0,56.7,50.4,58.7,-19.8,True,False,205.29,126462635118.61702,False
-GIS,"Consumer, Non-cyclical",Food,80.8,55.5,24.3,56.6,48.1,58.7,-24.5,True,False,36.46,19459007629.53537,False
-CMG,"Consumer, Cyclical",Retail,91.4,52.5,35.1,56.3,53.3,64.7,-33.5,True,False,36.43,46730000011.45935,False
-CLBT,BamHI,AI 應用軟體 (AI Apps),97.9,89.0,42.1,55.9,72.0,66.8,-17.3,True,False,16.18,4035936315.182991,False
-DOCU,Technology,Software,85.4,59.9,29.6,55.8,52.9,60.3,-41.9,True,False,49.38,9428844946.990845,False
-WTW,Financial,Insurance,86.9,37.9,31.8,55.1,45.3,62.9,-16.7,True,False,288.74,27270907667.896484,False
-BMI,BamHI,科技儀器 (Scientific Instruments),80.2,28.7,25.4,54.8,37.7,54.4,-41.8,False,True,141.46,4128590928.148041,True
-LPLA,Financial,Diversified Finan Serv,83.3,50.3,28.7,54.6,48.3,65.1,-19.2,True,False,321.35,25702492870.52664,False
-VLTO,Industrial,Environmental Control,87.0,46.9,32.6,54.4,49.2,61.3,-15.8,True,False,91.9,22570572920.15474,False
-LIF,BamHI,AI 應用軟體 (AI Apps),95.0,75.3,40.8,54.2,65.4,54.7,-52.2,False,True,53.0,4294679623.0,False
-EXPE,Communications,Internet,95.6,55.1,41.3,54.2,57.7,59.1,-11.2,True,False,266.28,31959478517.048676,False
-COR,"Consumer, Non-cyclical",Pharmaceuticals,80.1,29.9,26.4,53.7,38.5,62.2,-19.0,True,False,302.28,58811916979.298706,False
-HHH,Financial,Real Estate,81.7,68.9,29.0,52.8,55.5,60.6,-19.8,True,False,72.05,4295951819.409805,False
-CXT,Technology,Computers,96.0,76.2,43.9,52.1,67.2,64.5,-25.7,True,False,50.66,2915096303.4397316,False
-TECH,"Consumer, Non-cyclical",Healthcare-Products,98.8,87.3,46.9,52.0,73.4,75.9,-0.2,False,False,71.23,11098393265.006012,False
-RPD,BamHI,資安 (Cybersecurity),100.0,99.6,48.2,51.8,79.1,84.7,-43.3,False,False,12.97,866793133.3057003,False
-MANH,Technology,Software,88.6,85.1,37.7,50.9,66.8,65.2,-30.4,True,False,158.6,9383506238.312073,False
-TXRH,"Consumer, Cyclical",Retail,90.8,80.5,40.6,50.2,66.6,56.8,-3.8,True,False,189.09,12428812659.64096,False
-AJG,Financial,Insurance,94.2,73.1,44.2,50.0,65.8,67.4,-18.6,True,False,253.83,65219588330.47485,False
-WMS,Industrial,Metal Fabricate/Hardware,90.0,54.8,40.2,49.8,56.0,55.8,-13.7,True,False,151.04,11569015222.06659,False
-SLM,Financial,Diversified Finan Serv,92.5,76.7,43.0,49.5,66.4,62.1,-22.3,True,False,25.53,4814779291.846533,False
-MCO,"Consumer, Non-cyclical",Commercial Services,87.6,67.8,38.5,49.1,60.0,64.6,-7.9,True,False,494.73,86417676090.79266,False
-WEN,"Consumer, Cyclical",Retail,84.8,67.2,36.0,48.8,58.2,49.0,-29.9,False,True,7.42,1413366363.3325195,False
-SHC,"Consumer, Non-cyclical",Healthcare-Services,85.6,70.4,36.9,48.7,60.0,59.0,-8.2,True,False,17.77,5067417613.91909,False
-TTWO,Technology,Software,90.1,68.2,41.7,48.4,62.0,48.2,-9.6,False,True,237.04,44010424550.97868,False
-BKNG,Communications,Internet,75.8,31.6,28.2,47.6,39.1,50.3,-23.7,False,True,174.85,135487499264.08264,False
-XRAY,"Consumer, Non-cyclical",Healthcare-Products,97.9,55.6,51.2,46.6,62.3,69.3,-22.5,True,False,12.7,2544148835.8907175,False
-RVTY,"Consumer, Non-cyclical",Healthcare-Products,89.5,87.1,43.2,46.3,70.0,58.8,-5.5,True,False,111.21,12406562253.193977,False
-HAYW,Industrial,Building Materials,83.4,59.5,38.3,45.0,55.8,53.2,-8.3,False,True,15.88,3445372337.789444,True
-CRL,"Consumer, Non-cyclical",Healthcare-Services,97.2,90.8,52.6,44.6,76.8,70.0,-1.0,True,False,231.21,11136861176.691742,False
-SCHW,Financial,Diversified Finan Serv,88.6,66.0,44.9,43.8,62.1,66.0,-5.0,True,False,101.1,175826597103.9898,False
-HOOD,Communications,Internet,97.0,90.7,55.7,41.2,77.9,61.9,-25.6,True,False,113.45,102162295968.52666,False
-HRB,"Consumer, Non-cyclical",Commercial Services,90.4,89.9,49.6,40.8,73.9,64.7,-24.6,True,False,40.94,5189562700.501347,True
-MA,Financial,Diversified Finan Serv,86.3,52.8,46.0,40.2,56.8,65.8,-9.6,True,False,538.02,475385802924.59717,False
-OSK,Industrial,Machinery-Constr&Mining,81.9,47.4,41.9,40.0,52.1,55.7,-17.7,False,False,145.75,9087703286.75,False
-ORI,Financial,Insurance,80.0,43.9,40.5,39.5,49.8,59.0,-4.6,False,False,41.39,10080701732.506409,False
-AGO,Financial,Insurance,82.1,43.0,42.7,39.4,50.7,61.1,-9.5,False,False,82.68,3661274137.0339355,True
-RJF,Financial,Diversified Finan Serv,83.8,69.2,44.5,39.2,62.2,65.9,-3.8,False,False,167.43,32629264955.25403,False
-AXP,Financial,Diversified Finan Serv,84.9,65.4,45.8,39.2,61.4,64.1,-7.0,False,False,355.06,242266825185.74396,False
-BRZE,BamHI,AI 應用軟體 (AI Apps),96.5,74.4,57.6,38.9,72.1,67.2,-27.6,False,False,26.19,2949823471.261801,True
-AGNC,Financial,REITS,85.3,65.7,46.8,38.6,62.1,65.1,-1.8,False,False,11.18,12833849611.280212,False
-AMP,Financial,Diversified Finan Serv,91.2,72.6,52.7,38.5,68.4,70.1,-4.3,False,False,518.6,46620625567.64697,False
-PAYC,Technology,Software,78.3,74.8,40.7,37.5,61.9,59.8,-39.3,False,False,143.67,6698915084.283234,False
-RLI,Financial,Insurance,88.1,58.9,51.7,36.4,61.8,62.5,-7.8,False,False,60.14,5529171170.225296,False
-LNC,Financial,Insurance,90.0,77.2,53.6,36.3,70.3,72.1,-8.1,False,False,41.26,7889456187.274998,False
-GPN,"Consumer, Non-cyclical",Commercial Services,90.3,61.0,54.3,36.0,64.2,59.1,-14.6,False,False,75.89,20759216579.272293,False
-AYI,Industrial,Electrical Compo&Equip,86.7,76.4,52.4,34.3,68.9,49.9,-13.1,False,False,327.48,9803293260.441742,False
-OMF,Financial,Diversified Finan Serv,75.1,57.8,40.9,34.2,54.5,57.6,-12.8,False,False,59.96,6927235776.148254,True
-PAYX,Technology,Software,83.9,82.5,49.8,34.0,69.7,65.8,-23.5,False,False,109.52,38945310806.274414,False
-NLY,Financial,REITS,82.1,60.8,48.1,34.0,60.0,64.7,0.0,False,False,23.01,16861181197.009169,True
-BEAM,BamHI,醫療生技 (Biotech & Pharma),77.2,47.7,43.5,33.7,51.9,43.2,-18.5,False,False,30.89,3177938857.667511,True
-ZBRA,Technology,Office/Business Equip,92.1,69.4,59.7,32.4,70.1,54.2,-23.8,False,False,260.11,12389920895.365234,False
-DLO,BamHI,金融科技與支付 (Fintech & Payments),96.8,69.5,64.4,32.4,72.9,65.3,-4.7,False,False,14.84,4366953978.621906,False
-MTN,"Consumer, Cyclical",Entertainment,90.5,76.9,58.4,32.2,72.2,61.8,-4.6,False,False,147.64,5260933756.891022,True
-DV,Technology,Software,92.0,62.5,61.7,30.3,68.1,60.2,-28.7,False,False,11.6,1780184650.9419422,True
+BRBR,"Consumer, Non-cyclical",Pharmaceuticals,99.7,8.7,1.3,98.3,24.0,53.2,-79.2,False,True,12.09,1405799224.2425919,False
+BNC,BamHI,資料中心基建(Data_Center_Infra),99.5,66.0,3.0,96.5,47.5,57.6,-94.9,True,False,2.96,121874597.57065773,False
+INSP,"Consumer, Non-cyclical",Healthcare-Products,97.6,21.9,3.7,93.9,29.8,62.8,-64.9,True,False,50.5,1455064226.5,False
+NIQ,"Consumer, Non-cyclical",Commercial Services,98.8,32.5,6.8,92.0,35.5,70.0,-44.3,True,False,10.99,3243548331.028652,False
+LCID,"Consumer, Cyclical",Auto Manufacturers,92.4,14.3,3.4,89.0,25.6,51.9,-81.0,False,True,5.95,2322027933.164421,True
+KVYO,BamHI,AI 應用軟體 (AI Apps),98.1,32.8,11.3,86.8,37.2,64.7,-50.9,True,False,17.63,5276302852.024385,False
+CERT,"Consumer, Non-cyclical",Biotechnology,99.6,75.4,13.8,85.8,55.6,64.7,-48.1,True,False,7.06,1098286123.5785217,False
+DJT,Communications,Internet,92.6,30.2,9.2,83.4,34.3,65.1,-51.8,True,False,9.57,2650448049.440399,False
+ZENA,BamHI,無人機 (Drones),83.4,6.6,0.3,83.0,19.4,52.3,-77.7,False,True,1.49,129810141.83084965,True
+HUBS,Technology,Software,95.1,38.3,12.3,82.8,39.2,59.3,-61.6,True,False,215.33,11022895247.372986,False
+RBLX,Technology,Software,98.0,33.2,15.3,82.7,39.0,61.8,-59.7,True,False,57.07,40860906758.65063,False
+CCC,Technology,Software,99.1,62.2,16.5,82.6,51.3,66.5,-40.2,True,False,6.0,3521643216.0,False
+GTM,Technology,Software,82.8,0.6,0.5,82.3,17.0,49.5,-74.8,False,True,3.08,907731522.2347984,False
+COTY,"Consumer, Non-cyclical",Cosmetics/Personal Care,94.8,47.7,13.5,81.3,43.5,64.8,-54.0,True,False,2.37,2086705357.2986126,False
+ZS,Technology,Computers,92.8,69.9,12.2,80.6,51.4,56.0,-55.9,True,False,148.19,23963734904.548645,False
+NCNO,Technology,Software,97.1,37.3,17.6,79.5,41.4,62.3,-45.6,True,False,17.79,1948947080.7987213,False
+FOUR,"Consumer, Non-cyclical",Commercial Services,98.4,53.8,19.5,79.0,49.0,62.5,-52.2,True,False,51.01,4046568280.089035,False
+CHWY,Communications,Internet,85.3,10.4,8.3,77.1,24.5,56.9,-49.9,True,False,21.21,8683887055.630943,True
+DOCS,Technology,Software,81.1,25.4,4.6,76.4,28.2,55.7,-70.4,True,False,22.26,4070731808.07609,False
+BFAM,"Consumer, Non-cyclical",Commercial Services,95.5,21.3,19.1,76.4,35.3,59.1,-40.9,True,False,73.99,3892367770.870018,False
+FIGR,Technology,Computers,78.1,17.8,1.8,76.3,23.5,50.1,-58.2,False,True,30.93,6838649327.044624,False
+QGEN,"Consumer, Non-cyclical",Healthcare-Products,90.9,49.3,14.8,76.1,43.8,63.8,-25.2,True,False,41.24,8505750346.183777,False
+PODD,"Consumer, Non-cyclical",Healthcare-Products,80.3,11.1,4.7,75.6,22.4,53.1,-54.9,False,True,159.28,11032477190.168396,False
+RH,"Consumer, Cyclical",Retail,98.7,94.2,23.2,75.5,66.7,71.5,-24.2,True,False,190.26,3600902703.495163,True
+ELF,"Consumer, Non-cyclical",Cosmetics/Personal Care,95.6,71.5,20.6,75.0,56.0,59.9,-49.4,True,False,74.22,4374307254.96463,False
+JKHY,Technology,Software,93.2,38.4,19.4,73.8,41.7,63.4,-22.3,True,False,148.47,10548909393.33191,False
+RYAN,Financial,Insurance,94.0,68.0,22.0,72.0,54.8,61.1,-38.8,True,False,40.66,5264174390.00473,False
+FBIN,Industrial,Building Materials,96.6,90.6,25.3,71.3,65.7,61.6,-19.7,True,False,51.15,6101858461.577309,False
+U,Technology,Software,85.6,85.2,14.7,70.9,57.0,62.4,-36.8,True,False,31.27,13650449556.019863,False
+FIG,BamHI,AI 應用軟體 (AI Apps),98.2,88.0,27.5,70.7,65.8,60.4,-80.7,True,False,23.5,12416849465.5,False
+NU,Financial,Banks,90.0,25.9,20.4,69.6,36.5,60.0,-26.0,True,False,13.88,67047126384.40509,False
+IQV,"Consumer, Non-cyclical",Healthcare-Services,95.4,80.8,26.2,69.2,61.9,66.5,-15.3,True,False,206.81,34516588592.5293,False
+APPF,Technology,Software,88.6,73.3,20.4,68.1,55.2,59.0,-45.4,True,False,175.4,6201886472.388641,False
+GDDY,Communications,Internet,96.3,62.5,28.4,67.9,55.6,61.6,-46.1,True,False,91.27,12085046291.198936,False
+WDAY,Technology,Software,85.0,77.5,17.2,67.8,54.9,58.5,-42.7,True,False,141.82,35025780600.667786,False
+TMO,"Consumer, Non-cyclical",Healthcare-Products,91.9,51.6,24.4,67.4,48.8,67.9,-16.1,True,False,535.29,198925245834.3393,False
+ADBE,Technology,Software,83.5,28.2,16.1,67.4,34.4,53.1,-39.8,False,True,224.56,89262599029.54102,False
+AXON,Industrial,Miscellaneous Manufactur,97.5,94.1,30.2,67.3,69.3,55.2,-37.9,True,False,541.12,43615395512.67517,False
+VEEV,Technology,Software,96.9,78.9,29.6,67.3,62.8,65.6,-36.8,True,False,193.67,31460391870.52745,False
+MEDP,"Consumer, Non-cyclical",Healthcare-Services,92.2,51.4,25.8,66.4,49.3,58.8,-14.7,True,False,529.23,15114643651.663574,False
+GWRE,Technology,Software,96.0,46.8,29.9,66.2,49.9,61.0,-46.3,True,False,140.54,11700848837.58783,False
+PCTY,"Consumer, Non-cyclical",Commercial Services,94.1,86.9,28.2,65.8,64.9,64.7,-35.4,True,False,123.05,6588596500.303497,False
+DHR,"Consumer, Non-cyclical",Healthcare-Products,89.1,55.1,23.8,65.2,49.4,64.6,-16.7,True,False,200.79,142113259443.45203,False
+BRO,Financial,Insurance,91.4,44.0,26.5,65.0,46.5,58.1,-36.5,True,False,66.86,22662052856.137344,False
+RGEN,"Consumer, Non-cyclical",Healthcare-Products,92.1,74.6,27.6,64.5,59.3,65.5,-14.0,True,False,148.06,8351729846.685791,False
+LYFT,Communications,Internet,93.4,67.4,28.9,64.5,57.2,66.9,-33.9,True,False,16.23,6162247320.55513,False
+TTEK,Industrial,Environmental Control,90.6,45.2,26.2,64.4,46.7,67.6,-26.2,True,False,31.33,8130908799.869837,False
+NVO,BamHI,醫療生技 (Biotech & Pharma),94.2,88.6,29.7,64.4,66.2,67.5,-26.1,True,False,50.56,223668877166.4067,False
+KMPR,Financial,Insurance,77.0,16.2,12.6,64.4,26.9,46.9,-54.7,False,True,27.17,1599612887.9317474,False
+PTC,Technology,Software,80.9,22.9,16.7,64.2,32.0,49.1,-42.9,False,True,123.61,14277670896.00914,False
+W,Communications,Internet,87.4,74.5,23.3,64.1,56.6,58.5,-23.0,True,False,91.67,12100118821.637192,False
+PATH,Technology,Software,88.1,77.8,24.3,63.8,58.5,62.1,-38.1,True,False,11.95,6191537079.876402,False
+CHKP,BamHI,資安 (Cybersecurity),79.3,38.7,15.7,63.6,37.6,51.0,-40.6,False,True,132.39,13772241305.236465,False
+TOST,"Consumer, Non-cyclical",Commercial Services,97.4,57.9,34.0,63.4,56.2,69.5,-38.4,True,False,30.39,17626199645.996094,False
+GPC,"Consumer, Cyclical",Retail,94.9,64.6,32.9,62.0,58.0,58.9,-17.3,True,False,121.0,16833775068.0,False
+DOCU,Technology,Software,95.1,73.1,33.5,61.6,61.7,65.4,-39.8,True,False,51.16,9768726116.144165,False
+MKC,"Consumer, Non-cyclical",Food,79.7,35.0,18.2,61.5,37.2,52.8,-27.8,False,True,50.92,13689920535.558105,False
+FND,"Consumer, Cyclical",Retail,76.3,57.4,15.1,61.1,44.3,54.5,-37.6,False,True,56.4,6096510224.938583,True
+FLO,"Consumer, Non-cyclical",Food,79.1,42.6,18.5,60.6,40.3,55.1,-46.5,True,False,8.25,1748944147.5,False
+AVTR,"Consumer, Non-cyclical",Healthcare-Products,94.6,92.9,34.1,60.5,69.7,68.0,-28.2,True,False,11.2,7646860372.174742,False
+GIS,"Consumer, Non-cyclical",Food,87.7,62.8,28.1,59.5,53.9,62.1,-22.9,True,False,37.22,19864627150.619507,False
+LPLA,Financial,Diversified Finan Serv,89.5,56.2,30.5,58.9,52.6,68.4,-17.2,True,False,329.12,26323958821.778687,False
+RPD,BamHI,資安 (Cybersecurity),100.0,99.8,41.3,58.7,76.4,74.9,-46.4,True,False,12.25,818675070.5,False
+POOL,"Consumer, Cyclical",Distribution/Wholesale,75.4,24.6,17.1,58.3,31.8,48.4,-38.2,False,True,202.37,7374970339.165649,False
+TRU,"Consumer, Non-cyclical",Commercial Services,94.4,45.0,36.2,58.2,51.4,62.3,-21.3,True,False,77.6,14961279705.810547,False
+XYL,Industrial,Machinery-Diversified,84.9,48.3,26.7,58.2,47.0,66.7,-19.8,True,False,121.43,28863120927.528297,False
+SPGI,"Consumer, Non-cyclical",Commercial Services,88.2,62.4,30.4,57.8,54.8,66.0,-16.0,True,False,444.48,131566083251.95312,False
+DASH,Communications,Internet,92.0,55.4,34.9,57.2,54.5,60.8,-32.5,True,False,190.16,82856273771.16962,False
+WTW,Financial,Insurance,88.6,36.7,32.4,56.3,45.3,59.2,-17.7,True,False,285.12,26929006455.948242,False
+TEM,"Consumer, Non-cyclical",Healthcare-Products,84.8,53.2,28.5,56.3,49.6,53.6,-44.6,False,True,57.25,10280082910.75,False
+VLTO,Industrial,Environmental Control,86.8,47.0,31.9,55.0,48.9,57.5,-16.6,True,False,91.0,22349533206.0,False
+SHOP,BamHI,AI 應用軟體 (AI Apps),85.8,31.8,31.0,54.9,42.3,59.1,-31.0,True,False,123.55,160325231025.6276,False
+PYPL,"Consumer, Non-cyclical",Commercial Services,99.2,69.4,45.0,54.2,65.6,80.1,-28.4,False,False,55.52,48974497375.15585,False
+SLM,Financial,Diversified Finan Serv,94.7,74.2,40.8,53.9,64.9,60.1,-21.9,True,False,25.34,4778946522.077007,False
+CXT,Technology,Computers,97.2,71.9,43.4,53.8,65.5,66.6,-24.6,True,False,51.41,2958253078.6897316,False
+HHH,Financial,Real Estate,82.9,70.5,29.1,53.7,56.4,63.4,-18.9,True,False,72.83,4342458926.045883,False
+BILL,Technology,Software,99.4,78.5,46.1,53.3,69.7,70.3,-20.7,True,False,44.63,4445002032.390781,False
+DLTR,"Consumer, Cyclical",Retail,91.0,84.1,38.4,52.6,67.2,64.1,-10.0,True,False,127.03,24411937679.05188,True
+TECH,"Consumer, Non-cyclical",Healthcare-Products,98.3,85.7,45.9,52.3,72.3,76.3,0.0,False,False,71.48,11137345928.006012,False
+SHC,"Consumer, Non-cyclical",Healthcare-Services,90.4,72.1,38.7,51.7,62.4,62.8,-6.2,True,False,18.15,5175780832.317425,False
+CLBT,BamHI,AI 應用軟體 (AI Apps),97.4,84.5,46.2,51.2,71.8,61.8,-19.1,True,False,15.83,3948632284.0792522,False
+PINS,Communications,Internet,88.8,81.5,37.7,51.1,65.4,67.8,-39.5,True,False,23.68,13264525674.30645,False
+CRL,"Consumer, Non-cyclical",Healthcare-Services,97.3,87.9,46.3,51.0,73.1,66.2,-2.3,True,False,228.22,10992839399.398499,False
+ROCK,BamHI,住宅建材 (Building Materials),84.4,73.5,33.7,50.7,59.8,59.7,-40.7,True,False,44.21,1311205183.7075958,True
+RVTY,"Consumer, Non-cyclical",Healthcare-Products,88.1,82.6,38.7,49.3,66.2,59.1,-5.4,True,False,111.35,12422180553.323296,False
+AJG,Financial,Insurance,93.9,73.5,44.6,49.3,66.0,60.9,-20.5,True,False,247.77,63662520437.77466,False
+MCO,"Consumer, Non-cyclical",Commercial Services,89.0,71.4,39.8,49.2,62.3,68.2,-6.1,True,False,504.46,88117274420.88348,False
+WMS,Industrial,Metal Fabricate/Hardware,87.9,43.2,39.6,48.3,50.7,56.1,-13.5,True,False,151.26,11585866371.32721,False
+NXST,Communications,Media,77.0,28.9,28.7,48.3,38.4,57.4,-27.1,True,False,183.2,5594738294.802475,True
+EXPE,Communications,Internet,91.2,48.4,43.1,48.1,54.8,59.6,-11.0,True,False,267.11,32059095229.334106,False
+TXRH,"Consumer, Cyclical",Retail,92.3,79.2,45.4,47.0,68.3,57.6,-3.4,True,False,189.86,12479424744.018173,False
+ADP,"Consumer, Non-cyclical",Commercial Services,88.5,88.2,41.9,46.6,69.7,65.2,-18.2,True,False,247.47,98922243254.49689,True
+FDS,Communications,Media,77.6,67.0,31.1,46.5,54.8,55.4,-41.5,True,False,251.19,8933708832.999939,True
+MANH,Technology,Software,83.5,81.9,37.2,46.3,64.3,62.0,-31.3,True,False,156.58,9263993489.493622,False
+VRSK,"Consumer, Non-cyclical",Commercial Services,77.1,66.3,30.9,46.2,54.3,60.0,-36.0,True,False,191.94,25148332289.47754,True
+WEN,"Consumer, Cyclical",Retail,81.4,68.5,35.2,46.2,57.8,49.4,-29.6,False,True,7.45,1419080731.6687012,False
+COF,Financial,Diversified Finan Serv,79.6,50.9,33.4,46.1,49.7,62.0,-18.4,True,False,208.89,128680309010.10155,False
+SF,Financial,Diversified Finan Serv,80.7,36.6,35.3,45.4,44.9,66.8,-10.5,True,False,78.75,12080389308.75,True
+XRAY,"Consumer, Non-cyclical",Healthcare-Products,99.3,63.5,54.4,45.0,67.0,74.2,-18.3,True,False,13.4,2684377475.781435,False
+SCHW,Financial,Diversified Finan Serv,91.9,73.0,48.0,43.9,66.8,69.1,-3.5,True,False,102.79,178765740356.7561,False
+CTAS,"Consumer, Non-cyclical",Commercial Services,86.5,65.0,43.5,43.0,60.7,68.8,-14.2,True,False,192.37,76974329844.17664,True
+TTWO,Technology,Software,91.4,78.3,49.4,41.9,69.4,54.5,-7.0,False,True,243.8,45265533006.00969,False
+HRB,"Consumer, Non-cyclical",Commercial Services,92.9,91.6,52.1,40.9,76.0,65.4,-24.2,True,False,41.14,5214914838.61171,False
+RJF,Financial,Diversified Finan Serv,87.5,74.3,46.8,40.7,65.9,69.2,-2.2,True,False,170.3,33188581284.93582,False
+LIF,BamHI,AI 應用軟體 (AI Apps),93.0,76.2,53.1,39.9,70.3,60.0,-49.9,False,False,55.56,4502120863.240093,False
+OSK,Industrial,Machinery-Constr&Mining,77.7,43.4,37.7,39.9,48.0,55.4,-17.8,False,False,145.54,9074609093.241592,False
+AMP,Financial,Diversified Finan Serv,93.7,80.0,54.6,39.1,72.5,72.6,-2.7,False,False,527.28,47400937085.22363,False
+BBWI,"Consumer, Cyclical",Retail,76.4,65.0,37.5,38.9,56.3,51.5,-35.1,False,False,20.66,4164267005.1641083,True
+EEFT,"Consumer, Non-cyclical",Commercial Services,95.9,59.7,57.2,38.7,65.9,66.5,-26.3,False,False,78.25,2979376105.5,True
+PAYC,Technology,Software,80.1,76.7,41.6,38.4,63.3,60.8,-38.8,False,False,144.73,6748339694.327545,False
+LNC,Financial,Insurance,87.1,73.8,49.3,37.8,66.6,69.7,-8.7,False,False,40.96,7832092374.05909,False
+BDX,"Consumer, Non-cyclical",Pharmaceuticals,77.4,42.2,40.2,37.1,48.4,56.1,-15.3,False,False,154.88,42675702679.17224,True
+GPN,"Consumer, Non-cyclical",Commercial Services,95.3,67.1,59.0,36.3,69.5,63.2,-12.0,False,False,78.22,21396573451.455414,False
+MA,Financial,Diversified Finan Serv,84.4,54.0,48.5,35.9,57.9,63.6,-10.1,False,False,535.21,472902934449.2343,False
+BRZE,BamHI,AI 應用軟體 (AI Apps),97.0,79.6,61.1,35.9,75.7,67.2,-27.6,False,False,26.21,2952075941.3726273,False
+HOOD,Communications,Internet,96.2,90.5,62.1,34.1,80.3,63.6,-24.2,False,False,115.54,104044355110.21701,False
+HBAN,Financial,Banks,76.6,67.2,42.6,34.0,59.3,63.2,-4.2,False,False,18.12,36731607937.67569,True
+AGNC,Financial,REITS,84.7,64.1,50.9,33.8,63.0,68.0,-0.6,False,False,11.32,12994559008.719788,False
+AXP,Financial,Diversified Finan Serv,79.2,66.8,45.4,33.7,60.7,66.1,-6.1,False,False,358.44,244573091894.75604,False
+RTX,Industrial,Aerospace/Defense,78.0,46.9,44.9,33.2,52.3,58.7,-7.3,False,False,195.89,263801815888.96967,True
+RLI,Financial,Insurance,82.6,53.6,50.3,32.2,58.1,52.9,-10.5,False,False,58.05,5337020044.40662,False
+MRSH,Financial,Insurance,75.8,47.2,43.7,32.1,51.5,56.8,-15.4,False,False,176.22,84901827554.34805,True
+SLGN,Industrial,Packaging&Containers,90.5,68.4,59.4,31.1,69.3,65.2,-17.0,False,False,45.58,4816883563.145416,True
