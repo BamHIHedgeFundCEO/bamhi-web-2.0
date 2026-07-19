@@ -78,7 +78,7 @@ PENN,"Consumer, Cyclical",Entertainment,80.8,33.1,94.7,90.9,50.2,-6.8,True,20.57
 BAX,"Consumer, Non-cyclical",Healthcare-Products,80.7,92.0,88.0,67.9,58.7,-22.0,True,22.61,11677364586.107666,False
 MNST,"Consumer, Non-cyclical",Beverages,80.2,65.5,93.2,74.6,59.0,-2.4,True,97.5,95355790725.0,False
 OC,Industrial,Building Materials,80.2,91.6,82.7,72.0,57.5,-9.5,True,143.91,11588830682.193512,False
-AMAT,Technology,Semiconductors,80.2,19.2,95.1,95.6,43.9,-26.7,True,529.66,420528530371.64734,True
+AMAT,Technology,Semiconductors,80.2,19.2,95.1,95.6,43.9,-26.7,True,529.66,420528530371.64734,False
 HRB,"Consumer, Non-cyclical",Commercial Services,80.1,94.7,94.4,58.4,68.7,-22.5,False,42.08,5334069742.664871,False
 PFGC,"Consumer, Non-cyclical",Food,80.0,72.9,88.9,74.8,58.9,-3.2,True,111.76,17556362083.340126,False
 SHLS,BamHI,太陽能 (Solar),80.0,77.2,97.3,64.2,50.8,-19.3,True,10.3,1728049747.0999346,False
