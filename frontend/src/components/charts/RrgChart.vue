@@ -5,16 +5,20 @@
 -->
 <template>
   <div class="rrg-wrap">
-    <VChart :option="option" :style="{ height: height + 'px', width: '100%' }" autoresize @click="onClick" />
-    <p v-if="hasAbsTrend" class="rrg-legend">
-      <span class="dot solid"></span>實心＝絕對趨勢多頭（Close &gt; MA60 &gt; MA200）
-      <span class="dot hollow"></span>空心＝非多頭，相對位置可能只是抗跌
-    </p>
+    <VChart ref="chartRef" :option="option" :style="{ height: height + 'px', width: '100%' }" autoresize @click="onClick" />
+    <div class="rrg-bar">
+      <p v-if="hasAbsTrend" class="rrg-legend">
+        <span class="dot solid"></span>實心＝絕對趨勢多頭（Close &gt; MA60 &gt; MA200）
+        <span class="dot hollow"></span>空心＝非多頭，相對位置可能只是抗跌
+      </p>
+      <span v-else class="rrg-legend">滑過任一板塊可單獨highlight該條軌跡</span>
+      <button class="rrg-btn" title="匯出 PNG（2 倍解析度）" @click="downloadPng">📷 下載圖檔</button>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import VChart from 'vue-echarts'
 import '@/lib/echarts'
 
@@ -29,6 +33,20 @@ const emit = defineEmits(['select'])
 function onClick(params) {
   const sector = params?.data?._sector
   if (sector) emit('select', sector)
+}
+
+// 匯出 PNG。圖表背景是 transparent，直接匯出會得到透明底，
+// 所以指定與 .rrg-wrap 相同的深色底，貼到簡報/Discord 才不會變成一片黑或白。
+const chartRef = ref(null)
+function downloadPng() {
+  const inst = chartRef.value?.chart ?? chartRef.value
+  if (!inst?.getDataURL) return
+  const url = inst.getDataURL({ type: 'png', pixelRatio: 2, backgroundColor: '#111827' })
+  const tag = props.mode === 'trail' ? `軌跡${props.trailDays}日` : '快照'
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `RRG_${tag}_${new Date().toISOString().slice(0, 10)}.png`
+  a.click()
 }
 
 // 舊版預算 JSON 沒有 abs_up 欄位 → 不顯示圖例，避免說明與實際樣式不符
@@ -67,6 +85,10 @@ function absTrendText(p) {
   return ''
 }
 
+// 41 條軌跡疊在窄帶裡會糊成一片，線半透明讓端點浮出來；hover 時該條回到 1.0。
+// 想回到原本完全不透明改成 1 即可。
+const TRAIL_OPACITY = 0.5
+
 const QUAD_AREAS = {
   silent: true,
   data: [
@@ -90,15 +112,21 @@ const option = computed(() => {
     for (const p of props.points) {
       const tail = p.points.slice(-props.trailDays)
       if (tail.length < 2) continue
+      // 軌跡線與端點合成「同一個 series」：滑過端點時 focus 會把整條軌跡打亮、
+      // 其餘 40 條淡掉。拆成兩個 series 的話 focus 只認得其中一個。
+      const last = tail.length - 1
+      const data = tail.map((v, i) => (i === last
+        ? {
+            value: v, _sector: p.sector, symbolSize: 13, itemStyle: markStyle(p),
+            label: { show: true, formatter: p.short, position: 'right', color: p.color, fontSize: 10 },
+          }
+        : { value: v, _sector: p.sector, symbolSize: 0 }))
       series.push({
-        type: 'line', showSymbol: false, data: tail, silent: true, z: 2,
-        lineStyle: { color: p.color, width: 2.5, type: p.abs_up === false ? 'dashed' : 'solid' },
-      })
-      series.push({
-        type: 'scatter', data: [{ value: tail[tail.length - 1], _sector: p.sector }], symbolSize: 13,
-        itemStyle: markStyle(p),
-        label: { show: true, formatter: p.short, position: 'right', color: p.color, fontSize: 10 },
-        name: p.sector, z: 3,
+        type: 'line', data, name: p.sector, z: 2,
+        lineStyle: { color: p.color, width: 2.5, opacity: TRAIL_OPACITY },
+        labelLayout: { hideOverlap: true },
+        emphasis: { focus: 'series', lineStyle: { opacity: 1, width: 3 }, label: { fontSize: 12 } },
+        blur: { lineStyle: { opacity: 0.06 }, itemStyle: { opacity: 0.12 }, label: { show: false } },
         tooltip: { formatter: `<b>${p.sector}</b><br/>${absTrendText(p)}<br/>點擊查看深度分析` },
       })
     }
@@ -109,6 +137,9 @@ const option = computed(() => {
         itemStyle: markStyle(p),
         label: { show: true, formatter: p.short, position: 'right', color: p.color, fontSize: 10 },
         name: p.sector,
+        labelLayout: { hideOverlap: true },
+        emphasis: { focus: 'series', label: { fontSize: 12 } },
+        blur: { itemStyle: { opacity: 0.15 }, label: { show: false } },
         tooltip: { formatter: `<b>${p.sector}</b><br/>RS-Ratio: ${p.rs_ratio}<br/>RS-Momentum: ${p.rs_momentum}<br/>${p.label}<br/>${absTrendText(p)}<br/>點擊查看深度分析` },
         z: 3,
       })
@@ -120,8 +151,12 @@ const option = computed(() => {
     value: [x, y], symbolSize: 0, silent: true,
     label: { show: true, formatter: text, color, fontWeight: 'bold', fontSize: 12, align, verticalAlign: vAlign },
   })
+  // 象限底色、中軸線、角落標籤掛在同一個 series，且明確宣告 blur 保持原樣 ——
+  // 否則 hover 任一板塊時 focus:'series' 會把象限背景與角落標籤一起淡掉。
   series.push({
     type: 'scatter', z: 1, silent: true,
+    markArea: QUAD_AREAS, markLine: CENTER_LINES,
+    blur: { itemStyle: { opacity: 1 }, label: { show: true } },
     data: [
       cornerLabel(b.xMax, b.yMax, '領先 Leading', '#22c55e', 'right', 'top'),
       cornerLabel(b.xMax, b.yMin, '轉弱 Weakening', '#eab308', 'right', 'bottom'),
@@ -129,10 +164,6 @@ const option = computed(() => {
       cornerLabel(b.xMin, b.yMax, '改善 Improving', '#3b82f6', 'left', 'top'),
     ],
   })
-
-  if (series.length) {
-    series[0] = { ...series[0], markArea: QUAD_AREAS, markLine: CENTER_LINES }
-  }
 
   return {
     backgroundColor: 'transparent',
@@ -156,12 +187,35 @@ const option = computed(() => {
   border-radius: var(--radius-md);
   padding: 8px;
 }
+.rrg-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 4px 0 2px;
+}
+.rrg-btn {
+  flex: none;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  cursor: pointer;
+}
+.rrg-btn:hover {
+  background: var(--color-bg-raised);
+  color: var(--color-text-primary);
+  border-color: var(--color-accent);
+}
 .rrg-legend {
   display: flex;
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
-  margin: 4px 0 2px;
+  margin: 0;
   padding-left: 4px;
   font-size: 12px;
   color: #94a3b8;
