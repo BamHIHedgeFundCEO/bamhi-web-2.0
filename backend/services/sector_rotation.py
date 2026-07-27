@@ -310,6 +310,21 @@ def rrg_quadrant(rs_ratio: float, rs_momentum: float) -> dict:
     return {"label": "🔵 改善 Improving", "color": "#3b82f6", "desc": "弱勢但動能回升，潛在輪動候選"}
 
 
+def _abs_trend_up(df: pd.DataFrame) -> bool | None:
+    """絕對趨勢閘門：Close > MA60 > MA200 才算真多頭。
+
+    RRG 兩軸都建在 sector_index / SPY 之上(見 rs_raw)，絕對價格資訊已被消掉，
+    所以「跌 10% 但大盤跌 30%」的板塊照樣落在領先象限。本旗標把那一維補回去，
+    讓前端能把「相對領先但絕對在跌」的抗跌陷阱畫成空心點。
+    MA200 需 200 個交易日；區間不足時回 None，前端退回原本樣式。
+    """
+    v = df.dropna(subset=["Sector_Close", "MA60", "MA200"])
+    if v.empty:
+        return None
+    last = v.iloc[-1]
+    return bool(last["Sector_Close"] > last["MA60"] > last["MA200"])
+
+
 def _signal_from_df(df: pd.DataFrame) -> dict:
     """從板塊 df 推導首頁訊號，以 RRG 四象限為主色，MA 排列判斷趨勢結構。"""
     valid_rrg = df.dropna(subset=["RS_Ratio", "RS_Momentum"])
@@ -409,9 +424,11 @@ def get_overview(period: str):
             rr, rm = _f(last["RS_Ratio"]), _f(last["RS_Momentum"])
             if rr is not None and rm is not None:
                 q = rrg_quadrant(rr, rm)
-                rrg.append({"sector": name, "short": short, "rs_ratio": _f(rr, 2), "rs_momentum": _f(rm, 2), **q})
+                abs_up = _abs_trend_up(df)
+                rrg.append({"sector": name, "short": short, "rs_ratio": _f(rr, 2), "rs_momentum": _f(rm, 2),
+                            "abs_up": abs_up, **q})
                 tail = v.iloc[-20:]
-                trail.append({"sector": name, "short": short, "color": q["color"],
+                trail.append({"sector": name, "short": short, "color": q["color"], "abs_up": abs_up,
                               "points": [[_f(r, 3), _f(m, 3)] for r, m in zip(tail["RS_Ratio"], tail["RS_Momentum"])]})
         if "Sector_Close" in df:
             close_series[short] = df["Sector_Close"]

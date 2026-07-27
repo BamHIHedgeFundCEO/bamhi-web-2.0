@@ -6,6 +6,10 @@
 <template>
   <div class="rrg-wrap">
     <VChart :option="option" :style="{ height: height + 'px', width: '100%' }" autoresize @click="onClick" />
+    <p v-if="hasAbsTrend" class="rrg-legend">
+      <span class="dot solid"></span>實心＝絕對趨勢多頭（Close &gt; MA60 &gt; MA200）
+      <span class="dot hollow"></span>空心＝非多頭，相對位置可能只是抗跌
+    </p>
   </div>
 </template>
 
@@ -27,6 +31,9 @@ function onClick(params) {
   if (sector) emit('select', sector)
 }
 
+// 舊版預算 JSON 沒有 abs_up 欄位 → 不顯示圖例，避免說明與實際樣式不符
+const hasAbsTrend = computed(() => props.points.some((p) => p.abs_up === true || p.abs_up === false))
+
 // 動態軸範圍 (留較大 padding 避免標籤被切)
 const bounds = computed(() => {
   const rs = []
@@ -45,6 +52,20 @@ const bounds = computed(() => {
     yMin: +(Math.min(...ms, 99) - pad).toFixed(1), yMax: +(Math.max(...ms, 101) + pad).toFixed(1),
   }
 })
+
+// 絕對趨勢樣式：實心＝Close > MA60 > MA200(真多頭)；空心＝非多頭。
+// RRG 兩軸已除以 SPY，只看象限無法分辨「強勢」與「抗跌但絕對在跌」——空心點就是後者。
+// abs_up 為 null/undefined(區間不足算 MA200、或舊版預算 JSON)時退回實心，維持原樣式。
+function markStyle(p) {
+  return p.abs_up === false
+    ? { color: 'transparent', borderColor: p.color, borderWidth: 2.5 }
+    : { color: p.color, borderColor: '#fff', borderWidth: 1.5 }
+}
+function absTrendText(p) {
+  if (p.abs_up === true) return '絕對趨勢：<b>多頭</b>（Close &gt; MA60 &gt; MA200）'
+  if (p.abs_up === false) return '絕對趨勢：<b style="color:#f87171">非多頭</b> — 相對位置可能只是抗跌'
+  return ''
+}
 
 const QUAD_AREAS = {
   silent: true,
@@ -69,23 +90,26 @@ const option = computed(() => {
     for (const p of props.points) {
       const tail = p.points.slice(-props.trailDays)
       if (tail.length < 2) continue
-      series.push({ type: 'line', showSymbol: false, data: tail, lineStyle: { color: p.color, width: 2.5 }, silent: true, z: 2 })
+      series.push({
+        type: 'line', showSymbol: false, data: tail, silent: true, z: 2,
+        lineStyle: { color: p.color, width: 2.5, type: p.abs_up === false ? 'dashed' : 'solid' },
+      })
       series.push({
         type: 'scatter', data: [{ value: tail[tail.length - 1], _sector: p.sector }], symbolSize: 13,
-        itemStyle: { color: p.color, borderColor: '#fff', borderWidth: 1.5 },
+        itemStyle: markStyle(p),
         label: { show: true, formatter: p.short, position: 'right', color: p.color, fontSize: 10 },
         name: p.sector, z: 3,
-        tooltip: { formatter: `<b>${p.sector}</b><br/>點擊查看深度分析` },
+        tooltip: { formatter: `<b>${p.sector}</b><br/>${absTrendText(p)}<br/>點擊查看深度分析` },
       })
     }
   } else {
     for (const p of props.points) {
       series.push({
         type: 'scatter', data: [{ value: [p.rs_ratio, p.rs_momentum], _sector: p.sector }], symbolSize: 14,
-        itemStyle: { color: p.color, borderColor: '#fff', borderWidth: 1.5 },
+        itemStyle: markStyle(p),
         label: { show: true, formatter: p.short, position: 'right', color: p.color, fontSize: 10 },
         name: p.sector,
-        tooltip: { formatter: `<b>${p.sector}</b><br/>RS-Ratio: ${p.rs_ratio}<br/>RS-Momentum: ${p.rs_momentum}<br/>${p.label}<br/>點擊查看深度分析` },
+        tooltip: { formatter: `<b>${p.sector}</b><br/>RS-Ratio: ${p.rs_ratio}<br/>RS-Momentum: ${p.rs_momentum}<br/>${p.label}<br/>${absTrendText(p)}<br/>點擊查看深度分析` },
         z: 3,
       })
     }
@@ -131,5 +155,32 @@ const option = computed(() => {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: 8px;
+}
+.rrg-legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 4px 0 2px;
+  padding-left: 4px;
+  font-size: 12px;
+  color: #94a3b8;
+}
+.rrg-legend .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+}
+.rrg-legend .dot:not(:first-child) {
+  margin-left: 12px;
+}
+.rrg-legend .dot.solid {
+  background: #94a3b8;
+  border: 1.5px solid #fff;
+}
+.rrg-legend .dot.hollow {
+  background: transparent;
+  border: 2px solid #94a3b8;
 }
 </style>

@@ -16,6 +16,7 @@
 | 部署（Vercel/Render/Supabase 設定） | `DEPLOY.md` |
 | 換新電腦 | `SETUP.md` |
 | 選股邏輯 / 戰報篩選規則 | `SCREENING_PLAYBOOK.md` |
+| RRG 公式 / 象限判讀 / 已知限制 | `docs/RRG_GUIDE.md` |
 
 ## 架構
 
