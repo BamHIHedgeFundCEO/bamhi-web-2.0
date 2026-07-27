@@ -11,7 +11,7 @@
         <span class="dot solid"></span>實心＝絕對趨勢多頭（Close &gt; MA60 &gt; MA200）
         <span class="dot hollow"></span>空心＝非多頭，相對位置可能只是抗跌
       </p>
-      <span v-else class="rrg-legend">滑過任一板塊可單獨highlight該條軌跡</span>
+      <span v-else class="rrg-legend">標籤重疊時會自動隱藏，滑過該點可看完整資訊</span>
       <button class="rrg-btn" title="匯出 PNG（2 倍解析度）" @click="downloadPng">📷 下載圖檔</button>
     </div>
   </div>
@@ -112,21 +112,21 @@ const option = computed(() => {
     for (const p of props.points) {
       const tail = p.points.slice(-props.trailDays)
       if (tail.length < 2) continue
-      // 軌跡線與端點合成「同一個 series」：滑過端點時 focus 會把整條軌跡打亮、
-      // 其餘 40 條淡掉。拆成兩個 series 的話 focus 只認得其中一個。
-      const last = tail.length - 1
-      const data = tail.map((v, i) => (i === last
-        ? {
-            value: v, _sector: p.sector, symbolSize: 13, itemStyle: markStyle(p),
-            label: { show: true, formatter: p.short, position: 'right', color: p.color, fontSize: 10 },
-          }
-        : { value: v, _sector: p.sector, symbolSize: 0 }))
+      // 軌跡線與端點必須是兩個 series：把 itemStyle 掛到 line series 的 data item 上，
+      // 符號的填色不吃 color:'transparent'，空心點會被畫成白色實心圓盤。
       series.push({
-        type: 'line', data, name: p.sector, z: 2,
+        type: 'line', showSymbol: false, data: tail, silent: true, z: 2,
         lineStyle: { color: p.color, width: 2.5, opacity: TRAIL_OPACITY },
+        blur: { lineStyle: { opacity: TRAIL_OPACITY } },
+      })
+      series.push({
+        type: 'scatter', data: [{ value: tail[tail.length - 1], _sector: p.sector }], symbolSize: 13,
+        itemStyle: markStyle(p),
+        label: { show: true, formatter: p.short, position: 'right', color: p.color, fontSize: 10 },
+        name: p.sector, z: 3,
         labelLayout: { hideOverlap: true },
-        emphasis: { focus: 'series', lineStyle: { opacity: 1, width: 3 }, label: { fontSize: 12 } },
-        blur: { lineStyle: { opacity: 0.06 }, itemStyle: { opacity: 0.12 }, label: { show: false } },
+        emphasis: { focus: 'series', label: { fontSize: 12 } },
+        blur: { itemStyle: { opacity: 0.15 }, label: { show: false } },
         tooltip: { formatter: `<b>${p.sector}</b><br/>${absTrendText(p)}<br/>點擊查看深度分析` },
       })
     }
