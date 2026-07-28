@@ -37,6 +37,15 @@ BATCH_SLEEP = 2      # seconds between batches
 BATCH_RETRIES = 3    # retry failed batch up to 3x with exponential backoff
 
 
+class StaleDataError(RuntimeError):
+    """新抓到的資料比現有 CSV 還舊 —— 中止寫檔，不要用舊資料蓋掉好資料。
+
+    2026-07-26 的排程跑出這個狀況：job 回報 success，但 Yahoo 回的整批資料
+    只到 07-23（週四），把 07-24（週五）的正確資料覆蓋掉。CSV 當時沒有日期欄位，
+    前端顯示的「更新時間」是檔案 mtime（＝跑批次的時間），所以畫面上完全看不出來。
+    """
+
+
 def update():
     print("   [Market Radar] start...")
     try:
@@ -47,13 +56,40 @@ def update():
         raise
 
 
+def _existing_as_of(path: Path) -> pd.Timestamp | None:
+    """讀現有 CSV 的 as_of。舊格式沒有這欄 → None（第一次跑不擋）。"""
+    if not path.exists():
+        return None
+    try:
+        col = pd.read_csv(path, usecols=["as_of"])["as_of"]
+    except (ValueError, KeyError, pd.errors.EmptyDataError):
+        return None
+    parsed = pd.to_datetime(col, errors="coerce").dropna()
+    return parsed.max() if not parsed.empty else None
+
+
 def _run():
     universe = _build_universe()
     all_tickers = universe["ticker"].tolist()
     print(f"      Universe: {len(all_tickers)} tickers")
 
     print(f"      downloading {len(all_tickers) + 1} tickers x {DAYS} days...")
-    close, volume = _fetch_prices(all_tickers + ["SPY"])
+    close, volume, failed_batches = _fetch_prices(all_tickers + ["SPY"])
+
+    if close.empty:
+        raise StaleDataError("下載結果為空，不寫檔")
+
+    # 資料日期閘門：拿到的最後一根 bar 比現有 CSV 舊就中止，讓 job 以非零碼結束。
+    as_of = pd.Timestamp(close.index[-1]).normalize()
+    prev_as_of = _existing_as_of(DATA_DIR / "mr_kings.csv")
+    print(f"      as_of: {as_of.date()}  (現有 CSV: {prev_as_of.date() if prev_as_of is not None else '無'})")
+    if prev_as_of is not None and as_of < prev_as_of:
+        raise StaleDataError(
+            f"新資料 {as_of.date()} 比現有 CSV {prev_as_of.date()} 還舊"
+            f"（{failed_batches} 個 batch 下載失敗）—— 中止寫檔，保留原資料"
+        )
+    if failed_batches:
+        print(f"      [warn] {failed_batches} 個 batch 下載失敗，本次資料可能不完整")
 
     spy = close["SPY"].copy() if "SPY" in close.columns else None
     close = close.drop(columns=["SPY"], errors="ignore")
@@ -88,6 +124,10 @@ def _run():
 
     kings["Is_New"] = kings["ticker"].apply(lambda t: t not in prev_kings) if prev_kings is not None else False
     stars["Is_New"] = stars["ticker"].apply(lambda t: t not in prev_stars) if prev_stars is not None else False
+
+    # 資料日期寫進檔案本身，前端才能顯示「資料是哪一天的」而不是「批次何時跑的」
+    kings["as_of"] = as_of.strftime("%Y-%m-%d")
+    stars["as_of"] = as_of.strftime("%Y-%m-%d")
 
     kings.to_csv(DATA_DIR / "mr_kings.csv", index=False)
     print(f"      Kings: {len(kings)} (new: {int(kings['Is_New'].sum())})")
@@ -157,8 +197,10 @@ def _download_batch(batch: list) -> tuple[pd.DataFrame, pd.DataFrame]:
 
 
 def _fetch_prices(tickers: list) -> tuple:
+    """回傳 (close, volume, failed_batches)。failed_batches 供 _run 判斷資料完整度。"""
     all_close = {}
     all_vol = {}
+    failed_batches = 0
 
     batches = [
         [t for t in tickers[i : i + BATCH] if t]
@@ -184,6 +226,7 @@ def _fetch_prices(tickers: list) -> tuple:
 
         if close_df.empty:
             print(f"      [warn] batch {idx} gave up after {BATCH_RETRIES} attempts")
+            failed_batches += 1
             continue
 
         for t in close_df.columns:
@@ -193,7 +236,7 @@ def _fetch_prices(tickers: list) -> tuple:
                     all_vol[t] = vol_df[t].ffill()
 
     if not all_close:
-        return pd.DataFrame(), pd.DataFrame()
+        return pd.DataFrame(), pd.DataFrame(), failed_batches
 
     close = pd.DataFrame(all_close).ffill()
     volume = pd.DataFrame(all_vol).ffill()
@@ -206,7 +249,7 @@ def _fetch_prices(tickers: list) -> tuple:
     close = close[close.index < cutoff]
     volume = volume[volume.index < cutoff]
 
-    return close, volume
+    return close, volume, failed_batches
 
 
 def _liquidity_filter(close: pd.DataFrame, volume: pd.DataFrame) -> list:

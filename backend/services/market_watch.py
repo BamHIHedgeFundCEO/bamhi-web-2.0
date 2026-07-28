@@ -31,6 +31,19 @@ def _cached(path: str) -> dict | None:
     return None
 
 
+def _as_of(df: pd.DataFrame) -> str:
+    """資料本身的日期（pipeline 寫入的最後一根 bar）。
+
+    不要用檔案 mtime 當資料日期 —— mtime 是「批次何時跑的」。2026-07-26 的排程
+    成功跑完但抓到的是 07-23 的資料，畫面上卻顯示 07-26，因此完全看不出資料倒退。
+    舊格式沒有 as_of 欄位時回空字串，前端會退回顯示批次時間。
+    """
+    if "as_of" not in df.columns:
+        return ""
+    vals = df["as_of"].dropna().astype(str)
+    return vals.iloc[0] if not vals.empty else ""
+
+
 def get_kings() -> dict:
     path = os.path.join(DATA_DIR, "mr_kings.csv")
     if not os.path.exists(path):
@@ -45,7 +58,8 @@ def get_kings() -> dict:
         float_cols = df.select_dtypes("float64").columns
         df[float_cols] = df[float_cols].astype("float32")
         items = df.where(pd.notnull(df), None).to_dict(orient="records")
-        result = {"items": items, "total": len(items), "updated_at": _mtime_str(path)}
+        result = {"items": items, "total": len(items),
+                  "as_of": _as_of(df), "updated_at": _mtime_str(path)}
         _FILE_CACHE[path] = {"mtime": _mtime_float(path), "data": result}
         return result
     except Exception as e:
@@ -66,7 +80,8 @@ def get_rising_stars() -> dict:
         float_cols = df.select_dtypes("float64").columns
         df[float_cols] = df[float_cols].astype("float32")
         items = df.where(pd.notnull(df), None).to_dict(orient="records")
-        result = {"items": items, "total": len(items), "updated_at": _mtime_str(path)}
+        result = {"items": items, "total": len(items),
+                  "as_of": _as_of(df), "updated_at": _mtime_str(path)}
         _FILE_CACHE[path] = {"mtime": _mtime_float(path), "data": result}
         return result
     except Exception as e:

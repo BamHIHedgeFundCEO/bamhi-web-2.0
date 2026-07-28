@@ -57,7 +57,7 @@
           <button class="btn-dl" @click="dlImg(kingsExport, `BamHI_Kings_${today()}.png`)">🖼️ 圖片</button>
         </div>
         <div ref="kingsExport" class="export-region">
-          <p class="meta">更新：{{ kings.updated_at || '—' }}　共 {{ kings.total }} 檔（RS Rank ≥ 80，每 Sub_Industry 取前 3）</p>
+          <p class="meta">收盤日：{{ kings.as_of || '—' }}　共 {{ kings.total }} 檔（RS Rank ≥ 80，每 Sub_Industry 取前 3）<span class="meta-sub">批次更新：{{ kings.updated_at || '—' }}</span></p>
           <p class="hint">✅ 買點 = RSI14 介於 30–60（已降溫、未破壞）＋ 相對強勢線（個股÷SPY）&gt; 其 50 日均線（回調中仍跑贏大盤）</p>
           <details class="explain">
             <summary>📖 使用方法・條件・邏輯</summary>
@@ -109,7 +109,7 @@
           <button class="btn-dl" @click="dlImg(starsExport, `BamHI_RisingStars_${today()}.png`)">🖼️ 圖片</button>
         </div>
         <div ref="starsExport" class="export-region">
-          <p class="meta">更新：{{ stars.updated_at || '—' }}　共 {{ stars.total }} 檔</p>
+          <p class="meta">收盤日：{{ stars.as_of || '—' }}　共 {{ stars.total }} 檔<span class="meta-sub">批次更新：{{ stars.updated_at || '—' }}</span></p>
           <p class="hint">🚀 入選門檻：20R&gt;60R&gt;120R（動能多頭排列）+ 加速度≥30 + 20R≥75</p>
           <p class="hint">✓ 追動能：RSI 55–75 + 加速度&gt;40　｜　✓ 等回調：RSI 30–55 + 加速度&gt;40（以 55 切開，互斥）</p>
           <details class="explain">
@@ -416,6 +416,7 @@ const heatOption = computed(() => {
 .btn-dl:hover { color: var(--color-text-primary); border-color: var(--color-accent-cyan); }
 .export-region { background: var(--color-bg-base, #0a0e1a); padding: 12px; border-radius: var(--radius-md); }
 .meta { color: var(--color-text-muted); font-size: 13px; margin: 0 0 8px; }
+.meta-sub { opacity: 0.65; font-size: 12px; margin-left: 10px; }
 .hint { color: var(--color-text-secondary); font-size: 12px; margin: 0 0 16px; }
 .explain { margin: 0 0 16px; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 8px 14px; }
 .explain summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--color-text-secondary); }
