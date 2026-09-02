@@ -1,70 +1,73 @@
 ticker,sector,sub_industry,Rank,20R,60R,120R,RSI14,OffHigh,Pullback_Buy,Price,MktCap,Is_New,as_of
-MRNA,"Consumer, Non-cyclical",Biotechnology,99.8,100.0,99.9,99.6,64.1,-19.5,False,140.34,56028763200.21451,False,2026-08-31
-TEAM,Technology,Software,99.5,99.7,99.6,99.2,80.1,0.0,False,194.17,49151963245.03899,False,2026-08-31
-QMCO,BamHI,純血量子計算 (Pure Quantum),99.4,99.8,98.6,100.0,66.9,-6.8,False,24.33,958845321.3232555,False,2026-08-31
-RPD,BamHI,資安 (Cybersecurity),98.4,97.1,99.4,98.0,62.3,-35.3,False,13.46,907212616.9711304,False,2026-08-31
-PAYC,Technology,Software,98.1,98.9,99.5,96.2,81.1,0.0,False,239.1,10776624377.99533,False,2026-08-31
-ESTC,Technology,Software,97.6,98.8,98.1,96.5,73.2,-2.4,False,97.55,10254513192.45256,False,2026-08-31
-MAN,"Consumer, Non-cyclical",Commercial Services,97.4,89.5,99.7,99.0,75.2,0.0,False,62.95,2927637214.382286,False,2026-08-31
-NIQ,"Consumer, Non-cyclical",Commercial Services,97.3,99.6,99.8,93.7,80.5,-0.9,False,19.06,5621858610.316574,False,2026-08-31
-QLYS,BamHI,資安 (Cybersecurity),97.2,92.6,99.3,97.3,61.6,-5.0,False,186.14,6439513465.024887,False,2026-08-31
-BRZE,BamHI,AI 應用軟體 (AI Apps),97.0,97.2,97.6,96.3,70.6,-5.9,False,34.04,3833982115.8773727,False,2026-08-31
-OKTA,Technology,Computers,96.8,94.1,96.4,98.5,67.6,0.0,False,173.04,30251012207.395508,False,2026-08-31
-CRL,"Consumer, Non-cyclical",Healthcare-Services,96.7,95.1,98.7,95.4,64.3,-3.5,False,288.24,13760251999.080078,False,2026-08-31
-RHI,"Consumer, Non-cyclical",Commercial Services,96.3,91.4,97.4,97.7,67.7,0.0,False,45.34,4641085297.139175,False,2026-08-31
-GPUS,BamHI,加密貨幣(Crypto),96.3,99.9,96.3,94.5,63.8,-55.5,False,0.28,97416714.28482056,False,2026-08-31
-SN,"Consumer, Cyclical",Home Furnishings,96.0,92.4,98.7,95.2,72.3,-0.2,False,192.49,27241258531.10466,False,2026-08-31
-HALO,"Consumer, Non-cyclical",Biotechnology,95.8,96.0,97.9,93.6,68.9,-2.6,False,106.49,12086401777.542114,False,2026-08-31
-MPC,Energy,Oil&Gas,95.7,93.9,96.6,95.7,73.3,0.0,False,373.32,104837502579.982,False,2026-08-31
-ZBRA,Technology,Office/Business Equip,95.4,93.2,97.1,94.7,57.2,-7.7,True,353.55,16726683265.477295,False,2026-08-31
-DINO,Energy,Oil&Gas,95.3,88.6,96.7,97.2,69.4,0.0,False,101.61,18064617005.40065,False,2026-08-31
-ZETA,BamHI,AI 應用軟體 (AI Apps),95.3,97.8,94.3,94.9,68.7,0.0,False,30.97,7773891174.492636,False,2026-08-31
-MTW,BamHI,資料中心基建(Data_Center_Infra),95.2,97.5,98.8,90.5,64.2,-6.9,False,19.42,700323440.7313099,False,2026-08-31
-PRGO,"Consumer, Non-cyclical",Cosmetics/Personal Care,95.2,98.7,96.2,92.5,72.2,-34.0,False,14.64,2031581794.4426394,False,2026-08-31
-NTRA,"Consumer, Non-cyclical",Healthcare-Products,95.0,91.6,97.3,94.3,59.1,-4.9,True,321.96,46408655741.49933,False,2026-08-31
-RGEN,"Consumer, Non-cyclical",Healthcare-Products,94.4,94.6,97.0,91.6,68.4,-0.6,False,180.98,10213718447.461014,False,2026-08-31
-VLO,Energy,Oil&Gas,94.2,89.8,95.8,94.8,70.8,0.0,False,358.92,103342928168.33347,False,2026-08-31
-CAI,"Consumer, Non-cyclical",Healthcare-Products,94.0,99.4,97.6,87.7,64.6,-33.6,False,25.49,7205530850.849524,False,2026-08-31
-RVMD,"Consumer, Non-cyclical",Biotechnology,94.0,86.0,93.9,98.1,52.3,-7.0,True,205.57,44061139018.10681,False,2026-08-31
-ELF,"Consumer, Non-cyclical",Cosmetics/Personal Care,93.9,96.9,99.7,86.7,72.7,-25.6,False,109.05,6434822143.878113,False,2026-08-31
-PANW,Communications,Internet,93.9,81.1,95.3,98.8,59.0,-3.5,True,382.13,311435953979.4922,False,2026-08-31
-CRWD,Technology,Computers,93.6,87.6,92.1,98.1,63.0,0.0,False,231.0,236528948502.0,False,2026-08-31
-IQV,"Consumer, Non-cyclical",Healthcare-Services,92.5,84.9,96.0,92.8,71.5,-0.5,False,261.19,42991874401.85547,False,2026-08-31
-ABNB,Communications,Internet,92.1,93.5,95.5,87.9,59.3,-3.8,True,183.22,108023889375.74908,False,2026-08-31
-TENB,BamHI,資安 (Cybersecurity),91.6,79.1,93.1,96.5,58.5,-10.6,True,38.15,4201840519.510277,False,2026-08-31
-DASH,Communications,Internet,91.5,88.9,97.2,87.1,66.0,-17.7,False,231.74,100411937238.12411,True,2026-08-31
-VIRT,Financial,Diversified Finan Serv,90.9,84.2,91.3,94.0,61.0,-3.4,False,65.64,5796056450.025543,False,2026-08-31
-RBRK,Technology,Computers,90.9,95.0,85.2,94.6,51.0,-13.1,True,93.04,19150289969.08168,False,2026-08-31
-ASAN,BamHI,AI 應用軟體 (AI Apps),90.5,92.8,91.1,88.9,66.3,-32.5,False,10.26,2365030877.7795124,True,2026-08-31
-CORT,"Consumer, Non-cyclical",Pharmaceuticals,90.3,54.9,98.3,99.9,53.0,-8.3,True,113.35,12252953135.004936,False,2026-08-31
-FDS,Communications,Media,89.5,89.5,87.4,91.7,68.2,-15.3,False,313.55,11151575573.500305,False,2026-08-31
-ARGX,BamHI,醫療生技 (Biotech & Pharma),89.2,94.9,86.9,88.6,64.1,-2.6,False,1031.66,64156637955.41858,False,2026-08-31
-LPG,BamHI,天然氣供應鏈 (Natural Gas & LNG),88.8,78.8,90.2,92.4,61.5,-2.5,False,50.04,2140845396.4087143,False,2026-08-31
-TPG,Financial,Diversified Finan Serv,88.8,91.1,92.9,83.5,69.2,-19.4,False,54.12,9022616758.449146,False,2026-08-31
-BWLP,BamHI,天然氣供應鏈 (Natural Gas & LNG),88.4,82.6,87.7,92.1,61.7,-2.2,False,24.25,3681504147.0,False,2026-08-31
-KMX,"Consumer, Cyclical",Retail,87.7,70.2,93.3,91.0,57.0,-4.5,True,61.33,8703407777.526978,False,2026-08-31
-TGT,"Consumer, Cyclical",Retail,87.7,78.2,93.4,86.8,60.0,-5.3,True,160.88,73086412463.90002,False,2026-08-31
-JHX,Industrial,Building Materials,87.5,75.8,90.8,90.0,55.8,-4.4,True,29.71,17247322586.99579,False,2026-08-31
-ERO,BamHI,銅 (Copper),87.0,97.4,84.9,83.8,58.5,-8.1,True,37.13,3872756874.6972313,False,2026-08-31
-OWL,Financial,Diversified Finan Serv,86.2,84.7,86.7,86.5,66.2,-30.8,False,12.24,8371041058.505745,True,2026-08-31
-SSRM,BamHI,黃金礦 (Gold Miners),86.1,98.5,91.6,74.4,64.9,-4.1,False,37.61,7669029348.776367,False,2026-08-31
-MRK,"Consumer, Non-cyclical",Pharmaceuticals,85.5,89.0,88.1,81.2,61.5,-5.6,False,147.76,364549267678.3014,False,2026-08-31
-NWL,"Consumer, Cyclical",Housewares,85.5,44.5,99.2,92.2,59.3,-1.7,True,6.25,2661875000.0,False,2026-08-31
-SJM,"Consumer, Non-cyclical",Food,85.1,85.9,93.4,76.3,69.2,-0.9,False,131.16,14010929073.47818,False,2026-08-31
-GPC,"Consumer, Cyclical",Retail,84.1,71.2,95.7,79.0,57.3,-7.3,True,135.67,18703433115.431244,False,2026-08-31
-OSCR,BamHI,醫療保險 (Managed Care),84.0,41.5,90.7,98.6,47.9,-8.5,False,29.96,9247003917.427063,False,2026-08-31
-EXPD,Industrial,Transportation,84.0,83.4,81.8,86.3,65.8,-0.7,False,189.65,24652720668.900208,False,2026-08-31
-ASH,Basic Materials,Chemicals,83.9,61.5,92.0,86.9,55.0,-4.1,True,73.33,3358027905.950165,False,2026-08-31
-STT,Financial,Banks,83.7,68.1,81.6,93.8,57.6,-1.2,True,191.38,52572425127.01721,False,2026-08-31
-DXCM,"Consumer, Non-cyclical",Pharmaceuticals,83.7,68.5,89.3,85.7,64.0,-1.4,False,91.06,34362470339.60907,False,2026-08-31
-CRBG,Financial,Insurance,83.2,67.0,88.5,86.2,52.1,-5.7,True,32.54,14505438273.996933,False,2026-08-31
-LH,"Consumer, Non-cyclical",Healthcare-Services,83.2,77.9,91.4,77.6,66.6,-1.8,False,332.66,26978726296.99707,True,2026-08-31
-BX,Financial,Private Equity,83.0,73.5,86.4,84.3,58.7,-21.0,True,143.24,107519545452.6669,False,2026-08-31
-EQH,Financial,Insurance,82.5,68.8,89.4,82.4,53.3,-5.6,True,50.13,13673749193.655293,False,2026-08-31
-HOG,"Consumer, Cyclical",Leisure Time,82.4,79.0,75.1,91.4,54.9,-8.2,True,27.6,2872401232.900511,False,2026-08-31
-KNTK,BamHI,天然氣供應鏈 (Natural Gas & LNG),82.4,83.2,85.9,78.5,63.0,-0.5,False,54.83,4410649427.584183,True,2026-08-31
-ANET,Communications,Telecommunications,82.4,72.0,80.9,89.0,54.8,-7.0,True,195.69,246809054446.28174,True,2026-08-31
-TGB,BamHI,銅 (Copper),82.2,96.2,81.9,75.4,57.4,-6.6,True,9.04,3308850780.7573185,False,2026-08-31
-COTY,"Consumer, Non-cyclical",Cosmetics/Personal Care,81.7,61.1,98.5,75.2,56.0,-36.0,True,2.85,2509329264.332177,False,2026-08-31
-LW,"Consumer, Non-cyclical",Food,81.5,66.4,92.7,77.9,61.6,-15.6,False,54.53,7496956437.913879,False,2026-08-31
-AJG,Financial,Insurance,80.7,71.9,88.6,77.2,55.1,-14.8,True,262.15,67199791585.4187,False,2026-08-31
+MRNA,"Consumer, Non-cyclical",Biotechnology,99.9,100.0,100.0,99.7,67.5,-11.5,False,154.27,61590122301.74974,False,2026-09-01
+QMCO,BamHI,純血量子計算 (Pure Quantum),99.9,99.9,99.7,100.0,68.6,-7.4,False,24.17,952539727.1767445,False,2026-09-01
+TEAM,Technology,Software,99.6,99.7,99.6,99.6,72.9,-3.7,False,187.03,47344552260.44266,False,2026-09-01
+PAYC,Technology,Software,98.5,99.1,99.5,97.3,79.4,-0.5,False,237.95,10724791603.502335,False,2026-09-01
+RNG,Technology,Software,97.6,94.7,99.4,97.1,74.3,0.0,False,70.77,5909730804.4153595,True,2026-09-01
+NIQ,"Consumer, Non-cyclical",Commercial Services,97.5,99.7,99.9,93.9,76.6,-2.7,False,18.72,5521573571.549881,False,2026-09-01
+MAN,"Consumer, Non-cyclical",Commercial Services,97.4,89.3,99.7,99.1,65.6,-2.8,False,61.19,2845784193.111885,False,2026-09-01
+DINO,Energy,Oil&Gas,97.0,95.3,97.5,97.5,72.1,0.0,False,103.97,18484186997.5513,False,2026-09-01
+ZETA,BamHI,AI 應用軟體 (AI Apps),96.8,98.1,96.8,96.1,70.4,0.0,False,31.56,7921989239.744272,False,2026-09-01
+HALO,"Consumer, Non-cyclical",Biotechnology,96.8,97.9,98.2,94.7,72.3,-1.5,False,107.72,12226004698.547363,False,2026-09-01
+BRZE,BamHI,AI 應用軟體 (AI Apps),96.6,97.1,96.7,96.2,63.8,-9.4,False,32.78,3692065972.3301697,False,2026-09-01
+CRL,"Consumer, Non-cyclical",Healthcare-Services,96.6,95.7,98.6,95.0,57.9,-5.4,True,282.34,13478592945.65503,False,2026-09-01
+MPC,Energy,Oil&Gas,96.5,96.4,97.6,95.5,76.6,0.0,False,383.0,107555884229.0,False,2026-09-01
+NTRA,"Consumer, Non-cyclical",Healthcare-Products,95.9,94.4,97.8,94.9,58.2,-5.3,True,320.76,46235685376.85791,False,2026-09-01
+MTW,BamHI,資料中心基建(Data_Center_Infra),95.9,98.4,99.0,91.7,60.0,-9.2,False,18.96,683734899.2242813,False,2026-09-01
+OKTA,Technology,Computers,95.9,90.7,96.1,98.3,64.0,-3.8,False,166.43,29095445766.61328,False,2026-09-01
+QLYS,BamHI,資安 (Cybersecurity),95.8,86.4,99.1,97.2,52.5,-9.6,True,177.01,6123660936.973984,False,2026-09-01
+RPD,BamHI,資安 (Cybersecurity),95.6,88.9,98.9,95.7,50.9,-42.3,True,12.01,809481701.8267822,False,2026-09-01
+VLO,Energy,Oil&Gas,95.3,94.9,96.6,94.1,72.1,0.0,False,361.99,104226858795.59839,False,2026-09-01
+PRGO,"Consumer, Non-cyclical",Cosmetics/Personal Care,95.1,99.2,94.7,93.5,68.9,-34.2,False,14.43,2002440247.6990128,False,2026-09-01
+RVMD,"Consumer, Non-cyclical",Biotechnology,94.8,84.4,96.3,98.4,55.1,-5.1,True,209.87,44982782999.09546,False,2026-09-01
+RHI,"Consumer, Non-cyclical",Commercial Services,94.4,82.9,96.5,98.1,57.3,-3.9,True,43.55,4457857531.304123,False,2026-09-01
+CORT,"Consumer, Non-cyclical",Pharmaceuticals,94.1,73.3,98.7,99.9,52.7,-8.2,True,113.38,12256195954.958885,False,2026-09-01
+IQV,"Consumer, Non-cyclical",Healthcare-Services,94.0,91.6,96.4,92.9,67.0,-1.5,False,258.35,42524411004.63867,False,2026-09-01
+GPUS,BamHI,加密貨幣(Crypto),93.9,99.8,98.7,86.0,57.3,-62.0,True,0.24,83226777.9476738,False,2026-09-01
+CAI,"Consumer, Non-cyclical",Healthcare-Products,93.7,99.5,98.2,86.3,60.2,-32.7,False,24.78,7004827816.201429,False,2026-09-01
+ELF,"Consumer, Non-cyclical",Cosmetics/Personal Care,93.1,95.6,99.8,85.2,67.0,-28.0,False,105.54,6227703951.863434,False,2026-09-01
+RGEN,"Consumer, Non-cyclical",Healthcare-Products,93.1,91.8,95.9,91.1,53.6,-6.6,True,170.02,9595184523.538986,False,2026-09-01
+ABNB,Communications,Internet,92.7,96.0,95.1,88.7,60.9,-4.2,False,182.54,107625917241.12637,False,2026-09-01
+LPG,BamHI,天然氣供應鏈 (Natural Gas & LNG),92.7,94.6,89.1,95.4,63.8,-0.9,False,50.86,2175927181.772476,False,2026-09-01
+P,Technology,Computers,92.4,89.5,93.0,93.2,46.5,-20.6,True,93.78,31172934117.19226,True,2026-09-01
+VIRT,Financial,Diversified Finan Serv,92.3,93.2,89.3,94.8,59.7,-3.8,True,65.32,5767800260.012772,False,2026-09-01
+SN,"Consumer, Cyclical",Home Furnishings,91.7,75.4,97.3,94.2,47.0,-9.3,True,174.92,24754744435.548447,False,2026-09-01
+TGT,"Consumer, Cyclical",Retail,91.6,88.8,94.4,90.2,63.1,-3.6,False,163.75,74391090520.0,False,2026-09-01
+DASH,Communications,Internet,91.1,89.0,96.9,86.3,60.9,-19.9,False,225.66,97777498868.41608,False,2026-09-01
+BWLP,BamHI,天然氣供應鏈 (Natural Gas & LNG),90.7,91.4,86.0,95.2,62.1,-2.4,False,24.21,3675431423.849579,False,2026-09-01
+HPQ,Technology,Computers,90.5,84.5,88.1,95.9,63.2,0.0,False,31.32,28244092873.875237,True,2026-09-01
+ASAN,BamHI,AI 應用軟體 (AI Apps),89.8,90.1,89.7,89.9,59.1,-35.3,True,9.83,2265911581.823496,False,2026-09-01
+ASH,Basic Materials,Chemicals,89.7,76.4,94.3,91.8,64.4,-1.1,False,75.64,3463810478.849945,False,2026-09-01
+ROKU,Communications,Internet,89.6,78.7,90.9,93.8,58.7,-2.6,True,155.53,23083602067.3945,True,2026-09-01
+KMX,"Consumer, Cyclical",Retail,89.6,79.4,92.8,91.5,55.3,-5.0,True,61.0,8656576856.0,False,2026-09-01
+ERO,BamHI,銅 (Copper),88.6,95.4,94.5,79.3,51.1,-13.8,True,34.82,3631817649.2293625,False,2026-09-01
+MRK,"Consumer, Non-cyclical",Pharmaceuticals,88.3,94.8,88.8,84.4,63.7,-4.2,False,149.86,369730343176.5221,False,2026-09-01
+FDS,Communications,Media,88.0,88.4,83.1,92.7,61.7,-17.5,False,305.44,10863139540.749939,False,2026-09-01
+TPG,Financial,Diversified Finan Serv,87.7,83.8,92.1,85.2,59.6,-21.9,True,52.41,8737534225.171307,False,2026-09-01
+VRNS,BamHI,資安 (Cybersecurity),86.6,54.2,92.9,96.5,48.6,-33.1,False,42.35,4864341364.486809,True,2026-09-01
+ARGX,BamHI,醫療生技 (Biotech & Pharma),86.6,96.1,77.9,90.6,63.6,-2.9,False,1028.51,63960744958.51245,False,2026-09-01
+HUM,"Consumer, Non-cyclical",Healthcare-Services,86.5,85.2,74.5,99.2,57.1,-3.6,True,394.88,47417312609.36963,True,2026-09-01
+SSRM,BamHI,黃金礦 (Gold Miners),86.4,98.9,94.1,72.4,57.2,-8.6,True,35.83,7306071022.329102,False,2026-09-01
+SJM,"Consumer, Non-cyclical",Food,86.1,88.5,91.7,79.4,70.4,-0.3,False,131.42,14038702514.26091,False,2026-09-01
+SEIC,Financial,Diversified Finan Serv,85.9,76.5,87.2,89.4,67.0,-1.6,False,109.54,13146901306.160843,True,2026-09-01
+NWL,"Consumer, Cyclical",Housewares,85.9,50.9,98.8,90.5,51.8,-6.6,True,5.94,2529846024.3701935,False,2026-09-01
+PAG,"Consumer, Cyclical",Retail,85.7,60.9,91.4,92.2,57.7,-2.3,True,216.92,14243590290.927689,True,2026-09-01
+DXCM,"Consumer, Non-cyclical",Pharmaceuticals,85.2,74.6,87.7,88.0,61.0,-2.4,False,90.14,34015299126.777267,False,2026-09-01
+OSCR,BamHI,醫療保險 (Managed Care),84.9,55.6,85.7,98.7,47.3,-8.9,False,29.83,9206880326.452255,False,2026-09-01
+JHX,Industrial,Building Materials,84.8,64.9,90.1,89.5,46.3,-8.1,True,28.57,16585527304.998596,False,2026-09-01
+KNTK,BamHI,天然氣供應鏈 (Natural Gas & LNG),84.8,91.5,87.6,78.6,65.2,-0.1,False,55.03,4426737634.693878,False,2026-09-01
+ZBRA,Technology,Office/Business Equip,83.8,34.1,97.7,94.6,50.4,-10.3,True,343.7,16260674419.522705,False,2026-09-01
+CRBG,Financial,Insurance,83.7,69.0,84.8,90.1,48.6,-6.7,True,32.17,14340501216.506134,False,2026-09-01
+STT,Financial,Banks,82.4,67.2,79.4,93.1,50.5,-3.0,True,187.79,51586242605.03883,False,2026-09-01
+LNG,Energy,Pipelines,82.3,93.1,87.4,71.7,69.7,-0.5,False,294.13,60747892901.00757,True,2026-09-01
+EQH,Financial,Insurance,82.2,70.4,85.9,84.5,48.8,-7.0,True,49.36,13463719412.803024,False,2026-09-01
+ANET,Communications,Telecommunications,82.2,59.9,86.8,88.8,49.7,-10.1,True,189.26,238699369952.3661,False,2026-09-01
+ATKR,BamHI,住宅建材 (Building Materials),82.1,64.0,79.2,94.0,72.1,-0.1,False,93.63,3162123763.740921,True,2026-09-01
+AJG,Financial,Insurance,82.0,78.7,85.1,80.4,56.5,-14.8,True,262.0,67161342000.0,False,2026-09-01
+EXPD,Industrial,Transportation,81.4,74.0,80.0,86.6,60.3,-1.6,False,187.7,24399239352.700104,False,2026-09-01
+IFF,Basic Materials,Chemicals,81.4,79.3,81.9,81.9,58.3,-2.6,True,85.78,21886763514.677643,True,2026-09-01
+FTI,Energy,Oil&Gas Services,80.9,89.7,80.7,76.8,61.5,-1.8,False,78.31,30710392266.847412,True,2026-09-01
+HMY,BamHI,黃金礦 (Gold Miners),80.5,92.5,86.5,68.5,47.9,-24.7,True,19.23,12015576629.36324,True,2026-09-01
+TRGP,Energy,Pipelines,80.5,90.6,73.7,82.1,60.5,-2.0,False,296.06,63484447553.746765,True,2026-09-01
+USFD,"Consumer, Non-cyclical",Food,80.4,83.1,90.0,69.4,53.1,-3.9,True,106.66,23073835707.40677,True,2026-09-01
+MU,Technology,Semiconductors,80.1,76.3,63.4,98.8,50.4,-23.1,False,933.44,1054220745626.7476,True,2026-09-01
