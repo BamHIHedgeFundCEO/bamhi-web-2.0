@@ -22,7 +22,7 @@ IQV,"Consumer, Non-cyclical",Healthcare-Services,94.3,91.7,96.5,93.5,69.6,-1.4,F
 ELF,"Consumer, Non-cyclical",Cosmetics/Personal Care,94.3,90.7,99.6,90.8,69.6,-25.2,False,109.67,6471406813.273132,False,2026-09-04
 HALO,"Consumer, Non-cyclical",Biotechnology,94.2,83.9,98.7,95.0,72.3,-0.5,False,110.19,12506344897.094727,False,2026-09-04
 LPG,BamHI,天然氣供應鏈 (Natural Gas & LNG),94.2,97.2,90.1,96.8,73.4,0.0,False,55.2,2361604023.8405952,False,2026-09-04
-P,Technology,Computers,93.8,89.4,97.2,92.6,53.1,-15.8,True,99.51,33077615493.413544,False,2026-09-04
+P,Technology,Computers,93.8,89.4,97.2,92.6,53.1,-15.8,True,99.51,33159444458.860207,False,2026-09-04
 PRGO,"Consumer, Non-cyclical",Cosmetics/Personal Care,93.8,96.5,93.1,93.1,70.5,-29.5,False,14.92,2070437145.9872532,False,2026-09-04
 VRNS,BamHI,資安 (Cybersecurity),92.9,81.1,94.5,97.2,58.6,-27.2,True,46.09,5293919771.176319,False,2026-09-04
 CNH,Industrial,Machinery-Diversified,92.5,99.2,95.5,86.2,79.2,0.0,False,14.4,23157485300.136124,False,2026-09-04
@@ -41,11 +41,11 @@ MU,Technology,Semiconductors,87.7,95.2,72.9,98.8,60.1,-16.2,False,1016.59,114812
 ROKU,Communications,Internet,87.5,66.7,91.7,93.7,55.0,-2.6,True,155.59,23106768844.60782,False,2026-09-04
 VIRT,Financial,Diversified Finan Serv,87.4,95.1,76.9,94.1,56.6,-4.8,True,64.43,5689212710.487228,False,2026-09-04
 ABNB,Communications,Internet,87.1,69.5,94.9,88.2,56.3,-4.5,True,181.94,107269220422.49817,False,2026-09-04
-NX,BamHI,住宅建材 (Building Materials),87.0,76.7,96.2,82.8,67.1,0.0,False,22.93,1053128251.4661026,False,2026-09-04
+NX,BamHI,住宅建材 (Building Materials),87.0,76.7,96.2,82.8,67.1,0.0,False,22.93,1050794963.4250488,False,2026-09-04
 JHX,Industrial,Building Materials,86.8,62.0,93.9,92.1,59.3,-2.2,True,30.39,17642078055.997192,False,2026-09-04
 TPG,Financial,Diversified Finan Serv,86.7,86.8,88.5,85.0,59.2,-21.6,True,52.65,8777546110.036934,False,2026-09-04
 COTY,"Consumer, Non-cyclical",Cosmetics/Personal Care,86.7,75.7,96.5,82.2,59.3,-34.2,True,2.93,2579766722.117476,False,2026-09-04
-BBY,"Consumer, Cyclical",Retail,86.6,88.4,82.1,90.2,60.3,0.0,False,90.27,19025947756.488754,False,2026-09-04
+BBY,"Consumer, Cyclical",Retail,86.6,88.4,82.1,90.2,60.3,0.0,False,90.27,18932118594.418045,False,2026-09-04
 MRK,"Consumer, Non-cyclical",Pharmaceuticals,86.6,95.9,88.0,80.6,62.3,-3.9,False,150.33,370889916858.06616,False,2026-09-04
 STT,Financial,Banks,86.2,79.4,82.0,93.8,60.5,0.0,False,194.26,53363563359.91814,False,2026-09-04
 ZBRA,Technology,Office/Business Equip,85.9,39.5,99.1,95.9,60.7,-5.3,False,362.74,17278536148.910156,False,2026-09-04
