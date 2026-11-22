@@ -28,9 +28,9 @@ LH,"Consumer, Non-cyclical",Healthcare-Services,93.4,94.4,89.2,97.2,62.4,-1.4,Fa
 ALLE,Industrial,Electronics,92.7,77.8,95.8,97.1,54.2,-4.7,True,183.61,15482258180.985718,False,2026-11-20
 GEHC,"Consumer, Non-cyclical",Healthcare-Products,92.6,95.4,91.9,91.8,56.6,-8.3,True,80.64,36460394415.87697,False,2026-11-20
 RYAN,Financial,Insurance,92.2,90.6,87.5,97.7,59.0,-18.3,True,47.09,5636395893.613873,False,2026-11-20
-TSCO,"Consumer, Cyclical",Retail,92.1,96.6,91.1,90.7,66.0,-29.7,False,38.44,19933971931.44741,True,2026-11-20
+TSCO,"Consumer, Cyclical",Retail,92.1,96.6,91.1,90.7,66.0,-29.7,False,38.44,19933971931.44741,False,2026-11-20
 EHC,"Consumer, Non-cyclical",Healthcare-Services,92.0,89.7,92.5,92.5,49.9,-6.2,True,133.65,13114220278.550995,False,2026-11-20
-PTC,Technology,Software,91.8,71.8,98.2,95.5,66.8,-0.7,False,195.1,21194329008.444153,True,2026-11-20
+PTC,Technology,Software,91.8,71.8,98.2,95.5,66.8,-0.7,False,195.1,21194329008.444153,False,2026-11-20
 CBC,Financial,Banks,91.8,86.4,94.6,91.7,54.0,-4.5,True,36.69,8782934827.348492,False,2026-11-20
 CBOE,Financial,Diversified Finan Serv,91.6,84.0,95.4,91.7,59.5,-5.2,True,357.71,37319967470.35629,False,2026-11-20
 VFC,"Consumer, Cyclical",Apparel,91.6,94.9,99.8,81.8,52.9,-9.3,True,19.3,7597233596.277229,False,2026-11-20
@@ -44,7 +44,7 @@ PRGO,"Consumer, Non-cyclical",Cosmetics/Personal Care,90.7,68.5,94.2,98.4,50.1,-
 COLM,"Consumer, Cyclical",Apparel,90.7,98.3,99.1,78.6,69.8,-1.4,False,74.99,3777132207.6013184,False,2026-11-20
 PG,"Consumer, Non-cyclical",Cosmetics/Personal Care,90.4,84.1,97.6,86.3,61.5,-2.1,False,169.37,392562919612.6095,False,2026-11-20
 MAS,Industrial,Building Materials,90.3,91.7,94.9,84.9,56.8,-4.5,True,82.6,15922727613.657692,False,2026-11-20
-WEN,"Consumer, Cyclical",Retail,90.3,99.8,91.2,84.6,68.9,-4.9,False,8.6,1644689004.3533764,True,2026-11-20
+WEN,"Consumer, Cyclical",Retail,90.3,99.8,91.2,84.6,68.9,-4.9,False,8.6,1644689004.3533764,False,2026-11-20
 RRC,Energy,Oil&Gas,89.5,84.5,95.9,85.5,47.0,-15.0,True,47.94,11203137062.534512,False,2026-11-20
 WTRG,Utilities,Water,89.4,85.4,93.1,87.6,61.5,-1.2,False,45.19,12941332763.94236,False,2026-11-20
 ACM,Industrial,Engineering&Construction,89.3,99.4,97.8,75.9,73.0,-24.7,False,78.65,10130911179.598549,False,2026-11-20
@@ -57,8 +57,8 @@ KO,"Consumer, Non-cyclical",Beverages,87.8,83.3,89.5,88.3,58.0,-2.5,True,96.99,4
 ATR,Industrial,Packaging&Containers,87.7,94.0,83.6,88.6,58.3,-4.3,True,140.08,8879528434.468689,False,2026-11-20
 AWK,Utilities,Water,87.7,84.7,90.3,86.6,60.6,-1.3,False,149.53,29772119716.28232,False,2026-11-20
 HAYW,Industrial,Building Materials,87.6,98.8,91.5,78.0,56.2,-8.5,True,15.84,3300899706.8378105,False,2026-11-20
-G,Technology,Computers,87.5,74.7,91.6,89.8,54.7,-13.0,True,41.5,6939920334.0,True,2026-11-20
-KD,Technology,Computers,87.3,77.1,95.3,84.3,50.0,-45.0,True,15.12,3293562026.4315434,True,2026-11-20
+G,Technology,Computers,87.5,74.7,91.6,89.8,54.7,-13.0,True,41.5,6939920334.0,False,2026-11-20
+KD,Technology,Computers,87.3,77.1,95.3,84.3,50.0,-45.0,True,15.12,3293562026.4315434,False,2026-11-20
 POOL,"Consumer, Cyclical",Distribution/Wholesale,87.1,84.2,93.5,82.2,56.0,-21.3,True,208.23,7438412730.378723,False,2026-11-20
 BMI,BamHI,科技儀器 (Scientific Instruments),87.1,76.0,92.8,87.0,54.6,-15.8,True,154.27,4471801010.5351715,False,2026-11-20
 PCTY,"Consumer, Non-cyclical",Commercial Services,87.1,60.5,89.6,97.8,53.2,-6.0,True,173.43,9011996646.139343,False,2026-11-20
@@ -69,33 +69,33 @@ KR,"Consumer, Non-cyclical",Food,86.1,79.6,98.0,77.4,56.4,-7.9,True,68.44,404198
 DIS,Communications,Media,85.9,83.7,90.8,82.1,56.4,-3.6,True,117.98,201513345964.38217,False,2026-11-20
 GLIBK,Communications,Telecommunications,85.6,98.5,76.4,88.4,59.2,-33.5,True,26.64,1063069015.8039246,False,2026-11-20
 NXST,Communications,Media,85.4,97.4,90.2,74.7,59.9,-20.4,True,196.13,6044928372.133301,False,2026-11-20
-CME,Financial,Diversified Finan Serv,85.3,71.7,90.0,87.4,55.5,-3.7,True,307.56,110086144489.17798,True,2026-11-20
+CME,Financial,Diversified Finan Serv,85.3,71.7,90.0,87.4,55.5,-3.7,True,307.56,110086144489.17798,False,2026-11-20
 OGE,Utilities,Electric,84.8,85.3,92.9,76.5,63.0,-1.2,False,51.12,10567831621.192837,False,2026-11-20
-SJM,"Consumer, Non-cyclical",Food,84.7,81.4,77.0,94.1,58.4,-1.4,True,133.68,14280122321.04364,True,2026-11-20
+SJM,"Consumer, Non-cyclical",Food,84.7,81.4,77.0,94.1,58.4,-1.4,True,133.68,14280122321.04364,False,2026-11-20
 MIDD,Industrial,Machinery-Diversified,84.7,97.0,96.1,67.1,60.4,-8.7,False,131.67,5734951420.217514,False,2026-11-20
 TNL,"Consumer, Cyclical",Lodging,84.7,97.8,88.5,74.2,59.8,-3.7,True,77.39,4663110035.373459,False,2026-11-20
 TENB,BamHI,資安 (Cybersecurity),84.6,48.8,92.4,94.7,48.7,-18.9,True,41.99,4388275265.182575,False,2026-11-20
 SIRI,Communications,Media,84.5,95.7,89.7,73.8,55.8,-6.4,True,31.0,10431088165.0,False,2026-11-20
 EXR,Financial,REITS,84.5,90.6,89.9,76.0,58.7,-3.8,True,154.91,32332789784.56485,False,2026-11-20
 CLX,"Consumer, Non-cyclical",Household Products/Wares,84.3,98.4,77.4,84.2,63.7,-14.4,False,104.73,12687767189.763763,False,2026-11-20
-CHD,"Consumer, Non-cyclical",Household Products/Wares,84.2,85.3,87.5,80.4,57.3,-3.4,True,110.84,26161791779.30481,True,2026-11-20
+CHD,"Consumer, Non-cyclical",Household Products/Wares,84.2,85.3,87.5,80.4,57.3,-3.4,True,110.84,26161791779.30481,False,2026-11-20
 SEZL,BamHI,金融科技與支付 (Fintech & Payments),84.2,82.0,89.0,80.6,47.1,-27.1,True,137.42,4642515040.980743,False,2026-11-20
 MAR,"Consumer, Cyclical",Lodging,84.0,82.7,95.8,72.9,50.4,-5.1,True,406.64,104711591768.11707,False,2026-11-20
 RPD,BamHI,資安 (Cybersecurity),83.9,53.4,83.9,99.2,48.3,-20.2,True,14.3,980061495.4721603,False,2026-11-20
 COLD,Financial,REITS,83.5,93.7,87.2,74.6,58.4,-4.0,True,16.03,4577078909.469297,False,2026-11-20
-KDP,"Consumer, Non-cyclical",Beverages,82.8,71.3,90.4,81.0,48.7,-8.9,True,34.84,49738107410.11676,True,2026-11-20
-WEC,Utilities,Electric,82.4,86.5,91.4,71.5,62.6,-0.5,False,117.07,38515131855.62951,True,2026-11-20
-MO,"Consumer, Non-cyclical",Agriculture,82.2,72.1,93.3,76.2,47.6,-5.1,True,74.87,124541526394.81595,True,2026-11-20
+KDP,"Consumer, Non-cyclical",Beverages,82.8,71.3,90.4,81.0,48.7,-8.9,True,34.84,49738107410.11676,False,2026-11-20
+WEC,Utilities,Electric,82.4,86.5,91.4,71.5,62.6,-0.5,False,117.07,38515131855.62951,False,2026-11-20
+MO,"Consumer, Non-cyclical",Agriculture,82.2,72.1,93.3,76.2,47.6,-5.1,True,74.87,124541526394.81595,False,2026-11-20
 MTW,BamHI,資料中心基建(Data_Center_Infra),82.0,40.8,85.4,99.1,35.4,-17.4,False,20.31,733332663.2767944,False,2026-11-20
-WM,Industrial,Environmental Control,81.8,69.8,90.9,78.8,57.4,-1.9,True,239.63,95285256862.65674,True,2026-11-20
+WM,Industrial,Environmental Control,81.8,69.8,90.9,78.8,57.4,-1.9,True,239.63,95285256862.65674,False,2026-11-20
 FWONK,"Consumer, Cyclical",Entertainment,81.8,96.9,75.5,80.5,54.9,-6.8,True,103.64,26384867546.055542,False,2026-11-20
-ROKU,Communications,Internet,81.5,73.2,77.9,89.2,61.0,-1.4,False,160.52,23933744207.440002,True,2026-11-20
+ROKU,Communications,Internet,81.5,73.2,77.9,89.2,61.0,-1.4,False,160.52,23933744207.440002,False,2026-11-20
 LNG,Energy,Pipelines,81.3,65.1,82.3,88.5,49.9,-10.5,True,294.84,60207481255.94293,False,2026-11-20
 ICG,BamHI,加密貨幣(Crypto),81.2,23.8,98.8,92.2,43.0,-42.9,True,1.24,75282790.05899405,False,2026-11-20
 LUV,"Consumer, Cyclical",Airlines,80.8,85.2,91.9,67.4,49.5,-18.5,True,44.08,21581673806.888733,False,2026-11-20
-CHH,"Consumer, Cyclical",Lodging,80.7,90.5,87.0,69.4,53.0,-5.9,True,117.17,5215066253.322418,True,2026-11-20
+CHH,"Consumer, Cyclical",Lodging,80.7,90.5,87.0,69.4,53.0,-5.9,True,117.17,5215066253.322418,False,2026-11-20
 SPOT,Communications,Internet,80.4,64.5,89.5,79.4,48.6,-8.1,True,577.03,118594358742.87354,False,2026-11-20
-SARO,Industrial,Aerospace/Defense,80.4,98.1,84.0,67.9,58.3,-19.8,True,26.57,8721109074.641716,True,2026-11-20
+SARO,Industrial,Aerospace/Defense,80.4,98.1,84.0,67.9,58.3,-19.8,True,26.57,8721109074.641716,False,2026-11-20
 R,Industrial,Transportation,80.3,75.9,91.8,71.0,54.2,-3.3,True,276.1,10552187444.768524,False,2026-11-20
 GXO,Industrial,Transportation,80.0,89.6,87.9,67.4,49.0,-20.5,True,52.13,5892210909.218182,False,2026-11-20
 SITE,"Consumer, Cyclical",Distribution/Wholesale,80.0,82.9,93.9,64.7,50.3,-34.0,True,107.72,4646172198.571289,False,2026-11-20
